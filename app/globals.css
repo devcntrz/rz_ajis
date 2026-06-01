@@ -1,26 +1,132 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700;900&display=swap');
 
+/* ── Design Tokens ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary:      #BF4E02;
+  --primary-dk:   #8F3A01;
+  --primary-lt:   #D96A1A;
+  --primary-pale: #FBF0E8;
+  --primary-soft: #F0C4A0;
+  --white:        #FFFFFF;
+  --charcoal:     #1A0A00;
+  --gray:         #7A6055;
+  --gray-lt:      #F2EAE3;
+  --gray-md:      #D9CFC8;
+  --green:        #1A7A45;
+  --green-pale:   #E5F5ED;
+  --blue:         #1A5FA8;
+  --blue-pale:    #E5EEF8;
+  --red:          #B02020;
+  --red-pale:     #FDEAEA;
+  --gold:         #B87800;
+  --gold-pale:    #FDF4DC;
+  --sidebar-w:    220px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+  background: var(--white);
+  color: var(--charcoal);
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── App Shell ── */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--primary);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  z-index: 50;
 }
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 56px;
+  background: var(--white);
+  border-bottom: 1.5px solid var(--gray-lt);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #FAFAF8;
+}
+
+/* ── DataGrid responsive toggle ── */
+@media (min-width: 701px) {
+  .datagrid-mobile  { display: none !important; }
+  .datagrid-desktop { display: block; }
+  .mobile-nav       { display: none !important; }
+}
+
+@media (max-width: 700px) {
+  .datagrid-desktop { display: none !important; }
+  .datagrid-mobile  { display: flex; flex-direction: column; gap: 10px; }
+  .sidebar          { display: none !important; }
+  .topbar           { padding: 0 16px; }
+  .content-area     { padding: 16px 14px 80px; }
+  .mobile-nav       { display: flex; }
+}
+
+/* ── Mobile Nav ── */
+.mobile-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 62px;
+  background: var(--primary);
+  border-top: 2px solid var(--primary-dk);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+}
+
+/* ── Table base ── */
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; vertical-align: middle; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--gray-lt); }
+::-webkit-scrollbar-thumb { background: var(--primary-soft); border-radius: 99px; }
+
+/* ── Skeleton animation ── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.skeleton {
+  background: var(--gray-lt);
+  border-radius: 6px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Utility ── */
+.text-primary { color: var(--primary); }
+.text-gray    { color: var(--gray); }
+.fw-700       { font-weight: 700; }
+.fw-800       { font-weight: 800; }

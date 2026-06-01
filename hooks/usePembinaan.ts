@@ -1,0 +1,43 @@
+'use client';
+import useSWR from 'swr';
+import type { Pembinaan, PembinaanAnakRow } from '@/types/pembinaan';
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+export function usePembinaanList(params: Record<string, string | number> = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') {
+      query.append(k, String(v));
+    }
+  });
+
+  const queryString = query.toString();
+  const { data, error, mutate } = useSWR<{ data: Pembinaan[]; total: number }>(
+    `/api/anakjuara/pembinaan${queryString ? `?${queryString}` : ''}`,
+    fetcher,
+    { keepPreviousData: true },
+  );
+
+  return {
+    data:    data?.data ?? [],
+    total:   data?.total ?? 0,
+    loading: !data && !error,
+    error,
+    mutate,
+  };
+}
+
+export function usePembinaanDetail(id: string) {
+  const { data, error, mutate } = useSWR<{ data: Pembinaan & { anak: PembinaanAnakRow[] } }>(
+    id ? `/api/anakjuara/pembinaan/${id}` : null,
+    fetcher,
+  );
+
+  return {
+    session: data?.data ?? null,
+    loading: !data && !error,
+    error,
+    mutate,
+  };
+}
