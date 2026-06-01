@@ -16,25 +16,26 @@ import { DEFAULT_PAGE_SIZE, filtersAreEqual } from '@/lib/pagination';
 export default function PembinaanListPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Record<string, string> | null>(null);
+  const listReady = filters !== null;
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [mobilePage, setMobilePage] = useState(1);
-  const filtersKey = JSON.stringify(filters);
+  const filtersKey = JSON.stringify(filters ?? {});
   const totalRef = useRef(0);
 
   const desktopList = usePembinaanList(
-    { ...filters, page, limit },
-    { enabled: !isMobile },
+    { ...(filters ?? {}), page, limit },
+    { enabled: !isMobile && listReady },
   );
 
   const mobileList = usePembinaanList(
-    { ...filters, page: mobilePage, limit: DEFAULT_PAGE_SIZE },
-    { enabled: isMobile },
+    { ...(filters ?? {}), page: mobilePage, limit: DEFAULT_PAGE_SIZE },
+    { enabled: isMobile && listReady },
   );
 
   const infinite = useMobileInfiniteList({
-    enabled:    isMobile,
+    enabled:    isMobile && listReady,
     filtersKey,
     getId:      r => r.id_pembinaan,
     query: {
@@ -51,7 +52,7 @@ export default function PembinaanListPage() {
 
   const handleFilterChange = useCallback((newFilters: Record<string, string>) => {
     setFilters(prev => {
-      if (filtersAreEqual(prev, newFilters)) return prev;
+      if (prev !== null && filtersAreEqual(prev, newFilters)) return prev;
       setPage(1);
       setMobilePage(1);
       return newFilters;
@@ -91,14 +92,14 @@ export default function PembinaanListPage() {
       <div className="datagrid-desktop">
         <PembinaanTable
           data={desktopRows}
-          loading={!desktopList.isReady}
+          loading={!listReady || !desktopList.isReady}
           rowOffset={rowOffsetDesktop}
         />
       </div>
 
       <PembinaanCard data={isMobile ? infinite.items : desktopRows} />
 
-      {!isMobile && displayTotal > 0 && (
+      {!isMobile && listReady && displayTotal > 0 && (
         <DesktopPagination
           page={page}
           limit={limit}
@@ -108,7 +109,7 @@ export default function PembinaanListPage() {
         />
       )}
 
-      {isMobile && (
+      {isMobile && listReady && (
         <InfiniteScrollTrigger
           onLoadMore={infinite.loadMore}
           hasMore={infinite.hasMore}

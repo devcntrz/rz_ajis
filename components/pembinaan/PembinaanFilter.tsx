@@ -29,31 +29,42 @@ function semesterDisplayLabel(s: { semester: string; is_current: boolean | numbe
 }
 
 export function PembinaanFilter({ onFilterChange }: PembinaanFilterProps) {
-  const { current: activeSemester } = useCurrentSemester();
-  const appliedOnce = useRef(false);
+  const { current: activeSemester, loading: semesterLoading } = useCurrentSemester();
+  const initialLoadDone = useRef(false);
+  const onFilterChangeRef = useRef(onFilterChange);
+  onFilterChangeRef.current = onFilterChange;
 
   const [draft, setDraft] = useState<FilterDraft>({
     q: '', jenis: '', semester: '', semesterLabel: '', tgl_dari: '', tgl_sampai: '',
   });
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    if (!activeSemester || appliedOnce.current) return;
-    const label = semesterDisplayLabel(activeSemester);
-    setDraft(d => ({
-      ...d,
-      semester: activeSemester.semesterid,
-      semesterLabel: label,
-    }));
-    onFilterChange({
-      q: '',
-      jenis: '',
-      semester: activeSemester.semesterid,
-      tgl_dari: '',
-      tgl_sampai: '',
+  function applyInitialFilters(semester: string) {
+    onFilterChangeRef.current({
+      q: '', jenis: '', semester, tgl_dari: '', tgl_sampai: '',
     });
-    appliedOnce.current = true;
-  }, [activeSemester, onFilterChange]);
+  }
+
+  useEffect(() => {
+    if (initialLoadDone.current) return;
+
+    if (activeSemester) {
+      const label = semesterDisplayLabel(activeSemester);
+      setDraft(d => ({
+        ...d,
+        semester: activeSemester.semesterid,
+        semesterLabel: label,
+      }));
+      applyInitialFilters(activeSemester.semesterid);
+      initialLoadDone.current = true;
+      return;
+    }
+
+    if (!semesterLoading) {
+      applyInitialFilters('');
+      initialLoadDone.current = true;
+    }
+  }, [activeSemester, semesterLoading]);
 
   function applyFilters() {
     onFilterChange({
@@ -71,13 +82,7 @@ export function PembinaanFilter({ onFilterChange }: PembinaanFilterProps) {
     const empty: FilterDraft = {
       q: '', jenis: '', semester: '', semesterLabel: '', tgl_dari: '', tgl_sampai: '',
     };
-    const withSem: FilterDraft = semester
-      ? { ...empty, semester, semesterLabel: label }
-      : empty;
-    setDraft(withSem);
-    onFilterChange({
-      q: '', jenis: '', semester, tgl_dari: '', tgl_sampai: '',
-    });
+    setDraft(semester ? { ...empty, semester, semesterLabel: label } : empty);
   }
 
   return (
