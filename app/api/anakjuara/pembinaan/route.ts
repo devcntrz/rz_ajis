@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const tglDari  = sp.get('tgl_dari') || '';
     const tglSampai= sp.get('tgl_sampai') || '';
     const page     = Math.max(1, parseInt(sp.get('page')  || '1'));
-    const limit    = Math.min(100, parseInt(sp.get('limit') || '50'));
+    const limit    = Math.min(100, parseInt(sp.get('limit') || '10'));
     const offset   = (page - 1) * limit;
 
     const { sql: scope, params: scopeParams } = getScopeCondition(session, 'pb');

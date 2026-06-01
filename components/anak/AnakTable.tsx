@@ -7,20 +7,31 @@ import { STATUS_COLOR, calcAge } from '@/lib/utils';
 import type { AnakListRow } from '@/types/anak';
 
 interface AnakTableProps {
-  data:    AnakListRow[];
-  loading: boolean;
+  data:      AnakListRow[];
+  loading:   boolean;
+  rowOffset?: number;
 }
 
-export function AnakTable({ data, loading }: AnakTableProps) {
+export function AnakTable({ data, loading, rowOffset = 0 }: AnakTableProps) {
   const router = useRouter();
 
   const columns = [
+    {
+      key: 'no',
+      label: '#',
+      width: 36,
+      sticky: true,
+      left: 0,
+      render: (_r: AnakListRow, i: number) => (
+        <span style={{ fontWeight: 700, color: '#7A6055' }}>{rowOffset + i + 1}</span>
+      ),
+    },
     {
       key: 'avatar',
       label: '',
       width: 44,
       sticky: true,
-      left: 0,
+      left: 36,
       render: (r: AnakListRow) => <Avatar nama={r.nama_lengkap} gender={r.jns_kel} size={30} />,
     },
     {
@@ -28,7 +39,7 @@ export function AnakTable({ data, loading }: AnakTableProps) {
       label: 'ID Anak',
       width: 100,
       sticky: true,
-      left: 44,
+      left: 76,
       render: (r: AnakListRow) => <span style={{ fontWeight: 700, color: '#BF4E02' }}>{r.id_anak}</span>,
     },
     {
@@ -36,7 +47,7 @@ export function AnakTable({ data, loading }: AnakTableProps) {
       label: 'Nama Lengkap',
       width: 220,
       sticky: true,
-      left: 144,
+      left: 176,
       sep: true,
       render: (r: AnakListRow) => (
         <div>

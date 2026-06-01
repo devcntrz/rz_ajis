@@ -26,7 +26,7 @@ export function PenilaianCard({ data, semester, onSync }: PenilaianCardProps) {
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
   return (
-    <div className="datagrid-mobile" style={{ display: 'none', flexDirection: 'column', gap: 10 }}>
+    <div className="datagrid-mobile">
       {data.map(r => {
         const hasData = r.record_count > 0;
         const avg = Math.round(Number(r.nilai_capaian_avg || 0));

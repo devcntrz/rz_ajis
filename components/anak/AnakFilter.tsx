@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
@@ -26,15 +26,15 @@ export function AnakFilter({ onFilterChange }: AnakFilterProps) {
     fetcher,
   );
   const wilayahList = wilayahRes?.data ?? [];
+  const onFilterChangeRef = useRef(onFilterChange);
+  onFilterChangeRef.current = onFilterChange;
 
-  // Effect to debounce filter triggers
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      onFilterChange({ q, wilayah, status_ortu: statusOrtu, jenjang, asnaf });
+      onFilterChangeRef.current({ q, wilayah, status_ortu: statusOrtu, jenjang, asnaf });
     }, 300);
-
     return () => clearTimeout(delayDebounce);
-  }, [q, wilayah, statusOrtu, jenjang, asnaf, onFilterChange]);
+  }, [q, wilayah, statusOrtu, jenjang, asnaf]);
 
   return (
     <div style={{

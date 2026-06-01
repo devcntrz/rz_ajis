@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
@@ -17,13 +17,15 @@ export function PembinaanFilter({ onFilterChange }: PembinaanFilterProps) {
   const [tglSampai, setTglSampai] = useState('');
   const [expanded, setExpanded] = useState(false);
 
+  const onFilterChangeRef = useRef(onFilterChange);
+  onFilterChangeRef.current = onFilterChange;
+
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      onFilterChange({ q, jenis, semester, tgl_dari: tglDari, tgl_sampai: tglSampai });
+      onFilterChangeRef.current({ q, jenis, semester, tgl_dari: tglDari, tgl_sampai: tglSampai });
     }, 300);
-
     return () => clearTimeout(delayDebounce);
-  }, [q, jenis, semester, tglDari, tglSampai, onFilterChange]);
+  }, [q, jenis, semester, tglDari, tglSampai]);
 
   return (
     <div style={{

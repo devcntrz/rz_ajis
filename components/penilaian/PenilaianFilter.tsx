@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import { Search } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
@@ -25,13 +25,15 @@ export function PenilaianFilter({ onFilterChange, semester, setSemester }: Penil
   );
   const wilayahList = wilayahRes?.data ?? [];
 
+  const onFilterChangeRef = useRef(onFilterChange);
+  onFilterChangeRef.current = onFilterChange;
+
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      onFilterChange({ q, wilayah, status, semester });
+      onFilterChangeRef.current({ q, wilayah, status, semester });
     }, 300);
-
     return () => clearTimeout(delayDebounce);
-  }, [q, wilayah, status, semester, onFilterChange]);
+  }, [q, wilayah, status, semester]);
 
   return (
     <div style={{

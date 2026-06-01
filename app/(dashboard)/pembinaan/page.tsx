@@ -1,31 +1,78 @@
 'use client';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePembinaanList } from '@/hooks/usePembinaan';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useMobileInfiniteList } from '@/hooks/useMobileInfiniteList';
 import { PembinaanFilter } from '@/components/pembinaan/PembinaanFilter';
 import { PembinaanTable } from '@/components/pembinaan/PembinaanTable';
 import { PembinaanCard } from '@/components/pembinaan/PembinaanCard';
+import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
+import { InfiniteScrollTrigger } from '@/components/ui/InfiniteScrollTrigger';
 import { Btn } from '@/components/ui/Btn';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { DEFAULT_PAGE_SIZE, filtersAreEqual } from '@/lib/pagination';
 
 export default function PembinaanListPage() {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
-  const limit = 20;
+  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const [mobilePage, setMobilePage] = useState(1);
+  const filtersKey = JSON.stringify(filters);
+  const totalRef = useRef(0);
 
-  const { data, total, loading } = usePembinaanList({ ...filters, page, limit });
+  const desktopList = usePembinaanList(
+    { ...filters, page, limit },
+    { enabled: !isMobile },
+  );
 
-  const totalPages = Math.ceil(total / limit);
+  const mobileList = usePembinaanList(
+    { ...filters, page: mobilePage, limit: DEFAULT_PAGE_SIZE },
+    { enabled: isMobile },
+  );
 
-  const handleFilterChange = (newFilters: Record<string, string>) => {
-    setFilters(newFilters);
-    setPage(1); // Reset page on filter change
-  };
+  const infinite = useMobileInfiniteList({
+    enabled:    isMobile,
+    filtersKey,
+    getId:      r => r.id_pembinaan,
+    query: {
+      data:         mobileList.data,
+      total:        mobileList.total,
+      page:         mobileList.page,
+      isReady:      mobileList.isReady,
+      isValidating: mobileList.isValidating,
+      isLoading:    mobileList.loading,
+    },
+    currentPage: mobilePage,
+    setPage:     setMobilePage,
+  });
+
+  const handleFilterChange = useCallback((newFilters: Record<string, string>) => {
+    setFilters(prev => {
+      if (filtersAreEqual(prev, newFilters)) return prev;
+      setPage(1);
+      setMobilePage(1);
+      return newFilters;
+    });
+  }, []);
+
+  const rowOffsetDesktop = (page - 1) * limit;
+  const desktopRows = desktopList.isReady ? desktopList.data : [];
+
+  if (desktopList.isReady && desktopList.total > 0) {
+    totalRef.current = desktopList.total;
+  } else if (isMobile && infinite.total > 0) {
+    totalRef.current = infinite.total;
+  }
+
+  const displayTotal = isMobile
+    ? (infinite.total || totalRef.current)
+    : (desktopList.isReady ? desktopList.total : totalRef.current);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Title */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A0A00' }}>Sesi Pembinaan</h2>
@@ -39,45 +86,34 @@ export default function PembinaanListPage() {
         </Btn>
       </div>
 
-      {/* Filters Bar */}
       <PembinaanFilter onFilterChange={handleFilterChange} />
 
-      {/* Grid: Desktop Table + Mobile Cards */}
       <div className="datagrid-desktop">
-        <PembinaanTable data={data} loading={loading} />
+        <PembinaanTable
+          data={desktopRows}
+          loading={!desktopList.isReady}
+          rowOffset={rowOffsetDesktop}
+        />
       </div>
 
-      <PembinaanCard data={data} />
+      <PembinaanCard data={isMobile ? infinite.items : desktopRows} />
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginTop: 10, background: '#FFFFFF', padding: '10px 16px',
-          borderRadius: 12, border: '1.5px solid #F2EAE3',
-        }}>
-          <span style={{ fontSize: 12, color: '#7A6055' }}>
-            Halaman {page} dari {totalPages}
-          </span>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <Btn
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              size="sm"
-            >
-              <ChevronLeft size={14} />
-              <span>Sebelumnya</span>
-            </Btn>
-            <Btn
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              size="sm"
-            >
-              <span>Berikutnya</span>
-              <ChevronRight size={14} />
-            </Btn>
-          </div>
-        </div>
+      {!isMobile && displayTotal > 0 && (
+        <DesktopPagination
+          page={page}
+          limit={limit}
+          total={displayTotal}
+          onPageChange={setPage}
+          onLimitChange={next => { setLimit(next); setPage(1); }}
+        />
+      )}
+
+      {isMobile && (
+        <InfiniteScrollTrigger
+          onLoadMore={infinite.loadMore}
+          hasMore={infinite.hasMore}
+          loading={infinite.isInitialLoading || infinite.isLoadingMore}
+        />
       )}
     </div>
   );

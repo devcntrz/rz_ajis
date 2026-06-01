@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { filtersAreEqual } from '@/lib/pagination';
 import { usePenilaianList } from '@/hooks/usePenilaian';
 import { PenilaianFilter } from '@/components/penilaian/PenilaianFilter';
 import { PenilaianTable } from '@/components/penilaian/PenilaianTable';
@@ -22,9 +23,9 @@ export default function PenilaianListPage() {
 
   const { data, loading, mutate } = usePenilaianList({ ...filters, semester });
 
-  const handleFilterChange = (newFilters: Record<string, string>) => {
-    setFilters(newFilters);
-  };
+  const handleFilterChange = useCallback((newFilters: Record<string, string>) => {
+    setFilters(prev => (filtersAreEqual(prev, newFilters) ? prev : newFilters));
+  }, []);
 
   async function handleSync(idAnak: string) {
     try {

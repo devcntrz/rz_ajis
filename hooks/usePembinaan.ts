@@ -1,10 +1,17 @@
 'use client';
 import useSWR from 'swr';
+import { isListPageReady, parseRequestedPage } from '@/lib/pagination';
 import type { Pembinaan, PembinaanAnakRow } from '@/types/pembinaan';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export function usePembinaanList(params: Record<string, string | number> = {}) {
+export function usePembinaanList(
+  params: Record<string, string | number> = {},
+  options?: { enabled?: boolean },
+) {
+  const enabled = options?.enabled !== false;
+  const requestedPage = parseRequestedPage(params);
+
   const query = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') {
@@ -13,16 +20,28 @@ export function usePembinaanList(params: Record<string, string | number> = {}) {
   });
 
   const queryString = query.toString();
-  const { data, error, mutate } = useSWR<{ data: Pembinaan[]; total: number }>(
-    `/api/anakjuara/pembinaan${queryString ? `?${queryString}` : ''}`,
-    fetcher,
-    { keepPreviousData: true },
-  );
+  const key = enabled
+    ? `/api/anakjuara/pembinaan${queryString ? `?${queryString}` : ''}`
+    : null;
+
+  const { data, error, mutate, isLoading, isValidating } = useSWR<{
+    data: Pembinaan[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(key, fetcher);
+
+  const responsePage = data?.page ?? 0;
+  const isReady = isListPageReady(requestedPage, responsePage, isLoading, isValidating);
 
   return {
-    data:    data?.data ?? [],
-    total:   data?.total ?? 0,
-    loading: !data && !error,
+    data:         data?.data ?? [],
+    total:        data?.total ?? 0,
+    page:         responsePage,
+    requestedPage,
+    isReady,
+    loading:      isLoading,
+    isValidating,
     error,
     mutate,
   };

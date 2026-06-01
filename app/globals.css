@@ -82,11 +82,13 @@ html, body {
   .datagrid-mobile  { display: none !important; }
   .datagrid-desktop { display: block; }
   .mobile-nav       { display: none !important; }
+  .pagination-mobile-only { display: none !important; }
 }
 
 @media (max-width: 700px) {
   .datagrid-desktop { display: none !important; }
-  .datagrid-mobile  { display: flex; flex-direction: column; gap: 10px; }
+  .datagrid-mobile  { display: flex !important; flex-direction: column; gap: 10px; }
+  .pagination-desktop { display: none !important; }
   .sidebar          { display: none !important; }
   .topbar           { padding: 0 16px; }
   .content-area     { padding: 16px 14px 80px; }

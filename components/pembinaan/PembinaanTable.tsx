@@ -6,20 +6,31 @@ import { fmtTgl } from '@/lib/utils';
 import type { Pembinaan } from '@/types/pembinaan';
 
 interface PembinaanTableProps {
-  data:    Pembinaan[];
-  loading: boolean;
+  data:       Pembinaan[];
+  loading:    boolean;
+  rowOffset?: number;
 }
 
-export function PembinaanTable({ data, loading }: PembinaanTableProps) {
+export function PembinaanTable({ data, loading, rowOffset = 0 }: PembinaanTableProps) {
   const router = useRouter();
 
   const columns = [
+    {
+      key: 'no',
+      label: '#',
+      width: 36,
+      sticky: true,
+      left: 0,
+      render: (_r: Pembinaan, i: number) => (
+        <span style={{ fontWeight: 700, color: '#7A6055' }}>{rowOffset + i + 1}</span>
+      ),
+    },
     {
       key: 'tgl_pembinaan',
       label: 'Tanggal',
       width: 110,
       sticky: true,
-      left: 0,
+      left: 36,
       render: (r: Pembinaan) => <span style={{ fontWeight: 700 }}>{fmtTgl(r.tgl_pembinaan)}</span>,
     },
     {
@@ -27,7 +38,7 @@ export function PembinaanTable({ data, loading }: PembinaanTableProps) {
       label: 'Tema Materi & Pemateri',
       width: 280,
       sticky: true,
-      left: 110,
+      left: 146,
       sep: true,
       render: (r: Pembinaan) => (
         <div>

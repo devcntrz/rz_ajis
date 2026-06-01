@@ -9,7 +9,7 @@ interface PembinaanCardProps {
 
 export function PembinaanCard({ data }: PembinaanCardProps) {
   return (
-    <div className="datagrid-mobile" style={{ display: 'none', flexDirection: 'column', gap: 10 }}>
+    <div className="datagrid-mobile">
       {data.map(r => {
         const pct = r.jumlah_anak > 0 ? Math.round((r.jumlah_hadir / r.jumlah_anak) * 100) : 0;
         return (
