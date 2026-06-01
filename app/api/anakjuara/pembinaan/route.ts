@@ -1,16 +1,11 @@
 /**
  * GET  /api/anakjuara/pembinaan — List sessions (grouped by id_pembinaan)
  * POST /api/anakjuara/pembinaan — Create new session
- *
- * REAL SCHEMA:
- * - ajis_pembinaan_baru: one row per child per session
- * - GROUP BY id_pembinaan to get session-level summary
- * - kehadiran = 'y' (hadir) | 'n' (not)
- * - jenis_pembinaan, judul_materi, pemateri, id_wilayah_pembinaan
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getSession, getScopeCondition } from '@/lib/auth';
+import { bulanTahunFromDate, p3aValue } from '@/lib/pembinaanConstants';
 
 export async function GET(req: NextRequest) {
   try {
@@ -49,6 +44,7 @@ export async function GET(req: NextRequest) {
       id_pembinaan: string;
       tgl_pembinaan: string;
       semesterid: string;
+      semester_label: string;
       jenis_pembinaan: string;
       judul_materi: string;
       pemateri: string;
@@ -61,6 +57,7 @@ export async function GET(req: NextRequest) {
       `SELECT pb.id_pembinaan,
               MIN(pb.tgl_pembinaan)    AS tgl_pembinaan,
               MIN(pb.semesterid)       AS semesterid,
+              MIN(sem.semester)        AS semester_label,
               MIN(pb.jenis_pembinaan)  AS jenis_pembinaan,
               MIN(pb.judul_materi)     AS judul_materi,
               MIN(pb.pemateri)         AS pemateri,
@@ -70,6 +67,7 @@ export async function GET(req: NextRequest) {
               COUNT(*)                 AS jumlah_anak,
               SUM(CASE WHEN pb.kehadiran='y' THEN 1 ELSE 0 END) AS jumlah_hadir
        FROM   ajis_pembinaan_baru pb
+       LEFT JOIN ajis_semester sem ON sem.semesterid = pb.semesterid
        WHERE  ${WHERE}
        GROUP  BY pb.id_pembinaan
        ORDER  BY MIN(pb.tgl_pembinaan) DESC
@@ -93,21 +91,33 @@ export async function POST(req: NextRequest) {
       tgl_pembinaan:   string;
       semesterid:      string;
       jenis_pembinaan: string;
+      p3a?:            string;
       judul_materi:    string;
       pemateri:        string;
       kehadiran:       Record<string, { hadir: 'y' | 'n'; keterangan: string }>;
       mandiri:         Record<string, { bantu_ortu: boolean; sedekah: boolean; shalat_wajib: boolean; tilawah: boolean }>;
+      ortu_hadir?:     Record<string, string>;
     };
 
-    // Generate unique id_pembinaan (timestamp + random)
-    const tglStr   = body.tgl_pembinaan.replace(/-/g, '');
+    if (!body.tgl_pembinaan || !body.semesterid || !body.jenis_pembinaan?.trim()) {
+      return NextResponse.json({ error: 'Tanggal, semester, dan jenis pembinaan wajib diisi.' }, { status: 400 });
+    }
+    if (!body.judul_materi?.trim()) {
+      return NextResponse.json({ error: 'Tema materi wajib diisi.' }, { status: 400 });
+    }
+    if (body.jenis_pembinaan === 'P3A' && !body.p3a?.trim()) {
+      return NextResponse.json({ error: 'Field P3A wajib diisi.' }, { status: 400 });
+    }
+    if (!body.pemateri?.trim()) {
+      return NextResponse.json({ error: 'Pemateri wajib dipilih.' }, { status: 400 });
+    }
+
+    const tglStr = body.tgl_pembinaan.replace(/-/g, '');
     const idPembinaan = `${tglStr}${session.idWilayahPembinaan}${Date.now()}`.slice(0, 50);
+    const { bulan, tahun } = bulanTahunFromDate(body.tgl_pembinaan);
+    const p3a = p3aValue(body.jenis_pembinaan, body.p3a || '');
+    const isParenting = body.jenis_pembinaan === 'Parenting';
 
-    const d = new Date(body.tgl_pembinaan);
-    const bulan = String(d.getMonth() + 1).padStart(2, '0');
-    const tahun = String(d.getFullYear());
-
-    // Get anak for this wilayah
     const { sql: scope, params: scopeParams } = getScopeCondition(session, 'a');
     const anakList = await query<{
       id_anak: string; nama_lengkap: string; jenjang_pendidikan: string;
@@ -123,33 +133,43 @@ export async function POST(req: NextRequest) {
       scopeParams,
     );
 
-    // Insert one row per child
     for (const anak of anakList) {
-      const kh = body.kehadiran[anak.id_anak] || { hadir: 'n', keterangan: '' };
+      const kh = body.kehadiran[anak.id_anak] || { hadir: 'n', keterangan: 'Alfa' };
       const m  = body.mandiri[anak.id_anak] || { bantu_ortu: false, sedekah: false, shalat_wajib: false, tilawah: false };
+      const ortu = isParenting && kh.hadir === 'y'
+        ? (body.ortu_hadir?.[anak.id_anak] || '')
+        : '';
+
+      if (isParenting && kh.hadir === 'y' && !ortu) {
+        return NextResponse.json({
+          error: `Ortu hadir wajib untuk anak hadir: ${anak.nama_lengkap}.`,
+        }, { status: 400 });
+      }
 
       await query(
         `INSERT INTO ajis_pembinaan_baru
            (id_pembinaan, tgl_pembinaan, semesterid, bulan, tahun,
-            jenis_pembinaan, judul_materi, id_anak, kehadiran, keterangan,
-            id_wilayah_pembinaan, user_insert, date_insert, kantor_id,
-            jns_kel, asnaf, nik, nama_lengkap, jenjang_pendidikan, status_ortu,
+            jenis_pembinaan, p3a, judul_materi, id_anak, kehadiran, keterangan,
+            id_wilayah_pembinaan, user_insert, date_insert, user_update, date_update,
+            kantor_id, jns_kel, asnaf, nik, nama_lengkap, jenjang_pendidikan, status_ortu,
             nama_lengkap_ayah, nama_lengkap_ibu, nama_lengkap_wali,
             nama_kantor, nama_wilayah, pemateri, pemateri_personal,
             ortu_hadir, id_donatur, nama_donatur, program_donasi, tampil, via_input,
             capaian_tilawah, capaian_tahfidz, capaian_tahfidz_hal,
             pembiasaan_shalat_wajib, pembiasaan_tilawah, pembiasaan_sedekah, membantu_ortu)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
         [
           idPembinaan, body.tgl_pembinaan, body.semesterid, bulan, tahun,
-          body.jenis_pembinaan, body.judul_materi, anak.id_anak,
+          body.jenis_pembinaan, p3a, body.judul_materi, anak.id_anak,
           kh.hadir, kh.keterangan || '',
-          session.idWilayahPembinaan, session.username, anak.kantor_id,
+          session.idWilayahPembinaan, session.username, '', '0000-00-00',
+          anak.kantor_id,
           anak.jns_kel, anak.asnaf, anak.nik, anak.nama_lengkap,
           anak.jenjang_pendidikan, anak.status_ortu,
           anak.nama_lengkap_ayah, anak.nama_lengkap_ibu, anak.nama_lengkap_wali,
           anak.nama_kantor, anak.nama_wilayah,
-          body.pemateri, '', '', '', '', '', 'y', 'web',
+          body.pemateri, '', ortu,
+          '', '', '', 'y', 'web',
           '', '', '',
           m.shalat_wajib ? 1 : 0,
           m.tilawah      ? 1 : 0,

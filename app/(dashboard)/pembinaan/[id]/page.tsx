@@ -49,6 +49,7 @@ export default function PembinaanDetailPage() {
   const attendanceTotal = session.anak.length;
   const hadirCount = session.anak.filter(a => a.kehadiran === 'y').length;
   const pct = attendanceTotal > 0 ? Math.round((hadirCount / attendanceTotal) * 100) : 0;
+  const isParenting = session.jenis_pembinaan === 'Parenting';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -94,8 +95,16 @@ export default function PembinaanDetailPage() {
           </div>
           <div>
             <FLabel>Semester</FLabel>
-            <div style={{ fontSize: 14, fontWeight: 800 }}>Semester {session.semesterid}</div>
+            <div style={{ fontSize: 14, fontWeight: 800 }}>
+              {(session as { semester_label?: string }).semester_label || `Semester ${session.semesterid}`}
+            </div>
           </div>
+          {session.jenis_pembinaan === 'P3A' && (session as { p3a?: string }).p3a && (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <FLabel>Keterangan P3A</FLabel>
+              <div style={{ fontSize: 14, fontWeight: 800 }}>{(session as { p3a?: string }).p3a}</div>
+            </div>
+          )}
           <div style={{ gridColumn: '1 / -1' }}>
             <FLabel>Tema Utama Materi</FLabel>
             <div style={{ fontSize: 15, fontWeight: 800, color: '#BF4E02' }}>{session.judul_materi || '—'}</div>
@@ -128,6 +137,9 @@ export default function PembinaanDetailPage() {
                 <th style={{ padding: 10, fontWeight: 700, color: '#8F3A01', textAlign: 'left' }}>Anak Asuh</th>
                 <th style={{ padding: 10, fontWeight: 700, color: '#8F3A01', textAlign: 'center', width: 110 }}>Absensi</th>
                 <th style={{ padding: 10, fontWeight: 700, color: '#8F3A01', textAlign: 'left', width: 160 }}>Keterangan</th>
+                {isParenting && (
+                  <th style={{ padding: 10, fontWeight: 700, color: '#8F3A01', textAlign: 'center', width: 90 }}>Ortu Hadir</th>
+                )}
                 <th style={{ padding: 10, fontWeight: 700, color: '#8F3A01', textAlign: 'center' }}>Pembiasaan Mandiri</th>
               </tr>
             </thead>
@@ -152,6 +164,11 @@ export default function PembinaanDetailPage() {
                     <td style={{ padding: 10, color: '#7A6055' }}>
                       {anak.kehadiran === 'y' ? '—' : (anak.keterangan || 'Tanpa Keterangan')}
                     </td>
+                    {isParenting && (
+                      <td style={{ padding: 10, textAlign: 'center', textTransform: 'capitalize' }}>
+                        {anak.kehadiran === 'y' ? (anak.ortu_hadir || '—') : '—'}
+                      </td>
+                    )}
                     <td style={{ padding: 10, verticalAlign: 'middle' }}>
                       {anak.kehadiran === 'y' ? (
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>

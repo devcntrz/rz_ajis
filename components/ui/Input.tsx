@@ -10,6 +10,7 @@ const inputStyle: React.CSSProperties = {
 interface InputProps {
   value?:       string | number;
   onChange?:    (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?:   (e: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   type?:        string;
   name?:        string;
@@ -19,10 +20,10 @@ interface InputProps {
   style?:       React.CSSProperties;
 }
 
-export function Input({ value, onChange, placeholder, type = 'text', name, id, required, disabled, style }: InputProps) {
+export function Input({ value, onChange, onKeyDown, placeholder, type = 'text', name, id, required, disabled, style }: InputProps) {
   return (
     <input
-      type={type} value={value ?? ''} onChange={onChange}
+      type={type} value={value ?? ''} onChange={onChange} onKeyDown={onKeyDown}
       placeholder={placeholder} name={name} id={id}
       required={required} disabled={disabled}
       style={{ ...inputStyle, opacity: disabled ? 0.6 : 1, ...style }}

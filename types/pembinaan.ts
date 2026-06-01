@@ -13,6 +13,7 @@ export interface Pembinaan {
   id_pembinaan:        string;
   tgl_pembinaan:       string;
   semesterid:          string;
+  semester_label?:     string;
   bulan:               string;
   tahun:               string;
   jenis_pembinaan:     string;
@@ -43,6 +44,7 @@ export interface PembinaanAnakRow {
   pembiasaan_tilawah:       number;
   pembiasaan_sedekah:       number;
   membantu_ortu:            number;
+  ortu_hadir?:               string;
 }
 
 /** Mandiri data per child per session */

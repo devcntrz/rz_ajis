@@ -57,7 +57,9 @@ export function PembinaanTable({ data, loading, rowOffset = 0 }: PembinaanTableP
       key: 'semester',
       label: 'Semester',
       width: 90,
-      render: (r: Pembinaan) => <span>Semester {r.semesterid}</span>,
+      render: (r: Pembinaan) => (
+        <span>{r.semester_label || `Semester ${r.semesterid}`}</span>
+      ),
     },
     {
       key: 'wilayah',

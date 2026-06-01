@@ -23,7 +23,7 @@ export function PembinaanCard({ data }: PembinaanCardProps) {
                   {fmtTgl(r.tgl_pembinaan)}
                 </span>
                 <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: '#FBF0E8', color: '#BF4E02' }}>
-                  Sem {r.semesterid}
+                  {r.semester_label || `Sem ${r.semesterid}`}
                 </span>
               </div>
 

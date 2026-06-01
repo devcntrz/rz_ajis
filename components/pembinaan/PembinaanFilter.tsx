@@ -1,43 +1,97 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { Input, Sel } from '@/components/ui/Input';
+import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { Input } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
 import { Btn } from '@/components/ui/Btn';
+import { SearchSelect } from '@/components/ui/SearchSelect';
+import { JENIS_PEMBINAAN_OPTIONS } from '@/lib/pembinaanConstants';
+import { useCurrentSemester } from '@/hooks/useCurrentSemester';
+
+const jenisOptions = JENIS_PEMBINAAN_OPTIONS.map(j => ({ value: j, label: j }));
 
 interface PembinaanFilterProps {
   onFilterChange: (filters: Record<string, string>) => void;
 }
 
+interface FilterDraft {
+  q: string;
+  jenis: string;
+  semester: string;
+  semesterLabel: string;
+  tgl_dari: string;
+  tgl_sampai: string;
+}
+
+function semesterDisplayLabel(s: { semester: string; is_current: boolean | number | string }): string {
+  const isCurrent = s.is_current === true || s.is_current === 1 || s.is_current === '1';
+  return `${s.semester}${isCurrent ? ' (Aktif)' : ''}`;
+}
+
 export function PembinaanFilter({ onFilterChange }: PembinaanFilterProps) {
-  const [q, setQ] = useState('');
-  const [jenis, setJenis] = useState('');
-  const [semester, setSemester] = useState('');
-  const [tglDari, setTglDari] = useState('');
-  const [tglSampai, setTglSampai] = useState('');
+  const { current: activeSemester } = useCurrentSemester();
+  const appliedOnce = useRef(false);
+
+  const [draft, setDraft] = useState<FilterDraft>({
+    q: '', jenis: '', semester: '', semesterLabel: '', tgl_dari: '', tgl_sampai: '',
+  });
   const [expanded, setExpanded] = useState(false);
 
-  const onFilterChangeRef = useRef(onFilterChange);
-  onFilterChangeRef.current = onFilterChange;
-
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      onFilterChangeRef.current({ q, jenis, semester, tgl_dari: tglDari, tgl_sampai: tglSampai });
-    }, 300);
-    return () => clearTimeout(delayDebounce);
-  }, [q, jenis, semester, tglDari, tglSampai]);
+    if (!activeSemester || appliedOnce.current) return;
+    const label = semesterDisplayLabel(activeSemester);
+    setDraft(d => ({
+      ...d,
+      semester: activeSemester.semesterid,
+      semesterLabel: label,
+    }));
+    onFilterChange({
+      q: '',
+      jenis: '',
+      semester: activeSemester.semesterid,
+      tgl_dari: '',
+      tgl_sampai: '',
+    });
+    appliedOnce.current = true;
+  }, [activeSemester, onFilterChange]);
+
+  function applyFilters() {
+    onFilterChange({
+      q:          draft.q,
+      jenis:      draft.jenis,
+      semester:   draft.semester,
+      tgl_dari:   draft.tgl_dari,
+      tgl_sampai: draft.tgl_sampai,
+    });
+  }
+
+  function resetFilters() {
+    const semester = activeSemester?.semesterid ?? '';
+    const label = activeSemester ? semesterDisplayLabel(activeSemester) : '';
+    const empty: FilterDraft = {
+      q: '', jenis: '', semester: '', semesterLabel: '', tgl_dari: '', tgl_sampai: '',
+    };
+    const withSem: FilterDraft = semester
+      ? { ...empty, semester, semesterLabel: label }
+      : empty;
+    setDraft(withSem);
+    onFilterChange({
+      q: '', jenis: '', semester, tgl_dari: '', tgl_sampai: '',
+    });
+  }
 
   return (
     <div style={{
       background: '#FFFFFF', border: '1.5px solid #F0C4A0', borderRadius: 16,
       padding: '14px 18px', marginBottom: 18,
     }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Search size={16} color="#7A6055" style={{ position: 'absolute', left: 11, top: 11 }} />
           <Input
-            value={q}
-            onChange={e => setQ(e.target.value)}
+            value={draft.q}
+            onChange={e => setDraft(d => ({ ...d, q: e.target.value }))}
+            onKeyDown={e => { if (e.key === 'Enter') applyFilters(); }}
             placeholder="Cari tema / materi pembinaan..."
             style={{ paddingLeft: 34 }}
           />
@@ -46,40 +100,76 @@ export function PembinaanFilter({ onFilterChange }: PembinaanFilterProps) {
           <SlidersHorizontal size={15} />
           <span>Filter</span>
         </Btn>
+        <Btn onClick={applyFilters} variant="primary" style={{ height: 38 }}>
+          <Search size={15} />
+          <span>Cari</span>
+        </Btn>
       </div>
 
       {expanded && (
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid #F2EAE3',
-        }}>
-          <div>
-            <FLabel>Jenis Pembinaan</FLabel>
-            <Sel value={jenis} onChange={e => setJenis(e.target.value)}>
-              <option value="">Semua Jenis</option>
-              <option value="Pembinaan Wilayah">Pembinaan Wilayah</option>
-              <option value="Pekan Berbagi Senyum">Pekan Berbagi Senyum</option>
-              <option value="Mentoring Online">Mentoring Online</option>
-            </Sel>
+        <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #F2EAE3' }}>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 12,
+          }}>
+            <div>
+              <FLabel>Jenis Pembinaan</FLabel>
+              <SearchSelect
+                options={jenisOptions}
+                value={draft.jenis}
+                onChange={v => setDraft(d => ({ ...d, jenis: v }))}
+                placeholder="Ketik jenis..."
+                allowEmpty
+                clearable
+              />
+            </div>
+
+            <div>
+              <FLabel>Semester</FLabel>
+              <SearchSelect
+                fetchUrl="/api/anakjuara/semester"
+                value={draft.semester}
+                onChange={v => setDraft(d => ({
+                  ...d,
+                  semester: v,
+                  semesterLabel: v ? d.semesterLabel : '',
+                }))}
+                onLabelChange={label => setDraft(d => ({ ...d, semesterLabel: label }))}
+                resolvedLabel={draft.semesterLabel || undefined}
+                placeholder="Ketik semester..."
+                allowEmpty
+                clearable
+              />
+            </div>
+
+            <div>
+              <FLabel>Dari Tanggal</FLabel>
+              <Input
+                type="date"
+                value={draft.tgl_dari}
+                onChange={e => setDraft(d => ({ ...d, tgl_dari: e.target.value }))}
+              />
+            </div>
+
+            <div>
+              <FLabel>Sampai Tanggal</FLabel>
+              <Input
+                type="date"
+                value={draft.tgl_sampai}
+                onChange={e => setDraft(d => ({ ...d, tgl_sampai: e.target.value }))}
+              />
+            </div>
           </div>
 
-          <div>
-            <FLabel>Semester</FLabel>
-            <Sel value={semester} onChange={e => setSemester(e.target.value)}>
-              <option value="">Semua Semester</option>
-              <option value="25">Semester Ganjil 2025/2026</option>
-              <option value="26">Semester Genap 2025/2026</option>
-            </Sel>
-          </div>
-
-          <div>
-            <FLabel>Dari Tanggal</FLabel>
-            <Input type="date" value={tglDari} onChange={e => setTglDari(e.target.value)} />
-          </div>
-
-          <div>
-            <FLabel>Sampai Tanggal</FLabel>
-            <Input type="date" value={tglSampai} onChange={e => setTglSampai(e.target.value)} />
+          <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'flex-end' }}>
+            <Btn type="button" onClick={resetFilters} variant="outline" size="sm">
+              <RotateCcw size={14} />
+              <span>Reset</span>
+            </Btn>
+            <Btn type="button" onClick={applyFilters} variant="primary" size="sm">
+              <Search size={14} />
+              <span>Terapkan Filter</span>
+            </Btn>
           </div>
         </div>
       )}
