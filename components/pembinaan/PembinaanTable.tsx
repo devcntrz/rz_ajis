@@ -1,7 +1,11 @@
 'use client';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/ui/DataTable';
-import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
+import { Btn } from '@/components/ui/Btn';
 import { fmtTgl } from '@/lib/utils';
 import type { Pembinaan } from '@/types/pembinaan';
 
@@ -9,10 +13,30 @@ interface PembinaanTableProps {
   data:       Pembinaan[];
   loading:    boolean;
   rowOffset?: number;
+  onDeleted?: () => void;
 }
 
-export function PembinaanTable({ data, loading, rowOffset = 0 }: PembinaanTableProps) {
+export function PembinaanTable({ data, loading, rowOffset = 0, onDeleted }: PembinaanTableProps) {
   const router = useRouter();
+  const [target, setTarget] = useState<Pembinaan | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function confirmDelete() {
+    if (!target) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/anakjuara/pembinaan/${target.id_pembinaan}`, { method: 'DELETE' });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'Gagal menghapus.');
+      toast.success(`Sesi "${target.judul_materi || target.id_pembinaan}" berhasil dihapus.`);
+      setTarget(null);
+      onDeleted?.();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Terjadi kesalahan saat menghapus.');
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   const columns = [
     {
@@ -86,16 +110,64 @@ export function PembinaanTable({ data, loading, rowOffset = 0 }: PembinaanTableP
         );
       },
     },
+    {
+      key: 'action',
+      label: '',
+      width: 46,
+      render: (r: Pembinaan) => (
+        <button
+          title="Hapus sesi"
+          onClick={e => { e.stopPropagation(); setTarget(r); }}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: '#B02020', padding: '4px 6px', borderRadius: 6,
+            display: 'flex', alignItems: 'center',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FDEAEA'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
+        >
+          <Trash2 size={15} />
+        </button>
+      ),
+    },
   ];
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      rowKey={r => r.id_pembinaan}
-      loading={loading}
-      onRowClick={r => router.push(`/pembinaan/${r.id_pembinaan}`)}
-      minWidth={910}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={data}
+        rowKey={r => r.id_pembinaan}
+        loading={loading}
+        onRowClick={r => router.push(`/pembinaan/${r.id_pembinaan}`)}
+        minWidth={960}
+      />
+
+      <Modal open={!!target} onClose={() => !deleting && setTarget(null)} title="Hapus Sesi Pembinaan">
+        <p style={{ fontSize: 14, color: '#1A0A00', marginBottom: 6 }}>
+          Anda akan menghapus sesi:
+        </p>
+        <p style={{ fontSize: 14, fontWeight: 700, color: '#B02020', marginBottom: 6 }}>
+          &ldquo;{target?.judul_materi || target?.id_pembinaan}&rdquo;
+        </p>
+        <p style={{ fontSize: 13, color: '#7A6055', marginBottom: 20 }}>
+          Tindakan ini akan menghapus seluruh data kehadiran ({target?.jumlah_anak ?? 0} anak) pada sesi ini dan tidak bisa dibatalkan.
+        </p>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <Btn type="button" variant="outline" onClick={() => setTarget(null)} disabled={deleting}>
+            Batal
+          </Btn>
+          <Btn
+            type="button"
+            variant="primary"
+            disabled={deleting}
+            onClick={confirmDelete}
+            style={{ background: '#B02020', borderColor: '#B02020' }}
+          >
+            {deleting ? 'Menghapus...' : 'Ya, Hapus'}
+          </Btn>
+        </div>
+      </Modal>
+    </>
   );
 }

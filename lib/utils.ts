@@ -72,9 +72,10 @@ export const STATUS_COLOR: Record<string, [string, string]> = {
 export const HADIR_COLOR: Record<string, [string, string]> = {
   hadir: ['#1A7A45', '#E5F5ED'],
   y:     ['#1A7A45', '#E5F5ED'],
-  izin:  ['#B87800', '#FDF4DC'],
+  izin:  ['#1A5FA8', '#E5EEF8'],
   alfa:  ['#B02020', '#FDEAEA'],
   n:     ['#B02020', '#FDEAEA'],
+  sakit: ['#B87800', '#FDF4DC'],
 };
 
 /** NILAI_OPTIONS list */

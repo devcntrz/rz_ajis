@@ -1,10 +1,18 @@
 'use client';
 import { Toggle } from '@/components/ui/Toggle';
-import { Input } from '@/components/ui/Input';
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchSelect } from '@/components/ui/SearchSelect';
 import { ORTU_HADIR_OPTIONS } from '@/lib/pembinaanConstants';
 import type { PembinaanAnakRow, Mandiri } from '@/types/pembinaan';
+
+const STATUS_OPTIONS = ['Alfa', 'Izin', 'Sakit'] as const;
+type StatusOption = typeof STATUS_OPTIONS[number];
+
+const STATUS_STYLE: Record<StatusOption, { border: string; bg: string; color: string }> = {
+  Alfa:  { border: '#B02020', bg: '#FDEAEA', color: '#B02020' },
+  Izin:  { border: '#1A5FA8', bg: '#E5EEF8', color: '#1A5FA8' },
+  Sakit: { border: '#B87800', bg: '#FDF4DC', color: '#B87800' },
+};
 
 const ortuOptions = ORTU_HADIR_OPTIONS.map(o => ({ value: o.value, label: o.label }));
 
@@ -33,15 +41,21 @@ export function AttendanceMatrix({
     const nextOrtu = { ...ortuHadir };
     if (isHadir) {
       delete nextKeterangan[anakId];
-    } else {
-      nextKeterangan[anakId] = nextKeterangan[anakId] || 'Alfa';
       delete nextOrtu[anakId];
+    } else {
+      nextKeterangan[anakId] = normalizeStatus(nextKeterangan[anakId] || 'Alfa');
     }
     onChange(nextKehadiran, nextKeterangan, mandiri, nextOrtu);
   }
 
-  function handleKetChange(anakId: string, value: string) {
-    onChange(kehadiran, { ...keterangan, [anakId]: value }, mandiri, ortuHadir);
+  function normalizeStatus(val: string): StatusOption {
+    if (val === 'Izin') return 'Izin';
+    if (val === 'Sakit') return 'Sakit';
+    return 'Alfa';
+  }
+
+  function handleStatusChange(anakId: string, status: StatusOption) {
+    onChange(kehadiran, { ...keterangan, [anakId]: status }, mandiri, ortuHadir);
   }
 
   function handleOrtuChange(anakId: string, value: string) {
@@ -86,7 +100,7 @@ export function AttendanceMatrix({
             )}
             {anakList.map((anak, i) => {
               const isHadir = (kehadiran[anak.id_anak] ?? 'n') === 'y';
-              const ket = keterangan[anak.id_anak] || '';
+              const status: StatusOption = normalizeStatus(keterangan[anak.id_anak] || 'Alfa');
               const m = mandiri[anak.id_anak] || { shalat_wajib: false, tilawah: false, sedekah: false, bantu_ortu: false };
               const ortu = ortuHadir[anak.id_anak] || '';
 
@@ -107,19 +121,40 @@ export function AttendanceMatrix({
                       <Toggle
                         value={isHadir}
                         onChange={v => handleHadirToggle(anak.id_anak, v)}
-                        label={isHadir ? 'Hadir' : 'Alfa'}
+                        label={isHadir ? 'Hadir' : status}
                       />
                     </div>
                   </td>
 
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
                     {!isHadir ? (
-                      <Input
-                        value={ket}
-                        onChange={e => handleKetChange(anak.id_anak, e.target.value)}
-                        placeholder="Contoh: Sakit, Izin, Alfa"
-                        style={{ padding: '5px 8px', fontSize: 12 }}
-                      />
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {STATUS_OPTIONS.map(opt => {
+                          const active = status === opt;
+                          const s = STATUS_STYLE[opt];
+                          return (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => handleStatusChange(anak.id_anak, opt)}
+                              style={{
+                                padding: '4px 12px',
+                                borderRadius: 20,
+                                fontSize: 12,
+                                fontWeight: active ? 700 : 500,
+                                fontFamily: 'inherit',
+                                cursor: 'pointer',
+                                border: `1.5px solid ${active ? s.border : '#F0C4A0'}`,
+                                background: active ? s.bg : '#FFFFFF',
+                                color: active ? s.color : '#7A6055',
+                                transition: 'all 0.15s',
+                              }}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
                     ) : (
                       <span style={{ fontSize: 12, color: '#7A6055' }}>—</span>
                     )}

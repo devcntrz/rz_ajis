@@ -6,9 +6,11 @@ interface ModalProps {
   onClose:  () => void;
   children: React.ReactNode;
   maxWidth?: number;
+  open?: boolean;
 }
 
-export function Modal({ title, onClose, children, maxWidth = 680 }: ModalProps) {
+export function Modal({ title, onClose, children, maxWidth = 680, open }: ModalProps) {
+  if (open === false) return null;
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(26,10,0,.5)',

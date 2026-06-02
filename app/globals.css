@@ -90,9 +90,19 @@ html, body {
   .datagrid-mobile  { display: flex !important; flex-direction: column; gap: 10px; }
   .pagination-desktop { display: none !important; }
   .sidebar          { display: none !important; }
-  .topbar           { padding: 0 16px; }
+  .topbar           { padding: 0 14px; gap: 8px; }
   .content-area     { padding: 16px 14px 80px; }
   .mobile-nav       { display: flex; }
+
+  /* Hide verbose topbar elements on small screens */
+  .topbar-location  { display: none !important; }
+  .topbar-spacer    { display: none !important; }
+  .topbar-username  { display: none !important; }
+  .topbar-logout-text { display: none !important; }
+}
+
+@media (min-width: 701px) {
+  .topbar-spacer    { display: none !important; }
 }
 
 /* ── Mobile Nav ── */

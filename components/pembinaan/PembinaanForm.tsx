@@ -1,11 +1,13 @@
 'use client';
 import { useState, useTransition, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useCurrentSemester } from '@/hooks/useCurrentSemester';
 import { useRouter } from 'next/navigation';
 import { Card, CardHead } from '@/components/ui/Card';
 import { FLabel } from '@/components/ui/FLabel';
 import { Input } from '@/components/ui/Input';
 import { Btn } from '@/components/ui/Btn';
+import { Modal } from '@/components/ui/Modal';
 import { SearchSelect } from '@/components/ui/SearchSelect';
 import { MultiSearchSelect } from '@/components/ui/MultiSearchSelect';
 import { AttendanceMatrix } from './AttendanceMatrix';
@@ -91,6 +93,7 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
   const [mandiri, setMandiri] = useState(initMandiri);
   const [ortuHadir, setOrtuHadir] = useState(initOrtuHadir);
   const [submitting, setSubmitting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   function handleMatrixChange(
     nextKehadiran:  Record<string, 'y' | 'n'>,
@@ -129,14 +132,21 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
     return null;
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const err = validate();
     if (err) {
-      alert(err);
+      toast.error(err);
       return;
     }
+    if (isEdit) {
+      setShowConfirm(true);
+    } else {
+      void doSave();
+    }
+  }
 
+  async function doSave() {
     setSubmitting(true);
 
     const payloadKehadiran: Record<string, { hadir: 'y' | 'n'; keterangan: string }> = {};
@@ -147,7 +157,7 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
       const id = anak.id_anak;
       payloadKehadiran[id] = {
         hadir:      kehadiran[id] ?? 'y',
-        keterangan: kehadiran[id] === 'y' ? '' : (keterangan[id] || 'Alfa'),
+        keterangan: kehadiran[id] === 'y' ? '' : (keterangan[id] || 'Alfa'), // keterangan default from matrix
       };
       payloadMandiri[id] = mandiri[id] || {
         shalat_wajib: false, tilawah: false, sedekah: false, bantu_ortu: false,
@@ -180,13 +190,15 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || 'Gagal menyimpan');
 
-      alert(isEdit ? 'Pembinaan berhasil diperbarui!' : 'Pembinaan berhasil ditambahkan!');
-      startTransition(() => {
+      toast.success(isEdit ? 'Sesi pembinaan berhasil diperbarui!' : 'Sesi pembinaan berhasil ditambahkan!');
+      if (isEdit && initialData?.id_pembinaan) {
+        router.push(`/pembinaan/${initialData.id_pembinaan}`);
+      } else {
         router.push('/pembinaan');
-        router.refresh();
-      });
+      }
+      router.refresh();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Terjadi kesalahan saat menyimpan data.');
+      toast.error(e instanceof Error ? e.message : 'Terjadi kesalahan saat menyimpan data.');
       setSubmitting(false);
     }
   }
@@ -288,6 +300,34 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
           {submitting ? 'Menyimpan...' : 'Simpan Pembinaan'}
         </Btn>
       </div>
+
+      <Modal
+        open={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        title="Konfirmasi Update"
+      >
+        <p style={{ fontSize: 14, color: '#1A0A00', marginBottom: 20 }}>
+          Apakah Anda yakin ingin menyimpan perubahan sesi pembinaan ini?
+        </p>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <Btn
+            type="button"
+            variant="outline"
+            onClick={() => setShowConfirm(false)}
+            disabled={submitting}
+          >
+            Batal
+          </Btn>
+          <Btn
+            type="button"
+            variant="primary"
+            disabled={submitting}
+            onClick={() => { setShowConfirm(false); void doSave(); }}
+          >
+            {submitting ? 'Menyimpan...' : 'Ya, Update'}
+          </Btn>
+        </div>
+      </Modal>
     </form>
   );
 }

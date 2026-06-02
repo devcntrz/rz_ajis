@@ -59,6 +59,11 @@ export default function PembinaanListPage() {
     });
   }, []);
 
+  const handleDeleted = useCallback(() => {
+    desktopList.mutate();
+    mobileList.mutate();
+  }, [desktopList, mobileList]);
+
   const rowOffsetDesktop = (page - 1) * limit;
   const desktopRows = desktopList.isReady ? desktopList.data : [];
 
@@ -94,10 +99,11 @@ export default function PembinaanListPage() {
           data={desktopRows}
           loading={!listReady || !desktopList.isReady}
           rowOffset={rowOffsetDesktop}
+          onDeleted={handleDeleted}
         />
       </div>
 
-      <PembinaanCard data={isMobile ? infinite.items : desktopRows} />
+      <PembinaanCard data={isMobile ? infinite.items : desktopRows} onDeleted={handleDeleted} />
 
       {!isMobile && listReady && displayTotal > 0 && (
         <DesktopPagination
