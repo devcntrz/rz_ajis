@@ -42,11 +42,21 @@ export async function GET(
       pembiasaan_sedekah: number;
     }>(
       `SELECT pb.id_pembinaan, pb.tgl_pembinaan, pb.semesterid,
-              pb.jenis_pembinaan, pb.judul_materi, pb.pemateri,
+              pb.jenis_pembinaan,
+              COALESCE(hdr.judul_materi, pb.judul_materi) AS judul_materi,
+              COALESCE(hdr.pemateri, pb.pemateri) AS pemateri,
               pb.kehadiran, pb.keterangan,
               pb.membantu_ortu, pb.pembiasaan_shalat_wajib,
               pb.pembiasaan_tilawah, pb.pembiasaan_sedekah
        FROM   ajis_pembinaan_baru pb
+       LEFT JOIN (
+         SELECT id_pembinaan,
+                MIN(judul_materi) AS judul_materi,
+                MIN(pemateri) AS pemateri
+         FROM   ajis_pembinaan_baru
+         WHERE  kehadiran = 'y'
+         GROUP  BY id_pembinaan
+       ) hdr ON hdr.id_pembinaan = pb.id_pembinaan
        WHERE  ${conditions.join(' AND ')}
        ORDER  BY pb.tgl_pembinaan DESC
        LIMIT  100`,

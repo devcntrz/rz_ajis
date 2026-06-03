@@ -9,6 +9,7 @@ interface ToggleProps {
 export function Toggle({ value, onChange, label }: ToggleProps) {
   return (
     <button
+      type="button"
       onClick={() => onChange(!value)}
       style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
     >

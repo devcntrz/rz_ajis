@@ -59,8 +59,14 @@ export async function GET(req: NextRequest) {
               MIN(pb.semesterid)       AS semesterid,
               MIN(sem.semester)        AS semester_label,
               MIN(pb.jenis_pembinaan)  AS jenis_pembinaan,
-              MIN(pb.judul_materi)     AS judul_materi,
-              MIN(pb.pemateri)         AS pemateri,
+              COALESCE(
+                MIN(CASE WHEN pb.kehadiran = 'y' THEN pb.judul_materi ELSE NULL END),
+                MIN(pb.judul_materi)
+              ) AS judul_materi,
+              COALESCE(
+                MIN(CASE WHEN pb.kehadiran = 'y' THEN pb.pemateri ELSE NULL END),
+                MIN(pb.pemateri)
+              ) AS pemateri,
               MIN(pb.nama_wilayah)     AS nama_wilayah,
               MIN(pb.nama_kantor)      AS nama_kantor,
               MIN(pb.id_wilayah_pembinaan) AS id_wilayah_pembinaan,

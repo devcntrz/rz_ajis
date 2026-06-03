@@ -39,13 +39,16 @@ export function AttendanceMatrix({
     const nextKehadiran = { ...kehadiran, [anakId]: isHadir ? ('y' as const) : ('n' as const) };
     const nextKeterangan = { ...keterangan };
     const nextOrtu = { ...ortuHadir };
+    const allOn: Mandiri = { shalat_wajib: true, tilawah: true, sedekah: true, bantu_ortu: true };
+    const allOff: Mandiri = { shalat_wajib: false, tilawah: false, sedekah: false, bantu_ortu: false };
+    const nextMandiri = { ...mandiri, [anakId]: isHadir ? allOn : allOff };
     if (isHadir) {
       delete nextKeterangan[anakId];
       delete nextOrtu[anakId];
     } else {
       nextKeterangan[anakId] = normalizeStatus(nextKeterangan[anakId] || 'Alfa');
     }
-    onChange(nextKehadiran, nextKeterangan, mandiri, nextOrtu);
+    onChange(nextKehadiran, nextKeterangan, nextMandiri, nextOrtu);
   }
 
   function normalizeStatus(val: string): StatusOption {

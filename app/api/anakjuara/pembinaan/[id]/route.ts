@@ -28,8 +28,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
               MIN(sem.semester) AS semester_label,
               MIN(pb.jenis_pembinaan) AS jenis_pembinaan,
               MIN(pb.p3a) AS p3a,
-              MIN(pb.judul_materi) AS judul_materi,
-              MIN(pb.pemateri) AS pemateri,
+              COALESCE(
+                MIN(CASE WHEN pb.kehadiran = 'y' THEN pb.judul_materi ELSE NULL END),
+                MIN(pb.judul_materi)
+              ) AS judul_materi,
+              COALESCE(
+                MIN(CASE WHEN pb.kehadiran = 'y' THEN pb.pemateri ELSE NULL END),
+                MIN(pb.pemateri)
+              ) AS pemateri,
               MIN(pb.nama_wilayah) AS nama_wilayah,
               MIN(pb.nama_kantor) AS nama_kantor,
               MIN(pb.id_wilayah_pembinaan) AS id_wilayah_pembinaan
@@ -85,7 +91,14 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const [existing] = await query<{ jenis_pembinaan: string; p3a: string; judul_materi: string; pemateri: string }>(
       `SELECT MIN(jenis_pembinaan) AS jenis_pembinaan, MIN(p3a) AS p3a,
-              MIN(judul_materi) AS judul_materi, MIN(pemateri) AS pemateri
+              COALESCE(
+                MIN(CASE WHEN kehadiran = 'y' THEN judul_materi ELSE NULL END),
+                MIN(judul_materi)
+              ) AS judul_materi,
+              COALESCE(
+                MIN(CASE WHEN kehadiran = 'y' THEN pemateri ELSE NULL END),
+                MIN(pemateri)
+              ) AS pemateri
        FROM ajis_pembinaan_baru WHERE id_pembinaan = ?`,
       [id],
     );

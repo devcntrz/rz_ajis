@@ -43,10 +43,10 @@ export default function NewPembinaanPage() {
     jns_kel:            a.jns_kel,
     kehadiran:          'y' as const,
     keterangan:         '',
-    pembiasaan_shalat_wajib: 0,
-    pembiasaan_tilawah: 0,
-    pembiasaan_sedekah: 0,
-    membantu_ortu:      0,
+    pembiasaan_shalat_wajib: 1,
+    pembiasaan_tilawah: 1,
+    pembiasaan_sedekah: 1,
+    membantu_ortu:      1,
   }));
 
   return (
