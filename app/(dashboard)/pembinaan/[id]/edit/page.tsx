@@ -36,7 +36,7 @@ export default function EditPembinaanPage() {
         </div>
       </div>
 
-      <PembinaanForm initialData={session} anakList={[]} isEdit />
+      <PembinaanForm initialData={session} isEdit />
     </div>
   );
 }

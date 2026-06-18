@@ -124,7 +124,13 @@ export async function POST(req: NextRequest) {
     const p3a = p3aValue(body.jenis_pembinaan, body.p3a || '');
     const isParenting = body.jenis_pembinaan === 'Parenting';
 
+    const idAnakList = Object.keys(body.kehadiran);
+    if (idAnakList.length === 0) {
+      return NextResponse.json({ error: 'Daftar kehadiran kosong. Muat daftar anak terlebih dahulu.' }, { status: 400 });
+    }
+
     const { sql: scope, params: scopeParams } = getScopeCondition(session, 'a');
+    const inPlaceholders = idAnakList.map(() => '?').join(',');
     const anakList = await query<{
       id_anak: string; nama_lengkap: string; jenjang_pendidikan: string;
       status_ortu: string; jns_kel: string; asnaf: string; nik: string;
@@ -135,9 +141,14 @@ export async function POST(req: NextRequest) {
               a.status_ortu, a.jns_kel, a.asnaf, a.nik,
               a.nama_lengkap_ayah, a.nama_lengkap_ibu, a.nama_lengkap_wali,
               a.kantor_id, a.nama_wilayah, a.nama_kantor
-       FROM ajis_anak a WHERE ${scope} AND a.aktif='y'`,
-      scopeParams,
+       FROM ajis_anak a
+       WHERE ${scope} AND a.aktif='y' AND a.id_anak IN (${inPlaceholders})`,
+      [...scopeParams, ...idAnakList],
     );
+
+    if (anakList.length < idAnakList.length) {
+      return NextResponse.json({ error: 'Beberapa anak di luar cakupan wilayah Anda.' }, { status: 403 });
+    }
 
     for (const anak of anakList) {
       const kh = body.kehadiran[anak.id_anak] || { hadir: 'n', keterangan: 'Alfa' };

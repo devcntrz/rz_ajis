@@ -16,6 +16,7 @@ import {
   DEFAULT_JENIS_PEMBINAAN,
   isParenting,
 } from '@/lib/pembinaanConstants';
+import type { AnakListRow, AnakListSource } from '@/types/anak';
 import type { PembinaanAnakRow, Mandiri } from '@/types/pembinaan';
 
 interface PembinaanFormProps {
@@ -30,7 +31,6 @@ interface PembinaanFormProps {
     pemateri:         string;
     anak:             PembinaanAnakRow[];
   };
-  anakList:           PembinaanAnakRow[];
   isEdit?:            boolean;
 }
 
@@ -41,7 +41,46 @@ function parsePemateriNames(pemateri: string): string[] {
   return pemateri.split(',').map(s => s.trim()).filter(Boolean);
 }
 
-export function PembinaanForm({ initialData, anakList, isEdit = false }: PembinaanFormProps) {
+function mapApiRowsToPembinaan(rows: AnakListRow[]): PembinaanAnakRow[] {
+  return rows.map(a => ({
+    id_row:             0,
+    id_pembinaan:       '',
+    id_anak:            a.id_anak,
+    nama_lengkap:       a.nama_lengkap,
+    jenjang_pendidikan: a.jenjang_pendidikan,
+    status_ortu:        a.status_ortu,
+    jns_kel:            a.jns_kel,
+    kehadiran:          'y',
+    keterangan:         '',
+    pembiasaan_shalat_wajib: 1,
+    pembiasaan_tilawah: 1,
+    pembiasaan_sedekah: 1,
+    membantu_ortu:      1,
+  }));
+}
+
+function buildMatrixState(list: PembinaanAnakRow[]) {
+  const kehadiran: Record<string, 'y' | 'n'> = {};
+  const keterangan: Record<string, string> = {};
+  const mandiri: Record<string, Mandiri> = {};
+  const ortuHadir: Record<string, string> = {};
+
+  list.forEach(anak => {
+    kehadiran[anak.id_anak] = anak.kehadiran || 'y';
+    keterangan[anak.id_anak] = anak.keterangan || '';
+    mandiri[anak.id_anak] = {
+      shalat_wajib: !!anak.pembiasaan_shalat_wajib,
+      tilawah:      !!anak.pembiasaan_tilawah,
+      sedekah:      !!anak.pembiasaan_sedekah,
+      bantu_ortu:   !!anak.membantu_ortu,
+    };
+    ortuHadir[anak.id_anak] = anak.ortu_hadir || '';
+  });
+
+  return { kehadiran, keterangan, mandiri, ortuHadir };
+}
+
+export function PembinaanForm({ initialData, isEdit = false }: PembinaanFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [tglPembinaan, setTglPembinaan] = useState(
@@ -59,6 +98,21 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
     parsePemateriNames(initialData?.pemateri || ''),
   );
 
+  const [loadedAnakList, setLoadedAnakList] = useState<PembinaanAnakRow[]>([]);
+  const [anakSource, setAnakSource] = useState<AnakListSource>('anak');
+  const [mentorIdSdm, setMentorIdSdm] = useState('');
+  const [mentorLabel, setMentorLabel] = useState('');
+  const [loadingAnak, setLoadingAnak] = useState(false);
+  const [anakLoaded, setAnakLoaded] = useState(false);
+
+  const editMatrixInit = isEdit && initialData?.anak ? buildMatrixState(initialData.anak) : null;
+  const [kehadiran, setKehadiran] = useState<Record<string, 'y' | 'n'>>(editMatrixInit?.kehadiran ?? {});
+  const [keterangan, setKeterangan] = useState<Record<string, string>>(editMatrixInit?.keterangan ?? {});
+  const [mandiri, setMandiri] = useState<Record<string, Mandiri>>(editMatrixInit?.mandiri ?? {});
+  const [ortuHadir, setOrtuHadir] = useState<Record<string, string>>(editMatrixInit?.ortuHadir ?? {});
+  const [submitting, setSubmitting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   useEffect(() => {
     if (isEdit || semesterid || !activeSemester) return;
     setSemesterid(activeSemester.semesterid);
@@ -67,33 +121,35 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
     );
   }, [isEdit, semesterid, activeSemester]);
 
-  const listToUse = isEdit ? (initialData?.anak ?? []) : anakList;
+  const listToUse = isEdit ? (initialData?.anak ?? []) : loadedAnakList;
   const showParenting = isParenting(jenisPembinaan);
   const showP3a = jenisPembinaan === 'P3A';
 
-  const initKehadiran: Record<string, 'y' | 'n'> = {};
-  const initKeterangan: Record<string, string> = {};
-  const initMandiri: Record<string, Mandiri> = {};
-  const initOrtuHadir: Record<string, string> = {};
+  async function handleLoadAnak() {
+    setLoadingAnak(true);
+    try {
+      const params = new URLSearchParams({ source: anakSource, limit: '500' });
+      if (mentorIdSdm) params.set('id_sdm', mentorIdSdm);
 
-  listToUse.forEach(anak => {
-    initKehadiran[anak.id_anak] = anak.kehadiran || 'y';
-    initKeterangan[anak.id_anak] = anak.keterangan || '';
-    initMandiri[anak.id_anak] = {
-      shalat_wajib: !!anak.pembiasaan_shalat_wajib,
-      tilawah:      !!anak.pembiasaan_tilawah,
-      sedekah:      !!anak.pembiasaan_sedekah,
-      bantu_ortu:   !!anak.membantu_ortu,
-    };
-    initOrtuHadir[anak.id_anak] = anak.ortu_hadir || '';
-  });
+      const res = await fetch(`/api/anakjuara/anak?${params}`);
+      const json = await res.json() as { data?: AnakListRow[]; error?: string };
+      if (!res.ok) throw new Error(json.error || 'Gagal memuat daftar anak.');
 
-  const [kehadiran, setKehadiran] = useState(initKehadiran);
-  const [keterangan, setKeterangan] = useState(initKeterangan);
-  const [mandiri, setMandiri] = useState(initMandiri);
-  const [ortuHadir, setOrtuHadir] = useState(initOrtuHadir);
-  const [submitting, setSubmitting] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+      const mapped = mapApiRowsToPembinaan(json.data ?? []);
+      const state = buildMatrixState(mapped);
+      setLoadedAnakList(mapped);
+      setKehadiran(state.kehadiran);
+      setKeterangan(state.keterangan);
+      setMandiri(state.mandiri);
+      setOrtuHadir(state.ortuHadir);
+      setAnakLoaded(true);
+      toast.success(`${mapped.length} anak dimuat.`);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Gagal memuat daftar anak.');
+    } finally {
+      setLoadingAnak(false);
+    }
+  }
 
   function handleMatrixChange(
     nextKehadiran:  Record<string, 'y' | 'n'>,
@@ -114,6 +170,7 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
     if (showP3a && !p3a.trim()) return 'Field P3A wajib diisi.';
     if (!judulMateri.trim()) return 'Tema materi wajib diisi.';
     if (pemateriSelected.length === 0) return 'Pilih minimal satu pemateri.';
+    if (!isEdit && listToUse.length === 0) return 'Muat daftar anak terlebih dahulu.';
 
     if (showParenting) {
       for (const anak of listToUse) {
@@ -157,7 +214,7 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
       const id = anak.id_anak;
       payloadKehadiran[id] = {
         hadir:      kehadiran[id] ?? 'y',
-        keterangan: kehadiran[id] === 'y' ? '' : (keterangan[id] || 'Alfa'), // keterangan default from matrix
+        keterangan: kehadiran[id] === 'y' ? '' : (keterangan[id] || 'Alfa'),
       };
       payloadMandiri[id] = mandiri[id] || {
         shalat_wajib: false, tilawah: false, sedekah: false, bantu_ortu: false,
@@ -279,7 +336,78 @@ export function PembinaanForm({ initialData, anakList, isEdit = false }: Pembina
 
       <Card>
         <CardHead title="Daftar Kehadiran Anak Juara" />
-        <div style={{ padding: 14 }}>
+        <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {!isEdit && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 14,
+              padding: 14,
+              background: '#FBF0E8',
+              borderRadius: 10,
+              border: '1px solid #F0C4A0',
+            }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <FLabel>Sumber Data Anak</FLabel>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#1A0A00', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="anakSource"
+                      value="anak"
+                      checked={anakSource === 'anak'}
+                      onChange={() => setAnakSource('anak')}
+                    />
+                    Data Anak (ajis_anak)
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#1A0A00', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="anakSource"
+                      value="pemasangan"
+                      checked={anakSource === 'pemasangan'}
+                      onChange={() => setAnakSource('pemasangan')}
+                    />
+                    Data Pemasangan aktif (status_pasangan = y)
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <FLabel>Filter Mentor (opsional)</FLabel>
+                <SearchSelect
+                  fetchUrl="/api/anakjuara/pemateri"
+                  value={mentorIdSdm}
+                  onChange={setMentorIdSdm}
+                  onLabelChange={setMentorLabel}
+                  resolvedLabel={mentorLabel}
+                  placeholder="Ketik nama mentor..."
+                  clearable
+                  allowEmpty
+                  emptyLabel="Semua mentor"
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                <Btn
+                  type="button"
+                  variant="primary"
+                  onClick={() => void handleLoadAnak()}
+                  disabled={loadingAnak}
+                  style={{ width: '100%' }}
+                >
+                  {loadingAnak ? 'Memuat...' : 'Tampilkan Data Anak'}
+                </Btn>
+              </div>
+            </div>
+          )}
+
+          {!isEdit && !anakLoaded && (
+            <p style={{ fontSize: 13, color: '#7A6055', margin: 0, textAlign: 'center', padding: '8px 0' }}>
+              Pilih sumber data, opsional filter mentor, lalu klik Tampilkan Data Anak.
+            </p>
+          )}
+
           <AttendanceMatrix
             anakList={listToUse}
             kehadiran={kehadiran}

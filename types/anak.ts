@@ -29,6 +29,8 @@ export interface Anak {
   alamat?:              string;
 }
 
+export type AnakListSource = 'anak' | 'pemasangan';
+
 export interface AnakListParams {
   wilayah?:    string;
   status_ortu?: string;
@@ -37,6 +39,8 @@ export interface AnakListParams {
   q?:          string;
   page?:       string;
   limit?:      string;
+  source?:     AnakListSource;
+  id_sdm?:     string;
 }
 
 export interface AnakListRow {
