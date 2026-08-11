@@ -129,10 +129,10 @@ export function SearchSelect(props: SearchSelectProps) {
       const rows = (json.data ?? []) as Array<Record<string, unknown>>;
       setAsyncOptions(
         rows.map(row => ({
-          value: String(row.semesterid ?? row.value ?? row.id_sdm ?? ''),
+          value: String(row.semesterid ?? row.value ?? row.id_anak ?? row.id_sdm ?? ''),
           label: row.semester
             ? semesterLabelFromRow(row)
-            : String(row.nama_lengkap ?? row.label ?? row.value ?? ''),
+            : String(row.nama_lengkap ?? row.nama_anak ?? row.label ?? row.value ?? ''),
         })).filter(o => o.value),
       );
     } catch {

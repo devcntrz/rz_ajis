@@ -42,6 +42,51 @@ export async function requireSession(): Promise<SessionData> {
   return session as SessionData;
 }
 
+/** True when user may access Ajuan Ganti Anak / Anak Juara pairing modules. */
+export function isGroup12(session: SessionData): boolean {
+  return session.idGroupUser === 1 || session.idGroupUser === 2;
+}
+
+/**
+ * Throws if session is not group 1 (Admin) or 2 (SpMD Cabang).
+ * Call after getSession / requireSession in protected ajuan routes.
+ */
+export function requireGroup12(session: SessionData): void {
+  if (!isGroup12(session)) {
+    throw new Error('Forbidden');
+  }
+}
+
+/**
+ * Kantor isolation for pairing / ajuan modules.
+ * - Group 1: no forced filter (optional UI kantor param applied by caller)
+ * - Group 2: always force session.idKantor; ignore client kantor
+ *
+ * Column names differ by table:
+ * - ajis_pemasangan / ajis_anak → kantor_id
+ * - ajis_view_ajuan → id_kantor
+ */
+export function getKantorScope(
+  session: SessionData,
+  column: 'kantor_id' | 'id_kantor' = 'kantor_id',
+  tableAlias = '',
+): { sql: string; params: unknown[]; forcedKantor: string | null } {
+  const prefix = tableAlias ? `${tableAlias}.` : '';
+
+  if (session.idGroupUser === 1) {
+    return { sql: '1=1', params: [], forcedKantor: null };
+  }
+  if (session.idGroupUser === 2) {
+    return {
+      sql:          `${prefix}${column} = ?`,
+      params:       [session.idKantor],
+      forcedKantor: session.idKantor,
+    };
+  }
+  // Other groups should not reach ajuan APIs; keep safe empty scope
+  return { sql: '1=0', params: [], forcedKantor: null };
+}
+
 /**
  * Returns SQL WHERE fragment + params for role-based data scoping.
  * Adapts to real ajis_anak / ajis_pembinaan_baru table column names.

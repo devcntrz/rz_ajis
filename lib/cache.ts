@@ -19,9 +19,10 @@ export const getHafalanItems = unstable_cache(
 export const getWilayahList = unstable_cache(
   async () =>
     query<{ id_wilayah_pembinaan: number; nama_wilayah: string; kantor_id: string }>(
-      `SELECT id_wilayah_pembinaan, nama_wilayah, kantor_id
+      `SELECT id_wilayah_pembinaan, MIN(nama_wilayah) AS nama_wilayah, MIN(kantor_id) AS kantor_id
        FROM ajis_wilayah_pembinaan
        WHERE aktif = 'y'
+       GROUP BY id_wilayah_pembinaan
        ORDER BY nama_wilayah`,
     ),
   ['wilayah-list'],

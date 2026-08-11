@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home, Users, ClipboardList, Award, ChevronRight,
+  Home, Users, ClipboardList, Award, ChevronRight, GraduationCap, RefreshCw,
 } from 'lucide-react';
 
 const T = {
@@ -10,19 +10,34 @@ const T = {
   white: '#FFFFFF',
 };
 
-const navItems = [
-  { href: '/',           icon: Home,          label: 'Beranda'   },
-  { href: '/anak',       icon: Users,         label: 'Anak Asuh' },
-  { href: '/pembinaan',  icon: ClipboardList, label: 'Pembinaan' },
-  { href: '/penilaian',  icon: Award,         label: 'Penilaian' },
+interface NavItem {
+  href: string;
+  icon: typeof Home;
+  label: string;
+  groups?: number[];
+}
+
+const navItems: NavItem[] = [
+  { href: '/',                 icon: Home,          label: 'Beranda' },
+  { href: '/anak',             icon: Users,         label: 'Anak Asuh' },
+  { href: '/anak-juara',       icon: GraduationCap, label: 'Anak Juara',       groups: [1, 2] },
+  { href: '/ajuan-pergantian', icon: RefreshCw,     label: 'Ajuan Pergantian', groups: [1, 2] },
+  { href: '/pembinaan',        icon: ClipboardList, label: 'Pembinaan' },
+  { href: '/penilaian',        icon: Award,         label: 'Penilaian' },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  idGroupUser: number;
+}
+
+export function Sidebar({ idGroupUser }: SidebarProps) {
   const pathname = usePathname();
+  const visible = navItems.filter(
+    item => !item.groups || item.groups.includes(idGroupUser),
+  );
 
   return (
     <nav className="sidebar">
-      {/* Logo */}
       <div style={{
         padding: '20px 16px 16px',
         borderBottom: '1px solid rgba(255,255,255,.18)',
@@ -35,9 +50,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Nav Items */}
       <div style={{ flex: 1, padding: '12px 10px' }}>
-        {navItems.map(({ href, icon: Icon, label }) => {
+        {visible.map(({ href, icon: Icon, label }) => {
           const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
           return (
             <Link key={href} href={href} style={{ textDecoration: 'none', display: 'block', marginBottom: 2 }}>
@@ -58,7 +72,6 @@ export function Sidebar() {
         })}
       </div>
 
-      {/* Footer */}
       <div style={{
         padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,.15)',
         fontSize: 11, color: 'rgba(255,255,255,.5)',

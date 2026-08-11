@@ -12,22 +12,24 @@ interface Column<T> {
 }
 
 interface DataTableProps<T> {
-  columns:    Column<T>[];
-  data:       T[];
-  rowKey:     (row: T) => string;
+  columns:     Column<T>[];
+  data:        T[];
+  rowKey:      (row: T) => string;
   onRowClick?: (row: T) => void;
-  minWidth?:  number;
-  loading?:   boolean;
-  emptyText?: string;
+  selectedKey?: string | null;
+  minWidth?:   number;
+  loading?:    boolean;
+  emptyText?:  string;
 }
 
 const T = {
   primaryPale: '#FBF0E8', primarySoft: '#F0C4A0', primaryDk: '#8F3A01',
   charcoal: '#1A0A00', grayLt: '#F2EAE3', white: '#FFFFFF',
+  selected: '#E5F5ED', selectedBorder: '#1A7A45',
 };
 
 export function DataTable<Row>({
-  columns, data, rowKey, onRowClick, minWidth = 900, loading, emptyText = 'Tidak ada data.',
+  columns, data, rowKey, onRowClick, selectedKey, minWidth = 900, loading, emptyText = 'Tidak ada data.',
 }: DataTableProps<Row>) {
   if (loading) {
     return (
@@ -73,14 +75,32 @@ export function DataTable<Row>({
               </tr>
             )}
             {data.map((row, i) => {
-              const bg = i % 2 === 0 ? T.white : '#FDFAF8';
+              const key = rowKey(row);
+              const selected = selectedKey != null && selectedKey !== '' && key === selectedKey;
+              const bg = selected ? T.selected : (i % 2 === 0 ? T.white : '#FDFAF8');
               return (
                 <tr
-                  key={rowKey(row)}
-                  style={{ background: bg, cursor: onRowClick ? 'pointer' : undefined }}
+                  key={key}
+                  style={{
+                    background: bg,
+                    cursor: onRowClick ? 'pointer' : undefined,
+                    boxShadow: selected ? `inset 3px 0 0 ${T.selectedBorder}` : undefined,
+                  }}
                   onClick={() => onRowClick?.(row)}
-                  onMouseEnter={e => { if (onRowClick) (e.currentTarget as HTMLElement).style.background = T.primaryPale; }}
-                  onMouseLeave={e => { if (onRowClick) (e.currentTarget as HTMLElement).style.background = bg; }}
+                  onMouseEnter={e => {
+                    if (!onRowClick || selected) return;
+                    (e.currentTarget as HTMLElement).style.background = T.primaryPale;
+                    e.currentTarget.querySelectorAll('td').forEach(td => {
+                      (td as HTMLElement).style.background = T.primaryPale;
+                    });
+                  }}
+                  onMouseLeave={e => {
+                    if (!onRowClick || selected) return;
+                    (e.currentTarget as HTMLElement).style.background = bg;
+                    e.currentTarget.querySelectorAll('td').forEach(td => {
+                      (td as HTMLElement).style.background = bg;
+                    });
+                  }}
                 >
                   {columns.map(c => (
                     <td key={c.key} style={{

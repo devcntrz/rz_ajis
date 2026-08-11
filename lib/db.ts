@@ -28,4 +28,50 @@ export async function queryOne<T>(sql: string, params?: any[]): Promise<T | null
   return rows[0] ?? null;
 }
 
+export type TxConnection = mysql.PoolConnection;
+
+/** Run work inside a single DB transaction (BEGIN / COMMIT / ROLLBACK). */
+export async function withTransaction<T>(
+  fn: (conn: TxConnection) => Promise<T>,
+): Promise<T> {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const result = await fn(conn);
+    await conn.commit();
+    return result;
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
+}
+
+export async function txQuery<T>(
+  conn: TxConnection,
+  sql: string,
+  params?: any[],
+): Promise<T[]> {
+  const [rows] = await conn.execute(sql, params);
+  return rows as T[];
+}
+
+export async function txQueryOne<T>(
+  conn: TxConnection,
+  sql: string,
+  params?: any[],
+): Promise<T | null> {
+  const rows = await txQuery<T>(conn, sql, params);
+  return rows[0] ?? null;
+}
+
+export async function txExecute(
+  conn: TxConnection,
+  sql: string,
+  params?: any[],
+): Promise<void> {
+  await conn.execute(sql, params);
+}
+
 export default pool;
