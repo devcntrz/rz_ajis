@@ -18,6 +18,12 @@ function cardTone(row: AjuanGantiAnak): { color: string; border: string } {
   return { color: '#1A0A00', border: '#F0C4A0' };
 }
 
+function approveLabel(v: string) {
+  if (v === 'y') return 'Disetujui';
+  if (v === 'n') return 'Ditolak';
+  return 'Pending';
+}
+
 export function AjuanCard({ data, loading, onDelete, onUlangi, onEksekusi }: AjuanCardProps) {
   if (loading && data.length === 0) {
     return (
@@ -57,6 +63,12 @@ export function AjuanCard({ data, loading, onDelete, onUlangi, onEksekusi }: Aju
           >
             <div style={{ fontSize: 11, opacity: 0.8 }}>
               {fmtTgl(r.tgl_ajuan)} · {r.nama_kantor}
+            </div>
+            {/* Approval and execution are independent — show both, never one masking the other. */}
+            <div style={{ fontSize: 11, fontWeight: 700, marginTop: 3 }}>
+              Approve: {approveLabel(r.approve_funding)}
+              {' · '}
+              Eksekusi: {r.status_eksekusi === 'y' ? 'Sudah' : 'Belum'}
             </div>
             <div style={{ fontWeight: 800, fontSize: 14, marginTop: 4 }}>
               {r.nama_anak_asal} → {r.nama_anak_pengganti}

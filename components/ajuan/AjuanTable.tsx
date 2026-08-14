@@ -40,7 +40,8 @@ type ColDef = {
  */
 const COLS: ColDef[] = [
   { key: 'no',             label: '#',              width: 40,  sticky: true },
-  { key: 'status',         label: 'Status',         width: 92,  sticky: true },
+  { key: 'approve',        label: 'Approve',        width: 92,  sticky: true },
+  { key: 'eksekusi',       label: 'Eksekusi',       width: 88,  sticky: true },
   { key: 'tgl_ajuan',      label: 'Tgl Ajuan',      width: 104, sticky: true },
   { key: 'tgl_approve',    label: 'Tgl Approve',    width: 104, sticky: true },
   { key: 'tgl_eksekusi',   label: 'Tgl Eksekusi',   width: 104, sticky: true },
@@ -175,7 +176,11 @@ export function AjuanTable({
 
               const values: Record<string, React.ReactNode> = {
                 no:             rowOffset + i + 1,
-                status:         r.status_eksekusi === 'y' ? 'Dieksekusi' : approveLabel(r.approve_funding),
+                // Approval and execution are independent state machines: legacy could
+                // execute an ajuan that funding never approved. Collapsing them into one
+                // column made the approve filter look broken.
+                approve:        approveLabel(r.approve_funding),
+                eksekusi:       r.status_eksekusi === 'y' ? 'Sudah' : 'Belum',
                 tgl_ajuan:      fmtTgl(r.tgl_ajuan),
                 tgl_approve:    fmtTgl(r.tgl_approve_funding),
                 tgl_eksekusi:   fmtTgl(r.tgl_eksekusi),
@@ -223,8 +228,8 @@ export function AjuanTable({
                           width: c.width,
                           minWidth: c.width,
                           maxWidth: c.width,
-                          fontSize: c.key === 'status' ? 11 : 12,
-                          fontWeight: c.key === 'status' || c.key === 'nama_donatur' || c.key === 'nama_anak_asal' || c.key === 'nama_pengganti'
+                          fontSize: c.key === 'approve' || c.key === 'eksekusi' ? 11 : 12,
+                          fontWeight: c.key === 'approve' || c.key === 'eksekusi' || c.key === 'nama_donatur' || c.key === 'nama_anak_asal' || c.key === 'nama_pengganti'
                             ? 600
                             : 400,
                           color,

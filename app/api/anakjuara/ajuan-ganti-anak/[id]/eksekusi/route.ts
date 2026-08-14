@@ -77,9 +77,6 @@ export async function POST(
     if (!ajuan) {
       return NextResponse.json({ error: 'Ajuan tidak ditemukan.' }, { status: 404 });
     }
-    if (ajuan.status_eksekusi === 'y') {
-      return NextResponse.json({ error: 'Ajuan sudah dieksekusi.' }, { status: 400 });
-    }
     if (!ajuan.id_pemasangan_baru || !ajuan.id_anak_pengganti) {
       return NextResponse.json(
         { error: 'Data pemasangan / anak pengganti tidak lengkap.' },
@@ -107,6 +104,25 @@ export async function POST(
 
     const year = String(new Date().getFullYear());
     const newIdPemasangan = `${ajuan.id_anak_pengganti}${ajuan.id_donatur}${year}`;
+
+    /*
+     * The legacy app ran these steps without a transaction, so it could mark an ajuan
+     * executed while the pairing it was supposed to create never appeared. Blocking on
+     * status_eksekusi alone left those rows unrepairable from the UI. Block on the real
+     * evidence instead: the new pairing existing. If it is missing, this is a repair of
+     * a half-finished execution and must be allowed to run.
+     */
+    const alreadyDone = await queryOne<{ id_pemasangan_baru: string }>(
+      `SELECT id_pemasangan_baru FROM ajis_pemasangan
+       WHERE id_pemasangan_baru = ? LIMIT 1`,
+      [newIdPemasangan],
+    );
+    if (ajuan.status_eksekusi === 'y' && alreadyDone) {
+      return NextResponse.json(
+        { error: 'Ajuan sudah dieksekusi dan pemasangan barunya sudah terbentuk.' },
+        { status: 400 },
+      );
+    }
     const month = new Date().getMonth() + 1;
     const semesterGanjil = month <= 6;
     const username = session.username;
