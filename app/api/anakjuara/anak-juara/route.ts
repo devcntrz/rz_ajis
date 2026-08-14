@@ -30,6 +30,23 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(200, Math.max(1, parseInt(sp.get('limit') || '50', 10)));
     const offset = (page - 1) * limit;
 
+    const SORT_MAP: Record<string, string> = {
+      nama_anak:        'p.nama_anak',
+      id_anak:          'p.id_anak',
+      status_pasangan:  'p.status_pasangan',
+      nama_donatur:     'p.nama_donatur',
+      program_donasi:   'p.program_donasi',
+      nama_rfo:         'p.nama_rfo',
+      nama_kantor:      'p.nama_kantor',
+      nama_wilayah:     'p.nama_wilayah',
+      tgl_pemasangan:   'p.tgl_pemasangan',
+    };
+    const sortByRaw = sp.get('sort') || 'nama_anak';
+    const sortCol = SORT_MAP[sortByRaw] || SORT_MAP.nama_anak;
+    const sortDir = sp.get('order') === 'desc' ? 'DESC' : 'ASC';
+    const sortBy = SORT_MAP[sortByRaw] ? sortByRaw : 'nama_anak';
+    const order = sortDir === 'DESC' ? 'desc' : 'asc';
+
     const { sql: scopeSql, params: scopeParams, forcedKantor } = getKantorScope(
       session,
       'kantor_id',
@@ -108,7 +125,7 @@ export async function GET(req: NextRequest) {
          p.jcustid
        FROM ajis_pemasangan p
        WHERE ${WHERE}
-       ORDER BY p.nama_anak ASC
+       ORDER BY ${sortCol} ${sortDir}, p.id_pemasangan_baru ASC
        LIMIT ? OFFSET ?`,
       [...params, limit, offset],
     );
@@ -118,6 +135,8 @@ export async function GET(req: NextRequest) {
       total: countRow?.total ?? 0,
       page,
       limit,
+      sort: sortBy,
+      order,
     });
   } catch (err) {
     console.error('[anak-juara list]', err);

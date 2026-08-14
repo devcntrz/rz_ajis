@@ -1,14 +1,17 @@
 'use client';
 import React from 'react';
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 
 interface Column<T> {
-  key:     string;
-  label:   string;
-  width:   number;
-  sticky?: boolean;
-  left?:   number;
-  sep?:    boolean;
-  render:  (row: T, index: number) => React.ReactNode;
+  key:       string;
+  label:     string;
+  width:     number;
+  sticky?:   boolean;
+  left?:     number;
+  sep?:      boolean;
+  sortable?: boolean;
+  sortKey?:  string;
+  render:    (row: T, index: number) => React.ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -17,6 +20,11 @@ interface DataTableProps<T> {
   rowKey:      (row: T) => string;
   onRowClick?: (row: T) => void;
   selectedKey?: string | null;
+  /** Selected row uses text color (not cell background). */
+  selectedTextColor?: string;
+  sortBy?:     string;
+  sortDir?:    'asc' | 'desc';
+  onSort?:     (sortKey: string) => void;
   minWidth?:   number;
   loading?:    boolean;
   emptyText?:  string;
@@ -25,11 +33,14 @@ interface DataTableProps<T> {
 const T = {
   primaryPale: '#FBF0E8', primarySoft: '#F0C4A0', primaryDk: '#8F3A01',
   charcoal: '#1A0A00', grayLt: '#F2EAE3', white: '#FFFFFF',
-  selected: '#E5F5ED', selectedBorder: '#1A7A45',
+  selectedText: '#1A7A45',
 };
 
 export function DataTable<Row>({
-  columns, data, rowKey, onRowClick, selectedKey, minWidth = 900, loading, emptyText = 'Tidak ada data.',
+  columns, data, rowKey, onRowClick, selectedKey,
+  selectedTextColor = T.selectedText,
+  sortBy, sortDir = 'asc', onSort,
+  minWidth = 900, loading, emptyText = 'Tidak ada data.',
 }: DataTableProps<Row>) {
   if (loading) {
     return (
@@ -51,19 +62,39 @@ export function DataTable<Row>({
         <table style={{ borderCollapse: 'collapse', width: '100%', minWidth }}>
           <thead>
             <tr style={{ background: T.primaryPale }}>
-              {columns.map(c => (
-                <th key={c.key} style={{
-                  fontSize: 11, fontWeight: 800, color: T.primaryDk, textTransform: 'uppercase',
-                  letterSpacing: 0.5, padding: '10px 12px', whiteSpace: 'nowrap', textAlign: 'left',
-                  position: c.sticky ? 'sticky' : 'static', left: c.sticky ? c.left : undefined,
-                  background: T.primaryPale, zIndex: c.sticky ? 2 : 1,
-                  borderRight: c.sep ? `2px solid ${T.primarySoft}` : undefined,
-                  borderBottom: `1.5px solid ${T.primarySoft}`, minWidth: c.width,
-                  fontFamily: 'inherit',
-                }}>
-                  {c.label}
-                </th>
-              ))}
+              {columns.map(c => {
+                const colSortKey = c.sortKey || c.key;
+                const active = !!c.sortable && sortBy === colSortKey;
+                const canSort = !!c.sortable && !!onSort;
+                return (
+                  <th
+                    key={c.key}
+                    onClick={() => { if (canSort) onSort(colSortKey); }}
+                    style={{
+                      fontSize: 11, fontWeight: 800, color: T.primaryDk, textTransform: 'uppercase',
+                      letterSpacing: 0.5, padding: '10px 12px', whiteSpace: 'nowrap', textAlign: 'left',
+                      position: c.sticky ? 'sticky' : 'static', left: c.sticky ? c.left : undefined,
+                      background: T.primaryPale, zIndex: c.sticky ? 2 : 1,
+                      borderRight: c.sep ? `2px solid ${T.primarySoft}` : undefined,
+                      borderBottom: `1.5px solid ${T.primarySoft}`, minWidth: c.width,
+                      fontFamily: 'inherit',
+                      cursor: canSort ? 'pointer' : undefined,
+                      userSelect: 'none',
+                    }}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {c.label}
+                      {canSort && (
+                        active
+                          ? (sortDir === 'asc'
+                            ? <ArrowUp size={12} strokeWidth={2.5} />
+                            : <ArrowDown size={12} strokeWidth={2.5} />)
+                          : <ArrowUpDown size={12} strokeWidth={2} style={{ opacity: 0.45 }} />
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -77,25 +108,28 @@ export function DataTable<Row>({
             {data.map((row, i) => {
               const key = rowKey(row);
               const selected = selectedKey != null && selectedKey !== '' && key === selectedKey;
-              const bg = selected ? T.selected : (i % 2 === 0 ? T.white : '#FDFAF8');
+              const bg = i % 2 === 0 ? T.white : '#FDFAF8';
+              const textColor = selected ? selectedTextColor : T.charcoal;
               return (
                 <tr
                   key={key}
+                  data-selected={selected ? '1' : undefined}
                   style={{
                     background: bg,
                     cursor: onRowClick ? 'pointer' : undefined,
-                    boxShadow: selected ? `inset 3px 0 0 ${T.selectedBorder}` : undefined,
+                    color: textColor,
                   }}
                   onClick={() => onRowClick?.(row)}
                   onMouseEnter={e => {
-                    if (!onRowClick || selected) return;
-                    (e.currentTarget as HTMLElement).style.background = T.primaryPale;
+                    if (!onRowClick) return;
+                    const hoverBg = selected ? bg : T.primaryPale;
+                    (e.currentTarget as HTMLElement).style.background = hoverBg;
                     e.currentTarget.querySelectorAll('td').forEach(td => {
-                      (td as HTMLElement).style.background = T.primaryPale;
+                      (td as HTMLElement).style.background = hoverBg;
                     });
                   }}
                   onMouseLeave={e => {
-                    if (!onRowClick || selected) return;
+                    if (!onRowClick) return;
                     (e.currentTarget as HTMLElement).style.background = bg;
                     e.currentTarget.querySelectorAll('td').forEach(td => {
                       (td as HTMLElement).style.background = bg;
@@ -104,11 +138,12 @@ export function DataTable<Row>({
                 >
                   {columns.map(c => (
                     <td key={c.key} style={{
-                      fontSize: 12, color: T.charcoal, padding: '10px 12px', whiteSpace: 'nowrap',
+                      fontSize: 12, color: 'inherit', padding: '10px 12px', whiteSpace: 'nowrap',
                       position: c.sticky ? 'sticky' : 'static', left: c.sticky ? c.left : undefined,
                       background: bg, zIndex: c.sticky ? 1 : 0,
                       borderRight: c.sep ? `2px solid ${T.primarySoft}` : undefined,
                       minWidth: c.width, fontFamily: 'inherit',
+                      fontWeight: selected ? 700 : undefined,
                     }}>
                       {c.render(row, i)}
                     </td>

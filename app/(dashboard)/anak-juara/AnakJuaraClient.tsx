@@ -34,8 +34,21 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [toast, setToast] = useState('');
   const [exporting, setExporting] = useState(false);
-  const filtersKey = JSON.stringify(filters);
+  const [sortBy, setSortBy] = useState('nama_anak');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const filtersKey = JSON.stringify({ ...filters, sortBy, sortDir });
   const totalRef = useRef(0);
+
+  const handleSort = (key: string) => {
+    if (sortBy === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(key);
+      setSortDir('asc');
+    }
+    setPage(1);
+    setMobilePage(1);
+  };
 
   const handleExport = async () => {
     setExporting(true);
@@ -64,12 +77,12 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   };
 
   const desktopList = useAnakJuara(
-    { ...filters, page, limit },
+    { ...filters, page, limit, sort: sortBy, order: sortDir },
     { enabled: !isMobile },
   );
 
   const mobileList = useAnakJuara(
-    { ...filters, page: mobilePage, limit: DEFAULT_PAGE_SIZE },
+    { ...filters, page: mobilePage, limit: DEFAULT_PAGE_SIZE, sort: sortBy, order: sortDir },
     { enabled: isMobile },
   );
 
@@ -168,6 +181,9 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           loading={!desktopList.isReady}
           rowOffset={(page - 1) * limit}
           selectedId={selected?.id_pemasangan_baru}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={handleSort}
           onSelect={setSelected}
         />
       </div>

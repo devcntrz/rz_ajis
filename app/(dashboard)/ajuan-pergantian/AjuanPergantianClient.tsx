@@ -151,9 +151,9 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
             )}
           </p>
           <div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap', fontSize: 11 }}>
-            <span style={{ background: '#E5F5ED', color: '#1A7A45', padding: '3px 8px', borderRadius: 8 }}>Hijau = Disetujui</span>
-            <span style={{ background: '#E5EEF8', color: '#1A5FA8', padding: '3px 8px', borderRadius: 8 }}>Biru = Dieksekusi</span>
-            <span style={{ background: '#FDEAEA', color: '#B02020', padding: '3px 8px', borderRadius: 8 }}>Merah = Ditolak</span>
+            <span style={{ color: '#1A7A45', fontWeight: 700, padding: '3px 8px', borderRadius: 8, border: '1px solid #1A7A4540' }}>Hijau = Disetujui</span>
+            <span style={{ color: '#1A5FA8', fontWeight: 700, padding: '3px 8px', borderRadius: 8, border: '1px solid #1A5FA840' }}>Biru = Dieksekusi</span>
+            <span style={{ color: '#B02020', fontWeight: 700, padding: '3px 8px', borderRadius: 8, border: '1px solid #B0202040' }}>Merah = Ditolak</span>
           </div>
         </div>
         <Btn variant="outline" onClick={handleExport} disabled={exporting}>

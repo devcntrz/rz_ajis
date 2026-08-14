@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
 import { Btn } from '@/components/ui/Btn';
@@ -20,6 +20,24 @@ interface AjuanFilterProps {
   idGroupUser: number;
 }
 
+function buildFilters(input: {
+  q: string;
+  tahun: string;
+  bulan: string;
+  approve: string;
+  eksekusi: string;
+  kantorId: string;
+}): Record<string, string> {
+  return {
+    q: input.q.trim(),
+    tahun: input.tahun,
+    bulan: input.bulan,
+    approve_funding: input.approve,
+    status_eksekusi: input.eksekusi,
+    kantor_id: input.kantorId,
+  };
+}
+
 export function AjuanFilter({ onFilterChange, idGroupUser }: AjuanFilterProps) {
   const currentYear = String(new Date().getFullYear());
   const [q, setQ] = useState('');
@@ -35,36 +53,41 @@ export function AjuanFilter({ onFilterChange, idGroupUser }: AjuanFilterProps) {
     fetcher,
   );
   const kantorList = kantorRes?.data ?? [];
-  const onFilterChangeRef = useRef(onFilterChange);
-  onFilterChangeRef.current = onFilterChange;
-
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      onFilterChangeRef.current({
-        q,
-        tahun,
-        bulan,
-        approve_funding: approve,
-        status_eksekusi: eksekusi,
-        kantor_id: kantorId,
-      });
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [q, tahun, bulan, approve, eksekusi, kantorId]);
-
   const years = Array.from({ length: 6 }, (_, i) => String(Number(currentYear) - i));
+
+  const apply = () => {
+    onFilterChange(buildFilters({ q, tahun, bulan, approve, eksekusi, kantorId }));
+  };
+
+  const reset = () => {
+    setQ('');
+    setTahun(currentYear);
+    setBulan('');
+    setApprove('');
+    setEksekusi('');
+    setKantorId('');
+    onFilterChange(buildFilters({
+      q: '',
+      tahun: currentYear,
+      bulan: '',
+      approve: '',
+      eksekusi: '',
+      kantorId: '',
+    }));
+  };
 
   return (
     <div style={{
       background: '#FFFFFF', border: '1.5px solid #F0C4A0', borderRadius: 16,
       padding: '14px 18px',
     }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Search size={16} color="#7A6055" style={{ position: 'absolute', left: 11, top: 11 }} />
           <Input
             value={q}
             onChange={e => setQ(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') apply(); }}
             placeholder="Cari anak, donatur, RFO..."
             style={{ paddingLeft: 34 }}
           />
@@ -72,6 +95,13 @@ export function AjuanFilter({ onFilterChange, idGroupUser }: AjuanFilterProps) {
         <Btn onClick={() => setExpanded(!expanded)} variant="outline" style={{ height: 38 }}>
           <SlidersHorizontal size={15} />
           <span>Filter</span>
+        </Btn>
+        <Btn variant="primary" onClick={apply} style={{ height: 38 }}>
+          Terapkan Filter
+        </Btn>
+        <Btn variant="ghost" onClick={reset} style={{ height: 38 }}>
+          <RotateCcw size={14} />
+          Reset
         </Btn>
       </div>
 

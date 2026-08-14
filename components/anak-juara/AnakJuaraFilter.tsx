@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR from 'swr';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
 import { Btn } from '@/components/ui/Btn';
@@ -13,6 +13,22 @@ interface AnakJuaraFilterProps {
   idGroupUser: number;
 }
 
+function buildFilters(input: {
+  q: string;
+  tahun: string;
+  wilayah: string;
+  kantorId: string;
+  statusPasangan: string;
+}): Record<string, string> {
+  return {
+    q: input.q.trim(),
+    tahun: input.tahun,
+    wilayah: input.wilayah,
+    kantor_id: input.kantorId,
+    status_pasangan: input.statusPasangan,
+  };
+}
+
 export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilterProps) {
   const currentYear = String(new Date().getFullYear());
   const [q, setQ] = useState('');
@@ -20,10 +36,8 @@ export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilter
   const [wilayah, setWilayah] = useState('');
   const [kantorId, setKantorId] = useState('');
   const [statusPasangan, setStatusPasangan] = useState('y');
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
-  // Group 2: API auto-scopes by session kantor.
-  // Group 1: cascade — only when a kantor is selected.
   const wilayahKey = idGroupUser === 1
     ? (kantorId
       ? `/api/anakjuara/wilayah?kantor_id=${encodeURIComponent(kantorId)}`
@@ -41,47 +55,50 @@ export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilter
 
   const wilayahList = wilayahRes?.data ?? [];
   const kantorList = kantorRes?.data ?? [];
-  const onFilterChangeRef = useRef(onFilterChange);
-  onFilterChangeRef.current = onFilterChange;
+  const years = Array.from({ length: 6 }, (_, i) => String(Number(currentYear) - i));
 
-  // Reset wilayah when kantor changes (admin cascade)
+  // Cascade only: clear wilayah draft when kantor changes (does not fetch list yet until apply)
   useEffect(() => {
     setWilayah('');
   }, [kantorId]);
 
-  // Drop wilayah if it is no longer in the scoped list
   useEffect(() => {
     if (!wilayah) return;
     const stillValid = wilayahList.some(w => String(w.id_wilayah_pembinaan) === wilayah);
     if (!stillValid) setWilayah('');
   }, [wilayahList, wilayah]);
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      onFilterChangeRef.current({
-        q,
-        tahun,
-        wilayah,
-        kantor_id: kantorId,
-        status_pasangan: statusPasangan,
-      });
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [q, tahun, wilayah, kantorId, statusPasangan]);
+  const apply = () => {
+    onFilterChange(buildFilters({ q, tahun, wilayah, kantorId, statusPasangan }));
+  };
 
-  const years = Array.from({ length: 6 }, (_, i) => String(Number(currentYear) - i));
+  const reset = () => {
+    setQ('');
+    setTahun(currentYear);
+    setWilayah('');
+    setKantorId('');
+    setStatusPasangan('y');
+    onFilterChange(buildFilters({
+      q: '',
+      tahun: currentYear,
+      wilayah: '',
+      kantorId: '',
+      statusPasangan: 'y',
+    }));
+  };
 
   return (
     <div style={{
       background: '#FFFFFF', border: '1.5px solid #F0C4A0', borderRadius: 16,
       padding: '14px 18px',
     }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Search size={16} color="#7A6055" style={{ position: 'absolute', left: 11, top: 11 }} />
           <Input
             value={q}
             onChange={e => setQ(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') apply(); }}
             placeholder="Cari anak, donatur, kantor, RFO..."
             style={{ paddingLeft: 34 }}
           />
@@ -89,6 +106,13 @@ export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilter
         <Btn onClick={() => setExpanded(!expanded)} variant="outline" style={{ height: 38 }}>
           <SlidersHorizontal size={15} />
           <span>Filter</span>
+        </Btn>
+        <Btn variant="primary" onClick={apply} style={{ height: 38 }}>
+          Terapkan Filter
+        </Btn>
+        <Btn variant="ghost" onClick={reset} style={{ height: 38 }}>
+          <RotateCcw size={14} />
+          Reset
         </Btn>
       </div>
 

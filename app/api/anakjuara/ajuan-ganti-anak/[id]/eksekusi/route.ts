@@ -1,7 +1,7 @@
 /**
  * POST /api/anakjuara/ajuan-ganti-anak/[id]/eksekusi
  * Full child-replacement transaction (PRD §8.5).
- * Requires approve_funding='y' and status_eksekusi != 'y'.
+ * Allowed while pending or approved; blocked only if already executed.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import {
@@ -76,12 +76,6 @@ export async function POST(
 
     if (!ajuan) {
       return NextResponse.json({ error: 'Ajuan tidak ditemukan.' }, { status: 404 });
-    }
-    if (ajuan.approve_funding !== 'y') {
-      return NextResponse.json(
-        { error: 'Ajuan belum disetujui funding (approve_funding harus y).' },
-        { status: 400 },
-      );
     }
     if (ajuan.status_eksekusi === 'y') {
       return NextResponse.json({ error: 'Ajuan sudah dieksekusi.' }, { status: 400 });
