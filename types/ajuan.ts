@@ -98,4 +98,8 @@ export interface DonasiPindahRow {
   bulan:              string;
   tahun:              string;
   tgl_transaksi:      string;
+  transid:            string;
+  detailid:           number;
+  qty:                number;
+  jenis:              string;
 }

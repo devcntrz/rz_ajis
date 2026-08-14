@@ -1,8 +1,9 @@
 'use client';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Download } from 'lucide-react';
 import { useAnakJuara } from '@/hooks/useAnakJuara';
+import { useAnakJuaraKeuangan } from '@/hooks/useAnakJuaraKeuangan';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useMobileInfiniteList } from '@/hooks/useMobileInfiniteList';
 import { AnakJuaraFilter } from '@/components/anak-juara/AnakJuaraFilter';
@@ -122,7 +123,17 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
     ? (infinite.total || totalRef.current)
     : (desktopList.isReady ? desktopList.total : totalRef.current);
 
-  const desktopRows = desktopList.isReady ? desktopList.data : [];
+  const desktopRows = useMemo(
+    () => (desktopList.isReady ? desktopList.data : []),
+    [desktopList.isReady, desktopList.data],
+  );
+
+  // Finance pivot for this page only — never the whole table (PRD §9.4).
+  const pageIds = useMemo(
+    () => (isMobile ? [] : desktopRows.map(r => r.id_pemasangan_baru)),
+    [isMobile, desktopRows],
+  );
+  const { keuangan, loading: keuanganLoading } = useAnakJuaraKeuangan(pageIds);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -185,6 +196,8 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           sortDir={sortDir}
           onSort={handleSort}
           onSelect={setSelected}
+          keuangan={keuangan}
+          keuanganLoading={keuanganLoading}
         />
       </div>
 

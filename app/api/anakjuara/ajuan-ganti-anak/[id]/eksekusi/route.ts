@@ -132,32 +132,29 @@ export async function POST(
         [ajuan.id_anak_pengganti],
       );
 
-      // 3) Create new pairing
+      // 3) Create new pairing (PRD §8.5 step 3).
+      // Column list stays minimal: the remaining NOT NULL columns take their implicit
+      // defaults, and step 4 fills the denormalized biodata straight after.
+      // ON DUPLICATE KEY reactivates an existing pairing instead of aborting the whole
+      // transaction — tipe_ganti = 'anak_existing' points at a child that already has an
+      // inactive pairing row for this year.
       await txExecute(
         conn,
         `INSERT INTO ajis_pemasangan (
            tgl_pemasangan, id_donatur, id_anak, program_donasi, id_program,
            status_pasangan, user_insert, date_insert, id_pemasangan_baru, tahun,
-           tunda_penyaluran, via_input,
-           tgl_pemberhentian_pemasangan, id_wilayah_pembinaan, kantor_id,
-           harga_program, harga_penyaluran, keterangan_pemberhentian,
-           saldo_awal, status_saldo, program_sebelumnya, user_update, date_update,
-           jns_kel, nama_anak, kelas, nama_donatur, nama_wilayah, nama_kantor,
-           jenjang_pendidikan, asnaf, status_ortu, status_aj, id_sdm, nik,
-           status_mentor, no_rekening, cek, nia_rfo, nama_rfo, id_naik_jenjang,
-           history, user_stop, via_stop, jcustid, id_pemasangan_new, pinjam
+           tunda_penyaluran, via_input
          ) VALUES (
            NOW(), ?, ?, ?, ?,
            'y', ?, NOW(), ?, ?,
-           '', 'desktop',
-           '0000-00-00', '', '',
-           0, 0, '',
-           0, 'n', '', '', NOW(),
-           '', '', '', '', '', '',
-           '', '', '', '', '', '',
-           '', '', '', '', '', '',
-           '', '', '', 0, '', ''
-         )`,
+           '', 'desktop'
+         )
+         ON DUPLICATE KEY UPDATE
+           status_pasangan = 'y',
+           tgl_pemasangan  = NOW(),
+           program_donasi  = VALUES(program_donasi),
+           user_update     = VALUES(user_insert),
+           date_update     = NOW()`,
         [
           ajuan.id_donatur,
           ajuan.id_anak_pengganti,
@@ -369,6 +366,12 @@ export async function POST(
     });
   } catch (err) {
     console.error('[ajuan eksekusi]', err);
-    return NextResponse.json({ error: 'Gagal mengeksekusi pergantian anak.' }, { status: 500 });
+    // Surface the DB reason: a rolled-back replacement is invisible otherwise, and the
+    // generic message previously made a broken INSERT look like "nothing happened".
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json(
+      { error: `Gagal mengeksekusi pergantian anak: ${detail}`, code: 'EKSEKUSI_FAILED' },
+      { status: 500 },
+    );
   }
 }

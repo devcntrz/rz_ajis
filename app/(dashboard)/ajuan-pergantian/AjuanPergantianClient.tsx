@@ -97,6 +97,15 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
     mobileList.mutate();
   };
 
+  /**
+   * The saldo confirmation belongs to the click, not to the modal's lifecycle.
+   * Living in an effect made StrictMode's mount/unmount/mount replay ask twice.
+   */
+  const handleEksekusi = (row: AjuanGantiAnak) => {
+    if (!window.confirm('Sudah Update Saldo Akhir ?')) return;
+    setEksekusiRow(row);
+  };
+
   const handleDelete = async (row: AjuanGantiAnak) => {
     if (!window.confirm(`Hapus ajuan #${row.id_ajuan} (${row.nama_anak_asal} → ${row.nama_anak_pengganti})?`)) {
       return;
@@ -180,7 +189,7 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
           rowOffset={(page - 1) * limit}
           onDelete={handleDelete}
           onUlangi={handleUlangi}
-          onEksekusi={setEksekusiRow}
+          onEksekusi={handleEksekusi}
         />
       </div>
 
@@ -189,7 +198,7 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
         loading={infinite.isInitialLoading}
         onDelete={handleDelete}
         onUlangi={handleUlangi}
-        onEksekusi={setEksekusiRow}
+        onEksekusi={handleEksekusi}
       />
 
       {!isMobile && displayTotal > 0 && (

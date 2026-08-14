@@ -49,7 +49,8 @@ export async function GET(
     const rows = await query<DonasiPindahRow>(
       `SELECT
          d.id_input_donasi, d.id_pemasangan_baru, d.id_anak, d.id_donatur,
-         d.program_donasi, d.nominal_donasi, d.bulan, d.tahun, d.tgl_transaksi
+         d.program_donasi, d.nominal_donasi, d.bulan, d.tahun, d.tgl_transaksi,
+         d.transid, d.detailid, d.qty, d.jenis
        FROM ajis_input_donasi d
        WHERE d.id_anak = ? AND d.id_donatur = ?
          ${ajuan.id_pemasangan_baru ? 'AND d.id_pemasangan_baru = ?' : ''}

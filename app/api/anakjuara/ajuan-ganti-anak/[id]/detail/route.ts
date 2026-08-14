@@ -1,11 +1,19 @@
 /**
  * GET /api/anakjuara/ajuan-ganti-anak/[id]/detail
- * Fast eksekusi context: pairing profile + opname + monthly donasi pivot.
- * Avoids heavy ajis_view_anak_juara.
+ * Eksekusi context: pairing profile + opname + Jan–Des finance pivot.
+ * Computed in lib/keuangan so the modal and the Anak Juara grid always agree,
+ * and without touching the nested ajis_view_anak_juara.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { getSession, requireGroup12, getKantorScope } from '@/lib/auth';
+import {
+  BULAN_KEYS,
+  BULAN_LABEL,
+  buildKeuangan,
+  normalizeBulan,
+  type OpnameAgg,
+} from '@/lib/keuangan';
 
 type PairingDetail = {
   id_pemasangan_baru: string;
@@ -28,34 +36,10 @@ type PairingDetail = {
   nia_rfo: string;
   nama_rfo: string;
   status_pasangan: string;
-};
-
-type OpnameRow = {
-  saldo_awal_ganjil: number;
-  saldo_akhir_ganjil: number;
-  saldo_awal_genap: number;
-  saldo_akhir_genap: number;
+  harga_program: number;
 };
 
 type DonasiMonth = { bulan: string; tahun: string; total: number };
-
-const BULAN_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] as const;
-const BULAN_LABEL: Record<string, string> = {
-  '1': 'Jan', '2': 'Feb', '3': 'Mar', '4': 'Apr', '5': 'Mei', '6': 'Jun',
-  '7': 'Jul', '8': 'Agu', '9': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Des',
-};
-
-function normalizeBulan(b: string): string {
-  const n = Number(b);
-  if (Number.isFinite(n) && n >= 1 && n <= 12) return String(n);
-  const map: Record<string, string> = {
-    januari: '1', february: '2', februari: '2', maret: '3', march: '3',
-    april: '4', mei: '5', may: '5', juni: '6', june: '6',
-    juli: '7', july: '7', agustus: '8', august: '8',
-    september: '9', oktober: '10', october: '10', november: '11', desember: '12', december: '12',
-  };
-  return map[String(b).toLowerCase().trim()] || '';
-}
 
 export async function GET(
   _req: NextRequest,
@@ -120,7 +104,7 @@ export async function GET(
            p.jenjang_pendidikan, p.kelas, p.asnaf, p.status_ortu,
            p.id_donatur, p.nama_donatur, p.program_donasi, p.id_program,
            p.kantor_id, p.nama_kantor, p.id_wilayah_pembinaan, p.nama_wilayah,
-           p.nia_rfo, p.nama_rfo, p.status_pasangan
+           p.nia_rfo, p.nama_rfo, p.status_pasangan, p.harga_program
          FROM ajis_pemasangan p
          WHERE p.id_pemasangan_baru = ?
          LIMIT 1`,
@@ -130,32 +114,57 @@ export async function GET(
 
     const year = pairing?.tahun || String(new Date().getFullYear());
 
+    /*
+     * Aggregates are keyed on id_pemasangan_baru ALONE, matching the legacy view chain
+     * (ajis_view_donasi / ajis_view_penyaluran group by id_pemasangan_baru with no year
+     * predicate, and ajis_opname is joined on that column only). Adding `tahun = ?` here
+     * would silently produce different figures from the old app.
+     */
     const opname = ajuan.id_pemasangan_baru
-      ? await queryOne<OpnameRow>(
-          `SELECT saldo_awal_ganjil, saldo_akhir_ganjil, saldo_awal_genap, saldo_akhir_genap
+      ? await queryOne<OpnameAgg>(
+          `SELECT id_pemasangan_baru,
+                  saldo_awal_ganjil, saldo_akhir_ganjil, saldo_awal_genap, saldo_akhir_genap,
+                  date_opname_ganjil, user_opname_ganjil, date_opname_genap, user_opname_genap
            FROM ajis_opname
-           WHERE id_pemasangan_baru = ? AND tahun = ?
+           WHERE id_pemasangan_baru = ?
            LIMIT 1`,
-          [ajuan.id_pemasangan_baru, year],
+          [ajuan.id_pemasangan_baru],
         )
       : null;
 
-    const donasiMonths = ajuan.id_pemasangan_baru
-      ? await query<DonasiMonth>(
-          `SELECT bulan, tahun, SUM(IFNULL(nominal_donasi, 0)) AS total
-           FROM ajis_input_donasi
-           WHERE id_pemasangan_baru = ? AND tahun = ?
-           GROUP BY bulan, tahun`,
-          [ajuan.id_pemasangan_baru, year],
-        )
-      : [];
+    const [donasiMonths, penyaluranMonths] = ajuan.id_pemasangan_baru
+      ? await Promise.all([
+          query<DonasiMonth>(
+            `SELECT bulan, tahun, SUM(IFNULL(nominal_donasi, 0)) AS total
+             FROM ajis_input_donasi
+             WHERE id_pemasangan_baru = ? AND jenis = 'trans'
+             GROUP BY bulan, tahun`,
+            [ajuan.id_pemasangan_baru],
+          ),
+          query<DonasiMonth>(
+            `SELECT bulan, tahun, SUM(IFNULL(nominal_penyaluran, 0)) AS total
+             FROM ajis_penyaluran
+             WHERE id_pemasangan_baru = ?
+             GROUP BY bulan, tahun`,
+            [ajuan.id_pemasangan_baru],
+          ),
+        ])
+      : [[], []];
 
-    const pivot: Record<string, number> = {};
-    for (const k of BULAN_KEYS) pivot[k] = 0;
-    for (const row of donasiMonths) {
-      const key = normalizeBulan(String(row.bulan));
-      if (key) pivot[key] = Number(row.total) || 0;
-    }
+    const pivotOf = (rows: DonasiMonth[]) => {
+      const p: Record<string, number> = {};
+      for (const k of BULAN_KEYS) p[k] = 0;
+      for (const r of rows) {
+        const key = normalizeBulan(String(r.bulan));
+        if (key) p[key] += Number(r.total) || 0;
+      }
+      return p;
+    };
+
+    const donasi = pivotOf(donasiMonths);
+    const penyaluran = pivotOf(penyaluranMonths);
+    const hargaProgram = Number(pairing?.harga_program ?? 0);
+    const keuangan = buildKeuangan(donasi, penyaluran, opname, hargaProgram);
 
     return NextResponse.json({
       data: {
@@ -166,14 +175,20 @@ export async function GET(
           saldo_akhir_ganjil: 0,
           saldo_awal_genap: 0,
           saldo_akhir_genap: 0,
+          date_opname_ganjil: null,
+          user_opname_ganjil: null,
+          date_opname_genap: null,
+          user_opname_genap: null,
         },
         keuangan: {
           tahun: year,
+          harga_program: hargaProgram,
           months: BULAN_KEYS.map(k => ({
             bulan: k,
             label: BULAN_LABEL[k],
-            total: pivot[k] || 0,
+            total: donasi[k] || 0,
           })),
+          ...keuangan,
         },
       },
     });
