@@ -18,12 +18,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/',                 icon: Home,          label: 'Beranda' },
-  { href: '/anak',             icon: Users,         label: 'Anak Asuh' },
-  { href: '/anak-juara',       icon: GraduationCap, label: 'Anak Juara',       groups: [1, 2] },
-  { href: '/ajuan-pergantian', icon: RefreshCw,     label: 'Ajuan Pergantian', groups: [1, 2] },
-  { href: '/pembinaan',        icon: ClipboardList, label: 'Pembinaan' },
-  { href: '/penilaian',        icon: Award,         label: 'Penilaian' },
+  { href: '/', icon: Home, label: 'Beranda' },
+  { href: '/anak', icon: Users, label: 'Pengajuan Beasiswa' },
+  { href: '/anak-juara', icon: GraduationCap, label: 'Anak Juara', groups: [1, 2] },
+  { href: '/ajuan-pergantian', icon: RefreshCw, label: 'Ajuan Pergantian', groups: [1, 2] },
+  { href: '/pembinaan', icon: ClipboardList, label: 'Pembinaan' },
+  { href: '/penilaian', icon: Award, label: 'Penilaian' },
 ];
 
 interface SidebarProps {
