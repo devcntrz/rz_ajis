@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne, withTransaction, txExecute } from '@/lib/db';
 import { getSession, requireGroup12, getKantorScope } from '@/lib/auth';
+import { getDonaturSnapshot } from '@/lib/donatur';
 import type { AjuanGantiAnak, CreateAjuanPayload, TipeGanti } from '@/types/ajuan';
 
 const AJUAN_SELECT = `
@@ -224,12 +225,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const oidDonatur = body.oid_donatur ?? '';
-    const kantorDonatur = body.kantor_donatur ?? '';
-    const jenisKelDonatur = body.jenis_kelamin_donatur ?? '';
-    const jcustid = body.jcustid ?? String(pairing.jcustid ?? '');
-    const jenisDonatur = body.jenis_donatur ?? '';
-    const hp = body.hp ?? '';
+    /*
+     * Donor details live in `donatur`, not in `ajis_pemasangan`, so the selected
+     * Anak Juara row cannot carry them. Read them here rather than accepting them
+     * from the client: these columns end up on the ajuan record and must not be
+     * forgeable from the browser.
+     */
+    const donatur = await getDonaturSnapshot(pairing.id_donatur);
+    const oidDonatur = donatur.oid_donatur;
+    const kantorDonatur = donatur.kantor_donatur;
+    const jenisKelDonatur = donatur.jenis_kelamin;
+    const jcustid = String(donatur.jcustid || pairing.jcustid || '');
+    const jenisDonatur = donatur.jenis_donatur;
+    const hp = donatur.hp;
     const pindahSaldo = Number(body.pindah_saldo ?? 0) || 0;
     const keterangan = body.keterangan ?? '';
 

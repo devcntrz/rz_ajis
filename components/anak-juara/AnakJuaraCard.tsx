@@ -1,5 +1,6 @@
 'use client';
 import { Badge } from '@/components/ui/Badge';
+import { Btn } from '@/components/ui/Btn';
 import type { AnakJuaraRow } from '@/types/anak-juara';
 
 interface AnakJuaraCardProps {
@@ -7,9 +8,11 @@ interface AnakJuaraCardProps {
   loading?: boolean;
   selectedId?: string | null;
   onSelect: (row: AnakJuaraRow) => void;
+  /** Opens the Entry Ajuan Ganti modal straight from the card. */
+  onAjuan?: (row: AnakJuaraRow) => void;
 }
 
-export function AnakJuaraCard({ data, loading, selectedId, onSelect }: AnakJuaraCardProps) {
+export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan }: AnakJuaraCardProps) {
   if (loading && data.length === 0) {
     return (
       <div className="datagrid-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -33,10 +36,20 @@ export function AnakJuaraCard({ data, loading, selectedId, onSelect }: AnakJuara
       {data.map(r => {
         const selected = selectedId === r.id_pemasangan_baru;
         return (
-          <button
+          // A <button> root cannot hold the action button below (nested buttons are
+          // invalid and swallow clicks), so the card is a div with the keyboard
+          // behaviour a button would have given it.
+          <div
             key={r.id_pemasangan_baru}
-            type="button"
+            role="button"
+            tabIndex={0}
             onClick={() => onSelect(r)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect(r);
+              }
+            }}
             style={{
               textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
               background: selected ? '#FBF0E8' : '#FFFFFF',
@@ -61,7 +74,17 @@ export function AnakJuaraCard({ data, loading, selectedId, onSelect }: AnakJuara
             <div style={{ fontSize: 11, color: '#7A6055', marginTop: 2 }}>
               {r.program_donasi || '—'} · {r.nama_wilayah || '—'}
             </div>
-          </button>
+            {onAjuan && (
+              <div
+                style={{ marginTop: 10 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <Btn size="sm" variant="primary" onClick={() => onAjuan(r)}>
+                  Ajuan Ganti
+                </Btn>
+              </div>
+            )}
+          </div>
         );
       })}
     </div>

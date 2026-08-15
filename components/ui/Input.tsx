@@ -31,16 +31,17 @@ export function Input({ value, onChange, onKeyDown, placeholder, type = 'text', 
   );
 }
 
-export function Textarea({ value, onChange, placeholder, rows = 3, name, id }: {
+export function Textarea({ value, onChange, placeholder, rows = 3, name, id, style }: {
   value?: string; onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string; rows?: number; name?: string; id?: string;
+  style?: React.CSSProperties;
 }) {
   return (
     <textarea
       value={value ?? ''} onChange={onChange} placeholder={placeholder}
       rows={rows} name={name} id={id}
       style={{
-        ...inputStyle, resize: 'vertical', minHeight: 72,
+        ...inputStyle, resize: 'vertical', minHeight: 72, ...style,
       }}
     />
   );

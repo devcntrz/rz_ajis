@@ -51,6 +51,16 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
     setMobilePage(1);
   };
 
+  /**
+   * Row/card shortcut into the Entry Ajuan Ganti modal. Selection is still set so
+   * the "Terpilih: …" banner and the toolbar button stay in sync with the row
+   * being worked on.
+   */
+  const handleAjuan = (r: AnakJuaraRow) => {
+    setSelected(r);
+    setShowForm(true);
+  };
+
   const handleExport = async () => {
     setExporting(true);
     try {
@@ -196,6 +206,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           sortDir={sortDir}
           onSort={handleSort}
           onSelect={setSelected}
+          onAjuan={handleAjuan}
           keuangan={keuangan}
           keuanganLoading={keuanganLoading}
         />
@@ -206,6 +217,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
         loading={infinite.isInitialLoading}
         selectedId={selected?.id_pemasangan_baru}
         onSelect={setSelected}
+        onAjuan={handleAjuan}
       />
 
       {!isMobile && displayTotal > 0 && (

@@ -50,6 +50,11 @@ export interface AjuanListParams {
   limit?:           string | number;
 }
 
+/**
+ * Donor extras (oid_donatur, kantor_donatur, jenis_donatur, hp, jenis_kelamin,
+ * jcustid) are deliberately absent: the POST handler reads them from `donatur`
+ * via lib/donatur so they cannot be forged client-side.
+ */
 export interface CreateAjuanPayload {
   id_pemasangan_baru:    string;
   id_kantor:             string;
@@ -57,10 +62,7 @@ export interface CreateAjuanPayload {
   id_wilayah_pembinaan:  string;
   nama_wilayah:          string;
   id_donatur:            string;
-  oid_donatur?:          string;
-  kantor_donatur?:       string;
   nama_donatur:          string;
-  jenis_kelamin_donatur?: string;
   program_donasi:        string;
   nia_rfo:               string;
   nama_rfo:              string;
@@ -73,9 +75,6 @@ export interface CreateAjuanPayload {
   tipe_ganti:            TipeGanti;
   keterangan?:           string;
   pindah_saldo?:         number;
-  jcustid?:              string;
-  jenis_donatur?:        string;
-  hp?:                   string;
 }
 
 export interface EksekusiPayload {
