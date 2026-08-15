@@ -142,3 +142,7 @@ th, td { text-align: left; vertical-align: middle; }
 .text-gray    { color: var(--gray); }
 .fw-700       { font-weight: 700; }
 .fw-800       { font-weight: 800; }
+
+/* ── Spinner (inline button loaders, blocking overlays) ── */
+@keyframes ajis-spin { to { transform: rotate(360deg); } }
+.ajis-spin { animation: ajis-spin .8s linear infinite; }

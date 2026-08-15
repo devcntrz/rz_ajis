@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Btn } from '@/components/ui/Btn';
 import { FLabel } from '@/components/ui/FLabel';
@@ -179,12 +181,19 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.error || 'Gagal mengeksekusi.');
+        const msg = json.error || 'Gagal mengeksekusi.';
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success(
+        `Eksekusi berhasil. ${row.nama_anak_asal} diganti oleh ${row.nama_anak_pengganti}.`,
+      );
       onSuccess();
     } catch {
-      setError('Gagal mengeksekusi.');
+      const msg = 'Gagal mengeksekusi.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -194,8 +203,15 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
   const namaAnak = pairing?.nama_anak || row.nama_anak_asal;
 
   return (
-    <Modal title="Ganti Anak" onClose={onClose} maxWidth={1040}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    // Execution writes 11 tables; closing or editing mid-flight would leave the
+    // operator unsure whether it landed. Block the form until the request settles.
+    <Modal title="Ganti Anak" onClose={saving ? () => {} : onClose} maxWidth={1040}>
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 14,
+        pointerEvents: saving ? 'none' : undefined,
+        opacity: saving ? 0.6 : 1,
+        transition: 'opacity .15s',
+      }}>
         {/* Profile block — legacy-like key/value */}
         <div style={{
           background: '#FBF0E8', borderRadius: 12, padding: 12,
@@ -444,10 +460,28 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+        <div style={{
+          display: 'flex', justifyContent: 'flex-end', gap: 10, alignItems: 'center',
+          // Kept interactive so the disabled state is what stops the user, not a dead zone.
+          pointerEvents: 'auto',
+        }}>
+          {saving && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              marginRight: 'auto', fontSize: 12, fontWeight: 600, color: '#8F3A01',
+            }}>
+              <Loader2 size={15} className="ajis-spin" />
+              Memproses eksekusi — jangan tutup jendela ini...
+            </span>
+          )}
           <Btn variant="ghost" onClick={onClose} disabled={saving}>Batal</Btn>
           <Btn variant="primary" onClick={handleSubmit} disabled={saving}>
-            {saving ? 'Memproses...' : 'Simpan'}
+            {saving ? (
+              <>
+                <Loader2 size={14} className="ajis-spin" />
+                Memproses...
+              </>
+            ) : 'Simpan'}
           </Btn>
         </div>
       </div>

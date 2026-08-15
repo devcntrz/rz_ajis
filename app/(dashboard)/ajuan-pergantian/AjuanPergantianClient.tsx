@@ -224,8 +224,9 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
           row={eksekusiRow}
           onClose={() => setEksekusiRow(null)}
           onSuccess={() => {
+            // The modal already raised the success toast; a second inline banner
+            // here would report the same event twice.
             setEksekusiRow(null);
-            setToast('Eksekusi berhasil.');
             refresh();
           }}
         />
