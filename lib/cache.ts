@@ -28,3 +28,60 @@ export const getWilayahList = unstable_cache(
   ['wilayah-list'],
   { revalidate: 3600, tags: ['wilayah-master'] },
 );
+
+/* ── Transaksi module lookups (legacy m=kantor / kantor_trans / program) ────────── */
+
+/** IJIS coaching offices — the "Kantor" dropdown. */
+export const getAjisKantorOptions = unstable_cache(
+  async () =>
+    query<{ oid: string; kantor: string }>(
+      `SELECT oid, MIN(kantor) AS kantor
+       FROM ajis_kantor
+       WHERE oid IS NOT NULL AND oid <> ''
+       GROUP BY oid
+       ORDER BY kantor`,
+    ),
+  ['ajis-kantor-options'],
+  { revalidate: 3600, tags: ['kantor-master'] },
+);
+
+/**
+ * Transaction/donor offices. Legacy excluded the pseudo-offices that never hold Anak
+ * Juara pairings (superinfak, regional, call centre, channeling) so they would not
+ * clutter the picker.
+ */
+export const getKantorTransOptions = unstable_cache(
+  async () =>
+    query<{ oid: string; kantor: string }>(
+      `SELECT oid, kantor
+       FROM kantor
+       WHERE aktif = 'y'
+         AND kantor NOT LIKE '%superinfak%'
+         AND kantor NOT LIKE '%regional%'
+         AND kantor NOT LIKE '%call%'
+         AND kantor NOT LIKE '%channeling%'
+       ORDER BY kantor`,
+    ),
+  ['kantor-trans-options'],
+  { revalidate: 3600, tags: ['kantor-master'] },
+);
+
+/**
+ * Active donation programs. `setting_program` has the composite PK
+ * (id_program, progid), so rows are collapsed to one entry per id_program.
+ */
+export const getProgramOptions = unstable_cache(
+  async () =>
+    query<{ id_program: number; progid: string; nama_program: string; harga_program: number }>(
+      `SELECT id_program,
+              MIN(progid)        AS progid,
+              MIN(nama_program)  AS nama_program,
+              MAX(harga_program) AS harga_program
+       FROM setting_program
+       WHERE aktif = 'y'
+       GROUP BY id_program
+       ORDER BY nama_program`,
+    ),
+  ['program-options'],
+  { revalidate: 3600, tags: ['program-master'] },
+);

@@ -38,6 +38,12 @@ interface DataTableProps<T> {
   minWidth?:   number;
   loading?:    boolean;
   emptyText?:  string;
+  /**
+   * Draw a light vertical rule between every column, not just the `sep` ones.
+   * Opt-in: wide spreadsheet-style grids need it to stay readable across many columns,
+   * while the narrower tables read better without the extra lines.
+   */
+  gridLines?:  boolean;
 }
 
 const T = {
@@ -67,10 +73,14 @@ export function DataTable<Row>({
   columns, data, rowKey, onRowClick, selectedKey,
   selectedTextColor = T.selectedText, rowTextColor,
   sortBy, sortDir = 'asc', onSort,
-  minWidth = 900, loading, emptyText = 'Tidak ada data.',
+  minWidth = 900, loading, emptyText = 'Tidak ada data.', gridLines,
 }: DataTableProps<Row>) {
   const layout = computeLayout(columns);
   const hasGroups = columns.some(c => c.group);
+
+  /** `sep` stays the heavy group divider; gridLines adds a hairline everywhere else. */
+  const ruleOf = (c: Column<Row>) =>
+    c.sep ? `2px solid ${T.primarySoft}` : gridLines ? `1px solid ${T.grayLt}` : undefined;
 
   // Consecutive columns sharing a group label collapse into one spanning header cell.
   const groupCells: Array<{ label: string; span: number; key: string; start: number }> = [];
@@ -160,7 +170,7 @@ export function DataTable<Row>({
                       fontSize: 11, fontWeight: 800, color: T.primaryDk, textTransform: 'uppercase',
                       letterSpacing: 0.5, padding: '10px 12px', whiteSpace: 'nowrap',
                       textAlign: c.align ?? 'left',
-                      borderRight: c.sep ? `2px solid ${T.primarySoft}` : undefined,
+                      borderRight: ruleOf(c),
                       borderBottom: `1.5px solid ${T.primarySoft}`,
                       fontFamily: 'inherit',
                       cursor: canSort ? 'pointer' : undefined,
@@ -230,7 +240,7 @@ export function DataTable<Row>({
                   {columns.map((c, ci) => (
                     <td key={c.key} style={{
                       fontSize: 12, color: 'inherit', padding: '10px 12px', whiteSpace: 'nowrap',
-                      borderRight: c.sep ? `2px solid ${T.primarySoft}` : undefined,
+                      borderRight: ruleOf(c),
                       borderBottom: `1px solid ${T.grayLt}`,
                       fontFamily: 'inherit',
                       textAlign: c.align ?? 'left',

@@ -1,6 +1,6 @@
 'use client';
 import { Badge } from '@/components/ui/Badge';
-import { Btn } from '@/components/ui/Btn';
+import { RowActions } from '@/components/ui/RowActions';
 import type { AnakJuaraRow } from '@/types/anak-juara';
 
 interface AnakJuaraCardProps {
@@ -10,9 +10,11 @@ interface AnakJuaraCardProps {
   onSelect: (row: AnakJuaraRow) => void;
   /** Opens the Entry Ajuan Ganti modal straight from the card. */
   onAjuan?: (row: AnakJuaraRow) => void;
+  /** Opens the Update Opname modal straight from the card. */
+  onOpname?: (row: AnakJuaraRow) => void;
 }
 
-export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan }: AnakJuaraCardProps) {
+export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, onOpname }: AnakJuaraCardProps) {
   if (loading && data.length === 0) {
     return (
       <div className="datagrid-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -59,11 +61,20 @@ export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan }: 
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#BF4E02' }}>{r.id_anak}</span>
-              <Badge
-                label={r.status_pasangan === 'y' ? 'Aktif' : 'Nonaktif'}
-                color={r.status_pasangan === 'y' ? '#1A7A45' : '#7A6055'}
-                bg={r.status_pasangan === 'y' ? '#E5F5ED' : '#F2EAE3'}
-              />
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Badge
+                  label={r.status_pasangan === 'y' ? 'Aktif' : 'Nonaktif'}
+                  color={r.status_pasangan === 'y' ? '#1A7A45' : '#7A6055'}
+                  bg={r.status_pasangan === 'y' ? '#E5F5ED' : '#F2EAE3'}
+                />
+                <RowActions
+                  label={`Aksi untuk ${r.nama_anak}`}
+                  items={[
+                    { label: 'Ajuan Ganti Anak', onClick: () => onAjuan?.(r) },
+                    { label: 'Update Opname', onClick: () => onOpname?.(r) },
+                  ]}
+                />
+              </span>
             </div>
             <div style={{ fontWeight: 800, fontSize: 14, color: '#1A0A00', marginTop: 4 }}>
               {r.nama_anak}
@@ -74,16 +85,6 @@ export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan }: 
             <div style={{ fontSize: 11, color: '#7A6055', marginTop: 2 }}>
               {r.program_donasi || '—'} · {r.nama_wilayah || '—'}
             </div>
-            {onAjuan && (
-              <div
-                style={{ marginTop: 10 }}
-                onClick={e => e.stopPropagation()}
-              >
-                <Btn size="sm" variant="primary" onClick={() => onAjuan(r)}>
-                  Ajuan Ganti
-                </Btn>
-              </div>
-            )}
           </div>
         );
       })}

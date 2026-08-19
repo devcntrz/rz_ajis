@@ -20,6 +20,14 @@ export function fmtTgl(date: string | Date | null | undefined): string {
   return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+const RP = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
+
+/** Thousand-separated rupiah amount, without the "Rp" prefix. */
+export function fmtRp(value: number | string | null | undefined): string {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) ? RP.format(Math.round(n)) : '0';
+}
+
 /** Calculate age from birth date */
 export function calcAge(tglLahir: string | Date | null | undefined): number {
   if (!tglLahir) return 0;

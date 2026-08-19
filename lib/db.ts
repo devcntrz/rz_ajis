@@ -28,6 +28,12 @@ export async function queryOne<T>(sql: string, params?: any[]): Promise<T | null
   return rows[0] ?? null;
 }
 
+/** Single-statement write outside a transaction. Use withTransaction for multi-table work. */
+export async function execute(sql: string, params?: any[]): Promise<mysql.ResultSetHeader> {
+  const [result] = await pool.execute(sql, params);
+  return result as mysql.ResultSetHeader;
+}
+
 export type TxConnection = mysql.PoolConnection;
 
 /** Run work inside a single DB transaction (BEGIN / COMMIT / ROLLBACK). */
@@ -72,6 +78,37 @@ export async function txExecute(
   params?: any[],
 ): Promise<void> {
   await conn.execute(sql, params);
+}
+
+/** Like txExecute, but returns affectedRows / insertId. */
+export async function txExecuteResult(
+  conn: TxConnection,
+  sql: string,
+  params?: any[],
+): Promise<mysql.ResultSetHeader> {
+  const [result] = await conn.execute(sql, params);
+  return result as mysql.ResultSetHeader;
+}
+
+/**
+ * Multi-row statements (batch INSERT, `IN (...)`) exceed the placeholder limit of a
+ * prepared statement and, for a few hundred rows, are also markedly slower to prepare
+ * than to run. `query()` sends them unprepared. Callers still pass every value through
+ * `params` — this changes how the statement is transported, never how it is escaped.
+ */
+export async function txQueryUnprepared<T>(
+  conn: TxConnection,
+  sql: string,
+  params?: any[],
+): Promise<T> {
+  const [result] = await conn.query(sql, params);
+  return result as T;
+}
+
+/** Unprepared read outside a transaction. Same escaping rules as `query()`. */
+export async function queryUnprepared<T>(sql: string, params?: any[]): Promise<T[]> {
+  const [rows] = await pool.query(sql, params);
+  return rows as T[];
 }
 
 export default pool;

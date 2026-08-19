@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home, Users, ClipboardList, Award, ChevronRight, GraduationCap, RefreshCw,
+  Home, Users, ClipboardList, Award, ChevronRight, GraduationCap, RefreshCw, Wallet,
 } from 'lucide-react';
 
 const T = {
@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
   { href: '/anak', icon: Users, label: 'Pengajuan Beasiswa' },
   { href: '/anak-juara', icon: GraduationCap, label: 'Anak Juara', groups: [1, 2] },
   { href: '/ajuan-pergantian', icon: RefreshCw, label: 'Ajuan Pergantian', groups: [1, 2] },
+  { href: '/transaksi', icon: Wallet, label: 'Transaksi', groups: [1, 2] },
   { href: '/pembinaan', icon: ClipboardList, label: 'Pembinaan' },
   { href: '/penilaian', icon: Award, label: 'Penilaian' },
 ];

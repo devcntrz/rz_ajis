@@ -10,6 +10,7 @@ import { AnakJuaraFilter } from '@/components/anak-juara/AnakJuaraFilter';
 import { AnakJuaraTable } from '@/components/anak-juara/AnakJuaraTable';
 import { AnakJuaraCard } from '@/components/anak-juara/AnakJuaraCard';
 import { AjuanGantiAnakForm } from '@/components/anak-juara/AjuanGantiAnakForm';
+import { OpnameForm } from '@/components/anak-juara/OpnameForm';
 import { Btn } from '@/components/ui/Btn';
 import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { InfiniteScrollTrigger } from '@/components/ui/InfiniteScrollTrigger';
@@ -33,6 +34,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const [mobilePage, setMobilePage] = useState(1);
   const [selected, setSelected] = useState<AnakJuaraRow | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [opnameRow, setOpnameRow] = useState<AnakJuaraRow | null>(null);
   const [toast, setToast] = useState('');
   const [exporting, setExporting] = useState(false);
   const [sortBy, setSortBy] = useState('nama_anak');
@@ -59,6 +61,11 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const handleAjuan = (r: AnakJuaraRow) => {
     setSelected(r);
     setShowForm(true);
+  };
+
+  const handleOpname = (r: AnakJuaraRow) => {
+    setSelected(r);
+    setOpnameRow(r);
   };
 
   const handleExport = async () => {
@@ -143,7 +150,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
     () => (isMobile ? [] : desktopRows.map(r => r.id_pemasangan_baru)),
     [isMobile, desktopRows],
   );
-  const { keuangan, loading: keuanganLoading } = useAnakJuaraKeuangan(pageIds);
+  const { keuangan, loading: keuanganLoading, mutate: mutateKeuangan } = useAnakJuaraKeuangan(pageIds);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -207,6 +214,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           onSort={handleSort}
           onSelect={setSelected}
           onAjuan={handleAjuan}
+          onOpname={handleOpname}
           keuangan={keuangan}
           keuanganLoading={keuanganLoading}
         />
@@ -218,6 +226,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
         selectedId={selected?.id_pemasangan_baru}
         onSelect={setSelected}
         onAjuan={handleAjuan}
+        onOpname={handleOpname}
       />
 
       {!isMobile && displayTotal > 0 && (
@@ -235,6 +244,20 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           onLoadMore={infinite.loadMore}
           hasMore={infinite.hasMore}
           loading={infinite.isInitialLoading || infinite.isLoadingMore}
+        />
+      )}
+
+      {opnameRow && (
+        <OpnameForm
+          row={opnameRow}
+          onClose={() => setOpnameRow(null)}
+          onSuccess={() => {
+            setOpnameRow(null);
+            // Saldo feeds the grid's finance columns, so refresh both queries.
+            desktopList.mutate();
+            mobileList.mutate();
+            mutateKeuangan();
+          }}
         />
       )}
 

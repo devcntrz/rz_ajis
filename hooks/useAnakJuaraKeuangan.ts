@@ -15,7 +15,7 @@ export function useAnakJuaraKeuangan(ids: string[]) {
     ? `/api/anakjuara/anak-juara/keuangan?ids=${encodeURIComponent(ids.join(','))}`
     : null;
 
-  const { data, isLoading } = useSWR<{ data: Record<string, KeuanganPivot> }>(key, fetcher, {
+  const { data, isLoading, mutate } = useSWR<{ data: Record<string, KeuanganPivot> }>(key, fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
     dedupingInterval: 30_000,
@@ -24,5 +24,6 @@ export function useAnakJuaraKeuangan(ids: string[]) {
   return {
     keuangan: data?.data ?? {},
     loading: !!key && isLoading,
+    mutate,
   };
 }

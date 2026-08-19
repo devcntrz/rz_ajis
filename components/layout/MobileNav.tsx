@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, ClipboardList, Award, GraduationCap, RefreshCw } from 'lucide-react';
+import { Home, Users, ClipboardList, Award, GraduationCap, RefreshCw, Wallet } from 'lucide-react';
 
 interface NavItem {
   href: string;
@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { href: '/anak',             icon: Users,         label: 'Anak' },
   { href: '/anak-juara',       icon: GraduationCap, label: 'AJ',      groups: [1, 2] },
   { href: '/ajuan-pergantian', icon: RefreshCw,     label: 'Ajuan',   groups: [1, 2] },
+  { href: '/transaksi',        icon: Wallet,        label: 'Transaksi', groups: [1, 2] },
   { href: '/pembinaan',        icon: ClipboardList, label: 'Pembinaan' },
   { href: '/penilaian',        icon: Award,         label: 'Penilaian' },
 ];

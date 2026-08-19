@@ -7,6 +7,8 @@ import { Modal } from '@/components/ui/Modal';
 import { Btn } from '@/components/ui/Btn';
 import { FLabel } from '@/components/ui/FLabel';
 import { Input, Textarea } from '@/components/ui/Input';
+import { KeuanganGrid } from '@/components/keuangan/KeuanganGrid';
+import type { MonthCell, SemesterBlock } from '@/lib/keuangan';
 import type { AjuanGantiAnak, DonasiPindahRow } from '@/types/ajuan';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -15,24 +17,6 @@ interface EksekusiFormProps {
   row: AjuanGantiAnak;
   onClose: () => void;
   onSuccess: () => void;
-}
-
-interface MonthCell {
-  bulan: string;
-  label: string;
-  total: number;
-}
-
-interface SemesterBlock {
-  saldo_awal: number;
-  donasi: MonthCell[];
-  jml_donasi: number;
-  saldo_plus_donasi: number;
-  penyaluran: MonthCell[];
-  jml_tersalurkan: number;
-  saldo_akhir: number;
-  aktif: string;
-  wajib: string;
 }
 
 interface DetailPayload {
@@ -128,8 +112,6 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
   const detail = detailRes?.data;
   const pairing = detail?.pairing;
   const donasiList = useMemo(() => donasiRes?.data ?? [], [donasiRes]);
-  const ganjil = detail?.keuangan?.ganjil;
-  const genap = detail?.keuangan?.genap;
 
   // Prefill saldo from opname, falling back to the computed semester balance (legacy-like).
   useEffect(() => {
@@ -252,86 +234,15 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
           )}
         </div>
 
-        {/* Keuangan — legacy grouped pivot (Jan–Jun then Jul–Des) */}
-        <div>
-          <div style={{
-            background: '#E5EEF8', color: '#1A5FA8', fontSize: 12, fontWeight: 700,
-            padding: '8px 10px', borderRadius: '10px 10px 0 0', border: '1px solid #1A5FA830',
-            borderBottom: 'none',
-          }}>
-            Keuangan → silakan scroll ke kanan untuk mengetahui data penyaluran dan saldo akhir
-          </div>
-          <div style={{
-            overflowX: 'auto', border: '1px solid #F0C4A0', borderRadius: '0 0 10px 10px',
-            background: '#FFFFFF',
-          }}>
-            {/* borderCollapse must be 'separate': collapsed borders detach from sticky
-                cells and scroll away with the rest of the row. */}
-            <table style={{
-              borderCollapse: 'separate', borderSpacing: 0,
-              width: 'max-content', minWidth: '100%',
-            }}>
-              {/* Fixed widths keep the sticky offsets below exact — a column that
-                  renders wider than its offset lets the next one show through. */}
-              <colgroup>
-                {FROZEN.map(f => <col key={f.key} style={{ width: f.width }} />)}
-              </colgroup>
-              <thead>
-                <tr style={{ background: '#FBF0E8' }}>
-                  {FROZEN.map((f, i) => (
-                    <th key={f.key} style={{ ...thBase, ...stickyHead(i) }} rowSpan={2}>{f.label}</th>
-                  ))}
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Saldo Awal Jan–Jun</th>
-                  <th style={{ ...thBase, textAlign: 'center' }} colSpan={6}>Donasi Jan – Jun</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Σ Donasi Jan – Jun</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Σ Saldo + Donasi Jan – Jun</th>
-                  <th style={{ ...thBase, textAlign: 'center' }} colSpan={6}>Penyaluran Jan – Jun</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Σ Tersalurkan Jan – Jun</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Saldo Akhir Jan – Jun</th>
-                  <th style={thBase} rowSpan={2}>Aktif Jan – Jun</th>
-                  <th style={thBase} rowSpan={2}>Wajib Jan – Jun</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Saldo Awal Jul – Des</th>
-                  <th style={{ ...thBase, textAlign: 'center' }} colSpan={6}>Donasi Jul – Des</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Σ Donasi Jul – Des</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Σ Saldo + Donasi Jul – Des</th>
-                  <th style={{ ...thBase, textAlign: 'center' }} colSpan={6}>Penyaluran Jul – Des</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Σ Tersalurkan Jul – Des</th>
-                  <th style={{ ...thBase, textAlign: 'right' }} rowSpan={2}>Saldo Akhir Jul – Des</th>
-                  <th style={thBase} rowSpan={2}>Aktif Jul – Des</th>
-                  <th style={thBase} rowSpan={2}>Wajib Jul – Des</th>
-                  <th style={thBase} rowSpan={2}>Date Generated</th>
-                  <th style={thBase} rowSpan={2}>User Generated</th>
-                </tr>
-                <tr style={{ background: '#FBF0E8' }}>
-                  {([
-                    ['dg', ganjil?.donasi],
-                    ['pg', ganjil?.penyaluran],
-                    ['dn', genap?.donasi],
-                    ['pn', genap?.penyaluran],
-                  ] as const).flatMap(([prefix, group], gi) =>
-                    (group ?? FALLBACK_MONTHS[gi < 2 ? 0 : 1]).map(m => (
-                      <th key={`${prefix}-${m.bulan}`} style={{ ...thBase, textAlign: 'right' }}>
-                        {m.label}
-                      </th>
-                    )),
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ ...tdLeft, ...stickyCell(0) }}>{detail?.keuangan?.tahun || '—'}</td>
-                  <td style={{ ...tdLeft, ...stickyCell(1) }}>{idAnak}</td>
-                  <td style={{ ...tdLeft, ...stickyCell(2) }}>{namaAnak}</td>
-                  {([ganjil, genap] as (SemesterBlock | undefined)[]).map((s, si) => (
-                    <SemesterCells key={si} s={s} fallbackIndex={si} />
-                  ))}
-                  <td style={tdLeft}>{fmtTanggal(detail?.keuangan?.date_generated)}</td>
-                  <td style={tdLeft}>{detail?.keuangan?.user_generated || '—'}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <KeuanganGrid
+          rows={[{
+            key: row.id_pemasangan_baru || String(row.id_ajuan),
+            tahun: detail?.keuangan?.tahun || '—',
+            id_anak: idAnak,
+            nama_anak: namaAnak,
+            pivot: detail?.keuangan,
+          }]}
+        />
 
         {/* Anak baru */}
         <div>
@@ -489,30 +400,8 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
   );
 }
 
-// Placeholder month cells so the header/body column count stays stable while loading.
-const FALLBACK_MONTHS: MonthCell[][] = [
-  ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'].map((label, i) => ({ bulan: String(i + 1), label, total: 0 })),
-  ['Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'].map((label, i) => ({ bulan: String(i + 7), label, total: 0 })),
-];
-
-function SemesterCells({ s, fallbackIndex }: { s: SemesterBlock | undefined; fallbackIndex: number }) {
-  const months = s?.donasi ?? FALLBACK_MONTHS[fallbackIndex];
-  const salur = s?.penyaluran ?? FALLBACK_MONTHS[fallbackIndex];
-  return (
-    <>
-      <td style={tdRight}>{fmtRp(s?.saldo_awal ?? 0)}</td>
-      {months.map(m => <td key={`d${m.bulan}`} style={tdRight}>{fmtRp(m.total)}</td>)}
-      <td style={tdRight}>{fmtRp(s?.jml_donasi ?? 0)}</td>
-      <td style={tdRight}>{fmtRp(s?.saldo_plus_donasi ?? 0)}</td>
-      {salur.map(m => <td key={`p${m.bulan}`} style={tdRight}>{fmtRp(m.total)}</td>)}
-      <td style={tdRight}>{fmtRp(s?.jml_tersalurkan ?? 0)}</td>
-      <td style={tdRight}>{fmtRp(s?.saldo_akhir ?? 0)}</td>
-      <td style={tdLeft}>{s?.aktif || '—'}</td>
-      <td style={tdLeft}>{s?.wajib || '—'}</td>
-    </>
-  );
-}
-
+/* Cell styles for the "Pilih Donasi yg pindah" grid below. The finance pivot keeps
+   its own copies inside KeuanganGrid, which owns that table. */
 const thBase: React.CSSProperties = {
   fontSize: 10, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase',
   padding: '6px 8px', whiteSpace: 'nowrap', textAlign: 'left',
@@ -523,6 +412,7 @@ const tdLeft: React.CSSProperties = {
   fontSize: 11, padding: '6px 8px', whiteSpace: 'nowrap', borderBottom: '1px solid #F2EAE3',
   borderRight: '1px solid #F2EAE3', color: '#1A0A00', textAlign: 'left',
 };
+
 const tdRight: React.CSSProperties = {
   ...tdLeft,
   textAlign: 'right',
@@ -533,34 +423,3 @@ const emptyBoxStyle: React.CSSProperties = {
   fontSize: 12, color: '#7A6055', border: '1px dashed #F0C4A0',
   borderRadius: 10, padding: 12,
 };
-
-/** Frozen identity columns of the keuangan grid, in order. */
-const FROZEN = [
-  { key: 'tahun', label: 'Tahun', width: 70 },
-  { key: 'id_anak', label: 'ID Anak', width: 130 },
-  { key: 'nama_anak', label: 'Nama Anak', width: 190 },
-] as const;
-
-/** Cumulative left offset of frozen column `i`. */
-const frozenLeft = (i: number) =>
-  FROZEN.slice(0, i).reduce((a, f) => a + f.width, 0);
-
-const FREEZE_SHADOW = '2px 0 4px -2px rgba(26,10,0,0.28)';
-
-function frozen(i: number, bg: string, zIndex: number): React.CSSProperties {
-  const w = FROZEN[i].width;
-  return {
-    position: 'sticky',
-    left: frozenLeft(i),
-    zIndex,
-    background: bg,
-    // Pinned to an exact width so the offsets above can never drift.
-    width: w, minWidth: w, maxWidth: w,
-    overflow: 'hidden', textOverflow: 'ellipsis',
-    boxShadow: i === FROZEN.length - 1 ? FREEZE_SHADOW : undefined,
-  };
-}
-
-// Header outranks body so frozen headers are never painted over while scrolling.
-const stickyHead = (i: number) => frozen(i, '#FBF0E8', 4);
-const stickyCell = (i: number) => frozen(i, '#FFFFFF', 2);

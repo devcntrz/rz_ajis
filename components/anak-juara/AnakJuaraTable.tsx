@@ -1,7 +1,7 @@
 'use client';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
-import { Btn } from '@/components/ui/Btn';
+import { RowActions } from '@/components/ui/RowActions';
 import { fmtTgl } from '@/lib/utils';
 import type { KeuanganPivot, SemesterBlock } from '@/lib/keuangan';
 import type { AnakJuaraRow } from '@/types/anak-juara';
@@ -17,6 +17,8 @@ interface AnakJuaraTableProps {
   onSelect:    (row: AnakJuaraRow) => void;
   /** Opens the Entry Ajuan Ganti modal straight from the row. */
   onAjuan?:    (row: AnakJuaraRow) => void;
+  /** Opens the Update Opname modal straight from the row. */
+  onOpname?:   (row: AnakJuaraRow) => void;
   /** Per-page finance pivot, keyed by id_pemasangan_baru. Fills in after the grid. */
   keuangan?:        Record<string, KeuanganPivot>;
   keuanganLoading?: boolean;
@@ -34,7 +36,7 @@ function fmtRp(n: number | undefined) {
 }
 
 export function AnakJuaraTable({
-  data, loading, rowOffset = 0, selectedId, sortBy, sortDir, onSort, onSelect, onAjuan,
+  data, loading, rowOffset = 0, selectedId, sortBy, sortDir, onSort, onSelect, onAjuan, onOpname,
   keuangan = {}, keuanganLoading = false,
 }: AnakJuaraTableProps) {
   const isSel = (r: AnakJuaraRow) =>
@@ -158,18 +160,19 @@ export function AnakJuaraTable({
     {
       key: 'aksi',
       label: 'Aksi',
-      width: 124,
+      width: 64,
       // Frozen: DataTable only supports leading sticky columns, and this grid now
       // scrolls far to the right for the Jan–Des finance pivot, so a trailing
       // action column would sit off-screen.
       sticky: true,
       render: (r: AnakJuaraRow) => (
-        // Btn takes no event argument, so the row's onClick is stopped here.
-        <span onClick={e => e.stopPropagation()}>
-          <Btn size="sm" variant="primary" onClick={() => onAjuan?.(r)}>
-            Ajuan Ganti
-          </Btn>
-        </span>
+        <RowActions
+          label={`Aksi untuk ${r.nama_anak}`}
+          items={[
+            { label: 'Ajuan Ganti Anak', onClick: () => onAjuan?.(r) },
+            { label: 'Update Opname', onClick: () => onOpname?.(r) },
+          ]}
+        />
       ),
     },
     {
