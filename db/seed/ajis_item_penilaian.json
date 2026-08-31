@@ -1,0 +1,37 @@
+{
+  "table": "ajis_item_penilaian",
+  "source": "ajis_item_penilaian",
+  "conflict": "(id)",
+  "rows": [
+    {
+      "id": "30",
+      "item_penilaian": "Catatan Pembinaan",
+      "parent_id": "30",
+      "jenis": "sekolahjuara"
+    },
+    {
+      "id": "29",
+      "item_penilaian": "Suara Anak Juara",
+      "parent_id": "29",
+      "jenis": "sekolahjuara"
+    },
+    {
+      "id": "28",
+      "item_penilaian": "Catatan Pembinaan",
+      "parent_id": "28",
+      "jenis": "anakjuara"
+    },
+    {
+      "id": "27",
+      "item_penilaian": "Suara Anak Juara",
+      "parent_id": "27",
+      "jenis": "anakjuara"
+    },
+    {
+      "id": "26",
+      "item_penilaian": "Terbiasa Melaksanakan Shalat 5 Waktu",
+      "parent_id": "11",
+      "jenis": "sekolahjuara"
+    }
+  ]
+}

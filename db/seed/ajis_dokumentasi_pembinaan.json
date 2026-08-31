@@ -1,0 +1,41 @@
+{
+  "table": "ajis_dokumentasi_pembinaan",
+  "source": "ajis_dokumentasi_pembinaan",
+  "conflict": "(semesterid, kantor_id, id_wilayah_pembinaan)",
+  "rows": [
+    {
+      "semesterid": "juli-desem",
+      "kantor_id": "15-292",
+      "image": "2023_12_08_07_28_41__Dok.Pembinaan_SMT2_SD-JUARA-JAKARTA-UTARA.jpg",
+      "nama": "Rahmanto",
+      "id_wilayah_pembinaan": 331
+    },
+    {
+      "semesterid": "Juli - Des",
+      "kantor_id": "15-295",
+      "image": "2023_12_14_07_51_53__Dok_Pembinaan_SMT2_SD_Juara_Surabaya_JulDes.jpg",
+      "nama": "Suradin, S.Si, S.Pd",
+      "id_wilayah_pembinaan": 319
+    },
+    {
+      "semesterid": "Januari - ",
+      "kantor_id": "15-294",
+      "image": "2024_06_18_02_57_56__Dok.Pembinaan_SMT2_Yogyakarta.jpeg",
+      "nama": "Lilik Siswati",
+      "id_wilayah_pembinaan": 316
+    },
+    {
+      "semesterid": "Januari - ",
+      "kantor_id": "09-231",
+      "image": "2024_06_07_06_57_36__Dok.Pembinaan_SMT1_jakbar_cilandak timur.jpg",
+      "id_wilayah_pembinaan": 208
+    },
+    {
+      "semesterid": "januari - ",
+      "kantor_id": "09-214",
+      "image": "2026_06_17_13_19_52__Benda_Belendung.jpg",
+      "nama": "Azzahra Mauliaunnisa",
+      "id_wilayah_pembinaan": 19
+    }
+  ]
+}

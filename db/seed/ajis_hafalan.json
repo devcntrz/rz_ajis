@@ -1,0 +1,47 @@
+{
+  "table": "ajis_hafalan",
+  "source": "ajis_hafalan",
+  "conflict": "(id_anak, semesterid, konten_uji)",
+  "rows": [
+    {
+      "id_anak": "10232250002",
+      "jenis": "2",
+      "konten_uji": "Al-Fatihah",
+      "tgl_pengujian": "2026-06-25 17:00:00",
+      "tgl_insert": "2026-06-26 07:47:16",
+      "semesterid": "25"
+    },
+    {
+      "id_anak": "09226240068",
+      "jenis": "4",
+      "konten_uji": "Masuk Rumah",
+      "tgl_pengujian": "2026-05-09 17:00:00",
+      "tgl_insert": "2026-06-24 07:00:05",
+      "semesterid": "25"
+    },
+    {
+      "id_anak": "09226240068",
+      "jenis": "4",
+      "konten_uji": "Akan Tidur",
+      "tgl_pengujian": "2026-04-18 17:00:00",
+      "tgl_insert": "2026-06-24 06:59:47",
+      "semesterid": "25"
+    },
+    {
+      "id_anak": "09226240068",
+      "jenis": "4",
+      "konten_uji": "Bangun Tidur",
+      "tgl_pengujian": "2026-03-14 17:00:00",
+      "tgl_insert": "2026-06-24 06:59:27",
+      "semesterid": "25"
+    },
+    {
+      "id_anak": "09226240068",
+      "jenis": "4",
+      "konten_uji": "Untuk Orang tua",
+      "tgl_pengujian": "2026-02-07 17:00:00",
+      "tgl_insert": "2026-06-24 06:59:07",
+      "semesterid": "25"
+    }
+  ]
+}

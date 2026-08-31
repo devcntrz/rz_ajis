@@ -1,0 +1,70 @@
+{
+  "table": "ajis_data_prestasi",
+  "source": "ajis_data_prestasi",
+  "conflict": "(id)",
+  "rows": [
+    {
+      "id_anak": "09207220007",
+      "event_lomba": "ASOSIASI OLIMPIADE NUSANTARA",
+      "tgl": "2026-02-12 17:00:00",
+      "lokasi": "ONLINE",
+      "skala_prestasi_tingkat": "Nasional",
+      "capaian_prestasi": "JUARA 3",
+      "jenis_bidang": "BHS INGGRIS",
+      "publikasi_media": "PIAGAM",
+      "semesterid": "25",
+      "bulan": "2",
+      "tahun": "2026",
+      "show": false
+    },
+    {
+      "id_anak": "09214220056",
+      "event_lomba": "Olah raga ",
+      "tgl": "2025-10-25 17:00:00",
+      "lokasi": "Curug kulon ",
+      "skala_prestasi_tingkat": "Kecamatan",
+      "capaian_prestasi": "Juara 1 ",
+      "jenis_bidang": "Paskibraka ",
+      "publikasi_media": "WhatsApp ",
+      "semesterid": "24",
+      "bulan": "10",
+      "tahun": "2025",
+      "show": true
+    },
+    {
+      "id_anak": "09214210094",
+      "event_lomba": "Futsal antar Sekolah ",
+      "tgl": "2025-12-10 17:00:00",
+      "lokasi": "Curug",
+      "skala_prestasi_tingkat": "Kecamatan",
+      "capaian_prestasi": "Juara 1",
+      "jenis_bidang": "Olahraga ",
+      "publikasi_media": "WhatsApp ",
+      "bulan": "12",
+      "tahun": "2025",
+      "show": false
+    },
+    {
+      "id_anak": "09231170070",
+      "tgl": "2024-01-03 17:00:00",
+      "skala_prestasi_tingkat": "Sekolah",
+      "capaian_prestasi": "Wisuda tahfiz 3 juz",
+      "bulan": "1",
+      "tahun": "2024",
+      "show": false
+    },
+    {
+      "id_anak": "09198190088",
+      "event_lomba": "MBQ As Suryaniyah",
+      "tgl": "2023-10-20 17:00:00",
+      "lokasi": "Kampus As Suryaniyah Kota Bekasi",
+      "skala_prestasi_tingkat": "Kecamatan",
+      "capaian_prestasi": "Juara 3 Lomba MHQ dan Hafal 8 Juz ",
+      "jenis_bidang": "Agama Islam",
+      "semesterid": "2023",
+      "bulan": "10",
+      "tahun": "2023",
+      "show": true
+    }
+  ]
+}

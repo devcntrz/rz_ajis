@@ -1,0 +1,57 @@
+{
+  "table": "ajis_kantor",
+  "source": "ajis_kantor",
+  "conflict": "(oid)",
+  "rows": [
+    {
+      "oid": "17-312",
+      "kantor": "RZ - Bintaro",
+      "oid_parent": "09-219",
+      "oid_parent_second": "17-312",
+      "jenis": "anakjuara",
+      "external_ids": {
+        "id_kantor_postgree": "0"
+      }
+    },
+    {
+      "oid": "17-311",
+      "kantor": "PMD - Aceh - Bireuen",
+      "oid_parent": "17-305",
+      "oid_parent_second": "17-303",
+      "jenis": "anakjuara",
+      "external_ids": {
+        "id_kantor_postgree": "105"
+      }
+    },
+    {
+      "oid": "17-310",
+      "kantor": "PMD - Aceh - Aceh Jaya",
+      "oid_parent": "17-305",
+      "oid_parent_second": "17-303",
+      "jenis": "anakjuara",
+      "external_ids": {
+        "id_kantor_postgree": "104"
+      }
+    },
+    {
+      "oid": "17-309",
+      "kantor": "PMD - Aceh - Aceh Besar",
+      "oid_parent": "17-305",
+      "oid_parent_second": "17-303",
+      "jenis": "anakjuara",
+      "external_ids": {
+        "id_kantor_postgree": "103"
+      }
+    },
+    {
+      "oid": "17-308",
+      "kantor": "PMD - Aceh - Banda Aceh",
+      "oid_parent": "17-305",
+      "oid_parent_second": "17-303",
+      "jenis": "anakjuara",
+      "external_ids": {
+        "id_kantor_postgree": "102"
+      }
+    }
+  ]
+}

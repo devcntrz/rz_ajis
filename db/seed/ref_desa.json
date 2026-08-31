@@ -1,0 +1,42 @@
+{
+  "table": "ref_desa",
+  "source": "ref_desa",
+  "conflict": "(desaid)",
+  "rows": [
+    {
+      "desaid": "Depok01",
+      "nama_desa": "Cikeduk",
+      "kelurahan": false,
+      "camatid": "Depok",
+      "aktif": true
+    },
+    {
+      "desaid": "91710301",
+      "nama_desa": "Asano",
+      "kelurahan": true,
+      "camatid": "917103",
+      "aktif": true
+    },
+    {
+      "desaid": "91710101",
+      "nama_desa": "Bhayangkara",
+      "kelurahan": true,
+      "camatid": "917101",
+      "aktif": true
+    },
+    {
+      "desaid": "9113302006",
+      "nama_desa": "Gidomen",
+      "kelurahan": false,
+      "camatid": "911330",
+      "aktif": true
+    },
+    {
+      "desaid": "9113302005",
+      "nama_desa": "Sentul",
+      "kelurahan": false,
+      "camatid": "911330",
+      "aktif": true
+    }
+  ]
+}

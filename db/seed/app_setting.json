@@ -1,0 +1,27 @@
+{
+  "table": "app_setting",
+  "source": "ajis_periode_penilaian + ajis_batas_expired_peminjaman",
+  "conflict": "(key)",
+  "rows": [
+    {
+      "key": "peminjaman.batas_expired_hari",
+      "value": "7",
+      "keterangan": "was ajis_batas_expired_peminjaman (§6.5)"
+    },
+    {
+      "key": "penilaian.periode.1",
+      "value": "{\"nama\":\"\",\"tgl_awal\":\"2013-06-30 17:00:00\",\"tgl_akhir\":\"2013-12-30 17:00:00\",\"aktif\":true}",
+      "keterangan": "was ajis_periode_penilaian (§6.5)"
+    },
+    {
+      "key": "penilaian.periode.2",
+      "value": "{\"nama\":\"\",\"tgl_awal\":\"2013-06-30 17:00:00\",\"tgl_akhir\":\"2013-12-30 17:00:00\",\"aktif\":true}",
+      "keterangan": "was ajis_periode_penilaian (§6.5)"
+    },
+    {
+      "key": "penilaian.periode.3",
+      "value": "{\"nama\":\"\",\"tgl_awal\":\"1899-11-29 16:52:48\",\"tgl_akhir\":\"1899-11-29 16:52:48\",\"aktif\":true}",
+      "keterangan": "was ajis_periode_penilaian (§6.5)"
+    }
+  ]
+}

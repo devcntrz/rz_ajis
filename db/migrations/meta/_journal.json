@@ -1,0 +1,90 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788155282696,
+      "tag": "0000_enable_extensions",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788155292568,
+      "tag": "0001_ref_and_kantor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788155443886,
+      "tag": "0002_setting_user_sdm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788155550218,
+      "tag": "0003_anak_pemasangan",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788155622672,
+      "tag": "0004_keuangan",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788155806282,
+      "tag": "0005_pembinaan_penilaian_laporan",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788155815205,
+      "tag": "0006_mv_donasi_bulanan",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788155815636,
+      "tag": "0007_mv_penyaluran_bulanan",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788155816079,
+      "tag": "0008_mv_zisco_agregat",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788155816698,
+      "tag": "0009_mv_donatur_agregat",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788155817182,
+      "tag": "0010_mv_rekap_transaksi_bulanan",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788156346042,
+      "tag": "0011_opname_natural_key",
+      "breakpoints": true
+    }
+  ]
+}

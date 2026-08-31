@@ -1,0 +1,2121 @@
+{
+  "id": "bb719563-3766-42e1-903e-38a5b6faaac0",
+  "prevId": "ed4eff47-0148-48c5-b1c5-5731cd91f88c",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.ref_desa": {
+      "name": "ref_desa",
+      "schema": "",
+      "columns": {
+        "desaid": {
+          "name": "desaid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nama_desa": {
+          "name": "nama_desa",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kelurahan": {
+          "name": "kelurahan",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "camatid": {
+          "name": "camatid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nomor_induk_desa": {
+          "name": "nomor_induk_desa",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ref_desa_camatid_idx": {
+          "name": "ref_desa_camatid_idx",
+          "columns": [
+            {
+              "expression": "camatid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ref_desa_camatid_ref_kecamatan_camatid_fk": {
+          "name": "ref_desa_camatid_ref_kecamatan_camatid_fk",
+          "tableFrom": "ref_desa",
+          "tableTo": "ref_kecamatan",
+          "columnsFrom": [
+            "camatid"
+          ],
+          "columnsTo": [
+            "camatid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_fungsi_struktur": {
+      "name": "ref_fungsi_struktur",
+      "schema": "",
+      "columns": {
+        "id_fungsi_struktur": {
+          "name": "id_fungsi_struktur",
+          "type": "varchar(16)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kode_fungsi": {
+          "name": "kode_fungsi",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nama_fungsi_struktur": {
+          "name": "nama_fungsi_struktur",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "user_insert": {
+          "name": "user_insert",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_insert": {
+          "name": "date_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_update": {
+          "name": "user_update",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_update": {
+          "name": "date_update",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ref_fungsi_struktur_nama_fungsi_struktur_unique": {
+          "name": "ref_fungsi_struktur_nama_fungsi_struktur_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nama_fungsi_struktur"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_kabupaten": {
+      "name": "ref_kabupaten",
+      "schema": "",
+      "columns": {
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kabupaten": {
+          "name": "kabupaten",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kota": {
+          "name": "kota",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ibukota": {
+          "name": "ibukota",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid": {
+          "name": "oid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "lat": {
+          "name": "lat",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lng": {
+          "name": "lng",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated": {
+          "name": "updated",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ref_kabupaten_propid_idx": {
+          "name": "ref_kabupaten_propid_idx",
+          "columns": [
+            {
+              "expression": "propid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ref_kabupaten_propid_ref_propinsi_propid_fk": {
+          "name": "ref_kabupaten_propid_ref_propinsi_propid_fk",
+          "tableFrom": "ref_kabupaten",
+          "tableTo": "ref_propinsi",
+          "columnsFrom": [
+            "propid"
+          ],
+          "columnsTo": [
+            "propid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_kecamatan": {
+      "name": "ref_kecamatan",
+      "schema": "",
+      "columns": {
+        "camatid": {
+          "name": "camatid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nama_kecamatan": {
+          "name": "nama_kecamatan",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kodepos": {
+          "name": "kodepos",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "updated": {
+          "name": "updated",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ref_kecamatan_kabid_idx": {
+          "name": "ref_kecamatan_kabid_idx",
+          "columns": [
+            {
+              "expression": "kabid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ref_kecamatan_kabid_ref_kabupaten_kabid_fk": {
+          "name": "ref_kecamatan_kabid_ref_kabupaten_kabid_fk",
+          "tableFrom": "ref_kecamatan",
+          "tableTo": "ref_kabupaten",
+          "columnsFrom": [
+            "kabid"
+          ],
+          "columnsTo": [
+            "kabid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_pekerjaan": {
+      "name": "ref_pekerjaan",
+      "schema": "",
+      "columns": {
+        "kerjaid": {
+          "name": "kerjaid",
+          "type": "varchar(3)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pekerjaan": {
+          "name": "pekerjaan",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_propinsi": {
+      "name": "ref_propinsi",
+      "schema": "",
+      "columns": {
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "propinsi": {
+          "name": "propinsi",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ibukota": {
+          "name": "ibukota",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_kantor": {
+      "name": "ajis_kantor",
+      "schema": "",
+      "columns": {
+        "oid": {
+          "name": "oid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kantor": {
+          "name": "kantor",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_telp": {
+          "name": "no_telp",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid_parent": {
+          "name": "oid_parent",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid_parent_second": {
+          "name": "oid_parent_second",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenis": {
+          "name": "jenis",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_ids": {
+          "name": "external_ids",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kantor": {
+      "name": "kantor",
+      "schema": "",
+      "columns": {
+        "oid": {
+          "name": "oid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kantor": {
+          "name": "kantor",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid_parent": {
+          "name": "oid_parent",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "id_office": {
+          "name": "id_office",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "omid": {
+          "name": "omid",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_ids": {
+          "name": "external_ids",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.map_kantor": {
+      "name": "map_kantor",
+      "schema": "",
+      "columns": {
+        "id_kantor_zains": {
+          "name": "id_kantor_zains",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kantor_id": {
+          "name": "kantor_id",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nama_kantor": {
+          "name": "nama_kantor",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_kantor_parent": {
+          "name": "id_kantor_parent",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_kantor_level": {
+          "name": "id_kantor_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coa": {
+          "name": "coa",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coa_outlet": {
+          "name": "coa_outlet",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_harga": {
+      "name": "ajis_harga",
+      "schema": "",
+      "columns": {
+        "id_harga": {
+          "name": "id_harga",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "program_donasi": {
+          "name": "program_donasi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "program": {
+          "name": "program",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "harga_program": {
+          "name": "harga_program",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "harga_penyaluran": {
+          "name": "harga_penyaluran",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "beasiswa": {
+          "name": "beasiswa",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transport": {
+          "name": "transport",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "frekuensi": {
+          "name": "frekuensi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ceria": {
+          "name": "ceria",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "progid": {
+          "name": "progid",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ajis_harga_progid_idx": {
+          "name": "ajis_harga_progid_idx",
+          "columns": [
+            {
+              "expression": "progid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_item_hafalan": {
+      "name": "ajis_item_hafalan",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "jenis": {
+          "name": "jenis",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "konten": {
+          "name": "konten",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ajis_item_hafalan_jenis_idx": {
+          "name": "ajis_item_hafalan_jenis_idx",
+          "columns": [
+            {
+              "expression": "jenis",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_item_penilaian": {
+      "name": "ajis_item_penilaian",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "item_penilaian": {
+          "name": "item_penilaian",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_parent": {
+          "name": "is_parent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "jenis": {
+          "name": "jenis",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target": {
+          "name": "target",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_semester": {
+      "name": "ajis_semester",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "semesterid": {
+          "name": "semesterid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "semester": {
+          "name": "semester",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_awal": {
+          "name": "tgl_awal",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_akhir": {
+          "name": "tgl_akhir",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "onprogress": {
+          "name": "onprogress",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "tgl_awal_donasi": {
+          "name": "tgl_awal_donasi",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_akhir_donasi": {
+          "name": "tgl_akhir_donasi",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_awal_saldo": {
+          "name": "tgl_awal_saldo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_akhir_saldo": {
+          "name": "tgl_akhir_saldo",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenis": {
+          "name": "jenis",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tahun": {
+          "name": "tahun",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lapsem": {
+          "name": "lapsem",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover": {
+          "name": "cover",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_siswa": {
+          "name": "cover_siswa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kata_pengantar": {
+          "name": "kata_pengantar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kata_pengantar_siswa": {
+          "name": "kata_pengantar_siswa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profil": {
+          "name": "profil",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kotak_profil_ceria": {
+          "name": "kotak_profil_ceria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kotak_pembinaan_ceria": {
+          "name": "kotak_pembinaan_ceria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kotak_profil_siswa": {
+          "name": "kotak_profil_siswa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kotak_pembinaan_siswa": {
+          "name": "kotak_pembinaan_siswa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keuangan": {
+          "name": "keuangan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "surat": {
+          "name": "surat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bawah": {
+          "name": "bawah",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bawah_siswa": {
+          "name": "bawah_siswa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ajis_semester_tgl_idx": {
+          "name": "ajis_semester_tgl_idx",
+          "columns": [
+            {
+              "expression": "tgl_awal",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tgl_akhir",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ajis_semester_onprogress_idx": {
+          "name": "ajis_semester_onprogress_idx",
+          "columns": [
+            {
+              "expression": "semesterid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "onprogress",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ajis_semester_semesterid_unique": {
+          "name": "ajis_semester_semesterid_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "semesterid"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.app_setting": {
+      "name": "app_setting",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "varchar(100)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keterangan": {
+          "name": "keterangan",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.setting_program": {
+      "name": "setting_program",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_program": {
+          "name": "id_program",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "progid": {
+          "name": "progid",
+          "type": "varchar(6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_progid": {
+          "name": "parent_progid",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_program": {
+          "name": "nama_program",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nama_inggris_program": {
+          "name": "nama_inggris_program",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_alias": {
+          "name": "nama_alias",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenis_program": {
+          "name": "jenis_program",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'dn'"
+        },
+        "coa_program": {
+          "name": "coa_program",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kredit_account": {
+          "name": "kredit_account",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sifat_program": {
+          "name": "sifat_program",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'tt'"
+        },
+        "keterangan": {
+          "name": "keterangan",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_digulirkan": {
+          "name": "tgl_digulirkan",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "tgl_inaktif": {
+          "name": "tgl_inaktif",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kprogid": {
+          "name": "kprogid",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_insert": {
+          "name": "tgl_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_change_status": {
+          "name": "tgl_change_status",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'nm'"
+        },
+        "dana_pengelola": {
+          "name": "dana_pengelola",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "pdanaid": {
+          "name": "pdanaid",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_anggaran": {
+          "name": "id_anggaran",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "harga_program": {
+          "name": "harga_program",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "harga_penyaluran": {
+          "name": "harga_penyaluran",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nominal_dp": {
+          "name": "nominal_dp",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nominal_dss": {
+          "name": "nominal_dss",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "persentase_dp": {
+          "name": "persentase_dp",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "persentase_dss": {
+          "name": "persentase_dss",
+          "type": "numeric(20, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenjang_pendidikan": {
+          "name": "jenjang_pendidikan",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "baru": {
+          "name": "baru",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_ids": {
+          "name": "external_ids",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "setting_program_progid_idx": {
+          "name": "setting_program_progid_idx",
+          "columns": [
+            {
+              "expression": "progid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "setting_program_id_program_unique": {
+          "name": "setting_program_id_program_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id_program"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "setting_program_jenis_check": {
+          "name": "setting_program_jenis_check",
+          "value": "jenis_program IS NULL OR jenis_program IN ('dn', 'ln')"
+        },
+        "setting_program_sifat_check": {
+          "name": "setting_program_sifat_check",
+          "value": "sifat_program IS NULL OR sifat_program IN ('t', 'tt')"
+        },
+        "setting_program_status_check": {
+          "name": "setting_program_status_check",
+          "value": "status IS NULL OR status IN ('m', 'nm')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.ajis_group_user": {
+      "name": "ajis_group_user",
+      "schema": "",
+      "columns": {
+        "id_group_user": {
+          "name": "id_group_user",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "group_user": {
+          "name": "group_user",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "keterangan": {
+          "name": "keterangan",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ajis_group_user_group_user_unique": {
+          "name": "ajis_group_user_group_user_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "group_user"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_user": {
+      "name": "ajis_user",
+      "schema": "",
+      "columns": {
+        "id_user": {
+          "name": "id_user",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nik": {
+          "name": "nik",
+          "type": "varchar(13)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kantor_id": {
+          "name": "kantor_id",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_kantor": {
+          "name": "nama_kantor",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_wilayah_pembinaan": {
+          "name": "id_wilayah_pembinaan",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_wilayah": {
+          "name": "nama_wilayah",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_group_user": {
+          "name": "id_group_user",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "user_insert": {
+          "name": "user_insert",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_insert": {
+          "name": "date_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ajis_user_scope_idx": {
+          "name": "ajis_user_scope_idx",
+          "columns": [
+            {
+              "expression": "kantor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id_wilayah_pembinaan",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ajis_user_aktif_idx": {
+          "name": "ajis_user_aktif_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "aktif",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ajis_user_id_group_user_ajis_group_user_id_group_user_fk": {
+          "name": "ajis_user_id_group_user_ajis_group_user_id_group_user_fk",
+          "tableFrom": "ajis_user",
+          "tableTo": "ajis_group_user",
+          "columnsFrom": [
+            "id_group_user"
+          ],
+          "columnsTo": [
+            "id_group_user"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ajis_user_username_unique": {
+          "name": "ajis_user_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        },
+        "ajis_user_email_unique": {
+          "name": "ajis_user_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_user_akses": {
+      "name": "ajis_user_akses",
+      "schema": "",
+      "columns": {
+        "userid": {
+          "name": "userid",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "levelid": {
+          "name": "levelid",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ajis_user_akses_levelid_idx": {
+          "name": "ajis_user_akses_levelid_idx",
+          "columns": [
+            {
+              "expression": "levelid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ajis_user_akses_userid_ajis_user_id_user_fk": {
+          "name": "ajis_user_akses_userid_ajis_user_id_user_fk",
+          "tableFrom": "ajis_user_akses",
+          "tableTo": "ajis_user",
+          "columnsFrom": [
+            "userid"
+          ],
+          "columnsTo": [
+            "id_user"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ajis_user_akses_userid_levelid_pk": {
+          "name": "ajis_user_akses_userid_levelid_pk",
+          "columns": [
+            "userid",
+            "levelid"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_wilayah_pembinaan": {
+      "name": "ajis_wilayah_pembinaan",
+      "schema": "",
+      "columns": {
+        "id_wilayah_pembinaan": {
+          "name": "id_wilayah_pembinaan",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nama_wilayah": {
+          "name": "nama_wilayah",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alamat_wilayah": {
+          "name": "alamat_wilayah",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kantor_id": {
+          "name": "kantor_id",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_kantor": {
+          "name": "nama_kantor",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status_approve": {
+          "name": "status_approve",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_propinsi": {
+          "name": "nama_propinsi",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_kabupaten": {
+          "name": "nama_kabupaten",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "camatid": {
+          "name": "camatid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_kecamatan": {
+          "name": "nama_kecamatan",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "desaid": {
+          "name": "desaid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_desa": {
+          "name": "nama_desa",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "user_insert": {
+          "name": "user_insert",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_insert": {
+          "name": "date_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_update": {
+          "name": "user_update",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_update": {
+          "name": "date_update",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ajis_wilayah_kantor_idx": {
+          "name": "ajis_wilayah_kantor_idx",
+          "columns": [
+            {
+              "expression": "kantor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "aktif",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ajis_wilayah_pembinaan_kantor_id_ajis_kantor_oid_fk": {
+          "name": "ajis_wilayah_pembinaan_kantor_id_ajis_kantor_oid_fk",
+          "tableFrom": "ajis_wilayah_pembinaan",
+          "tableTo": "ajis_kantor",
+          "columnsFrom": [
+            "kantor_id"
+          ],
+          "columnsTo": [
+            "oid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ajis_wilayah_pembinaan_nama_wilayah_unique": {
+          "name": "ajis_wilayah_pembinaan_nama_wilayah_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nama_wilayah"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ajis_wilayah_status_approve_check": {
+          "name": "ajis_wilayah_status_approve_check",
+          "value": "status_approve IS NULL OR status_approve IN ('y', 't')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sdm_penugasan": {
+      "name": "sdm_penugasan",
+      "schema": "",
+      "columns": {
+        "id_penugasan": {
+          "name": "id_penugasan",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "id_sdm": {
+          "name": "id_sdm",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id_wilayah_pembinaan": {
+          "name": "id_wilayah_pembinaan",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kantor_id": {
+          "name": "kantor_id",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_fungsi_struktur": {
+          "name": "id_fungsi_struktur",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keaktifan_edukasi": {
+          "name": "keaktifan_edukasi",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_insert": {
+          "name": "user_insert",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_insert": {
+          "name": "date_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_update": {
+          "name": "user_update",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_update": {
+          "name": "date_update",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "sdm_penugasan_sdm_idx": {
+          "name": "sdm_penugasan_sdm_idx",
+          "columns": [
+            {
+              "expression": "id_sdm",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sdm_penugasan_wilayah_idx": {
+          "name": "sdm_penugasan_wilayah_idx",
+          "columns": [
+            {
+              "expression": "id_wilayah_pembinaan",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kantor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sdm_penugasan_id_sdm_sdm_wilayah_id_sdm_fk": {
+          "name": "sdm_penugasan_id_sdm_sdm_wilayah_id_sdm_fk",
+          "tableFrom": "sdm_penugasan",
+          "tableTo": "sdm_wilayah",
+          "columnsFrom": [
+            "id_sdm"
+          ],
+          "columnsTo": [
+            "id_sdm"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sdm_penugasan_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk": {
+          "name": "sdm_penugasan_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk",
+          "tableFrom": "sdm_penugasan",
+          "tableTo": "ajis_wilayah_pembinaan",
+          "columnsFrom": [
+            "id_wilayah_pembinaan"
+          ],
+          "columnsTo": [
+            "id_wilayah_pembinaan"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sdm_penugasan_kantor_id_ajis_kantor_oid_fk": {
+          "name": "sdm_penugasan_kantor_id_ajis_kantor_oid_fk",
+          "tableFrom": "sdm_penugasan",
+          "tableTo": "ajis_kantor",
+          "columnsFrom": [
+            "kantor_id"
+          ],
+          "columnsTo": [
+            "oid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sdm_penugasan_id_fungsi_struktur_ref_fungsi_struktur_id_fungsi_struktur_fk": {
+          "name": "sdm_penugasan_id_fungsi_struktur_ref_fungsi_struktur_id_fungsi_struktur_fk",
+          "tableFrom": "sdm_penugasan",
+          "tableTo": "ref_fungsi_struktur",
+          "columnsFrom": [
+            "id_fungsi_struktur"
+          ],
+          "columnsTo": [
+            "id_fungsi_struktur"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "sdm_penugasan_keaktifan_check": {
+          "name": "sdm_penugasan_keaktifan_check",
+          "value": "keaktifan_edukasi IS NULL OR keaktifan_edukasi IN ('y', 't')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sdm_wilayah": {
+      "name": "sdm_wilayah",
+      "schema": "",
+      "columns": {
+        "id_sdm": {
+          "name": "id_sdm",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nik": {
+          "name": "nik",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_lengkap": {
+          "name": "nama_lengkap",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenis_kelamin": {
+          "name": "jenis_kelamin",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_propinsi": {
+          "name": "nama_propinsi",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_kabupaten": {
+          "name": "nama_kabupaten",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "camatid": {
+          "name": "camatid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_kecamatan": {
+          "name": "nama_kecamatan",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "desaid": {
+          "name": "desaid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nama_desa": {
+          "name": "nama_desa",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenjang_pendidikan": {
+          "name": "jenjang_pendidikan",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_bergabung": {
+          "name": "tgl_bergabung",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tgl_keluar": {
+          "name": "tgl_keluar",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telp": {
+          "name": "telp",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hp": {
+          "name": "hp",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keterangan": {
+          "name": "keterangan",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keaktifan_edukasi": {
+          "name": "keaktifan_edukasi",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "foto": {
+          "name": "foto",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "user_insert": {
+          "name": "user_insert",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_insert": {
+          "name": "date_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_update": {
+          "name": "user_update",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_update": {
+          "name": "date_update",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "sdm_wilayah_nama_trgm_idx": {
+          "name": "sdm_wilayah_nama_trgm_idx",
+          "columns": [
+            {
+              "expression": "nama_lengkap",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sdm_wilayah_nik_unique": {
+          "name": "sdm_wilayah_nik_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nik"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "sdm_wilayah_jenis_kelamin_check": {
+          "name": "sdm_wilayah_jenis_kelamin_check",
+          "value": "jenis_kelamin IS NULL OR jenis_kelamin IN ('l', 'p')"
+        },
+        "sdm_wilayah_keaktifan_check": {
+          "name": "sdm_wilayah_keaktifan_check",
+          "value": "keaktifan_edukasi IS NULL OR keaktifan_edukasi IN ('y', 't')"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

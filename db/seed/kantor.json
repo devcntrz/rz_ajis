@@ -1,0 +1,54 @@
+{
+  "table": "kantor",
+  "source": "kantor",
+  "conflict": "(oid)",
+  "rows": [
+    {
+      "oid": "99-003",
+      "kantor": "RZ - Yogyakarta",
+      "aktif": true,
+      "omid": "003001",
+      "external_ids": {
+        "id_kantor": "3",
+        "id_kantor_postgree": "0"
+      }
+    },
+    {
+      "oid": "98-002",
+      "kantor": "RZ - Bandung",
+      "aktif": true,
+      "omid": "002001",
+      "external_ids": {
+        "id_kantor": "2",
+        "id_kantor_postgree": "0"
+      }
+    },
+    {
+      "oid": "98-001",
+      "kantor": "Corporate Partnership",
+      "omid": "003002",
+      "external_ids": {
+        "id_kantor": "253",
+        "id_kantor_postgree": "0"
+      }
+    },
+    {
+      "oid": "396",
+      "kantor": "RZ - Digital Fundraising",
+      "omid": "396",
+      "external_ids": {
+        "id_kantor": "396",
+        "id_kantor_postgree": "0"
+      }
+    },
+    {
+      "oid": "374",
+      "kantor": "RZ - Priority",
+      "omid": "374",
+      "external_ids": {
+        "id_kantor": "374",
+        "id_kantor_postgree": "0"
+      }
+    }
+  ]
+}

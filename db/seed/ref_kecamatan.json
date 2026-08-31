@@ -1,0 +1,43 @@
+{
+  "table": "ref_kecamatan",
+  "source": "ref_kecamatan",
+  "conflict": "(camatid)",
+  "rows": [
+    {
+      "camatid": "Kab Pale",
+      "nama_kecamatan": "Ilir Timur Tiga",
+      "kodepos": "30111 - 30",
+      "kabid": "Kab",
+      "aktif": true,
+      "updated": "1899-11-29 16:52:48"
+    },
+    {
+      "camatid": "927105",
+      "nama_kecamatan": "Sorong Utara",
+      "kabid": "9271",
+      "aktif": true,
+      "updated": "2011-04-20 17:00:00"
+    },
+    {
+      "camatid": "927104",
+      "nama_kecamatan": "Sorong Kepulauan",
+      "kabid": "9271",
+      "aktif": true,
+      "updated": "2011-04-20 17:00:00"
+    },
+    {
+      "camatid": "927103",
+      "nama_kecamatan": "Sorong Barat",
+      "kabid": "9271",
+      "aktif": true,
+      "updated": "2011-04-20 17:00:00"
+    },
+    {
+      "camatid": "927102",
+      "nama_kecamatan": "Sorong Timur",
+      "kabid": "9271",
+      "aktif": true,
+      "updated": "2011-04-20 17:00:00"
+    }
+  ]
+}

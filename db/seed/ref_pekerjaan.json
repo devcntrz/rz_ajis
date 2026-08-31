@@ -1,0 +1,32 @@
+{
+  "table": "ref_pekerjaan",
+  "source": "pekerjaan",
+  "conflict": "(kerjaid)",
+  "rows": [
+    {
+      "kerjaid": "wrg",
+      "pekerjaan": "Penjaga Warung",
+      "aktif": true
+    },
+    {
+      "kerjaid": "TRS",
+      "pekerjaan": "Tukang Reparasi/ Tukang Servis",
+      "aktif": true
+    },
+    {
+      "kerjaid": "TP",
+      "pekerjaan": "Tukang Pijat",
+      "aktif": true
+    },
+    {
+      "kerjaid": "TKY",
+      "pekerjaan": "Tukang Kayu",
+      "aktif": true
+    },
+    {
+      "kerjaid": "TKW",
+      "pekerjaan": "Tenaga Kerja Wanita",
+      "aktif": true
+    }
+  ]
+}

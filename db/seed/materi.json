@@ -1,0 +1,42 @@
+{
+  "table": "materi",
+  "source": "materi",
+  "conflict": "(id_materi)",
+  "rows": [
+    {
+      "id_materi": "7194",
+      "materi": "Aku Cinta Islam dan Siap Jadi Muslim Hebat",
+      "tanggal": "2025-12-20 17:00:00",
+      "semesterid": "24",
+      "oid": "09-198"
+    },
+    {
+      "id_materi": "7193",
+      "materi": "Menjadi Pemuda Hebat di Zaman Sekarang",
+      "tanggal": "2025-11-22 17:00:00",
+      "semesterid": "24",
+      "oid": "09-198"
+    },
+    {
+      "id_materi": "7192",
+      "materi": "Menghindari Dosa Kecil dan Besar",
+      "tanggal": "2025-10-18 17:00:00",
+      "semesterid": "24",
+      "oid": "09-198"
+    },
+    {
+      "id_materi": "7191",
+      "materi": "Teman Baik, Teman Buruk",
+      "tanggal": "2025-09-20 17:00:00",
+      "semesterid": "24",
+      "oid": "09-198"
+    },
+    {
+      "id_materi": "7190",
+      "materi": "Bersikap Baik kepada Orang Tua dan Guru",
+      "tanggal": "2025-08-23 17:00:00",
+      "semesterid": "24",
+      "oid": "09-198"
+    }
+  ]
+}

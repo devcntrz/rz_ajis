@@ -1,0 +1,44 @@
+{
+  "table": "map_kantor",
+  "source": "hcm_kantor",
+  "conflict": "(id_kantor_zains)",
+  "rows": [
+    {
+      "id_kantor_zains": "311001",
+      "nama_kantor": "RZ - Palmerah",
+      "aktif": true,
+      "id_kantor_level": 0,
+      "kantor_id": "18-311",
+      "coa": "101.01.002.611"
+    },
+    {
+      "id_kantor_zains": "306001",
+      "nama_kantor": "RZ - Regional Overseas",
+      "aktif": true,
+      "id_kantor_level": 0,
+      "kantor_id": "14-306"
+    },
+    {
+      "id_kantor_zains": "305001",
+      "nama_kantor": "RZ - Online Fundraising",
+      "aktif": true,
+      "id_kantor_level": 0,
+      "kantor_id": "14-305"
+    },
+    {
+      "id_kantor_zains": "304001",
+      "nama_kantor": "RZ - Strategic",
+      "aktif": true,
+      "id_kantor_level": 0,
+      "kantor_id": "14-304"
+    },
+    {
+      "id_kantor_zains": "303001",
+      "nama_kantor": "RZI - Kantor MTT",
+      "aktif": true,
+      "id_kantor_level": 0,
+      "kantor_id": "14-303",
+      "coa": "NULL"
+    }
+  ]
+}

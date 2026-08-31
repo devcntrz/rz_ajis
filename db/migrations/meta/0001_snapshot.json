@@ -1,0 +1,628 @@
+{
+  "id": "ed4eff47-0148-48c5-b1c5-5731cd91f88c",
+  "prevId": "788ce7d1-ab01-4a0e-934b-62a6adc14231",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.ref_desa": {
+      "name": "ref_desa",
+      "schema": "",
+      "columns": {
+        "desaid": {
+          "name": "desaid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nama_desa": {
+          "name": "nama_desa",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kelurahan": {
+          "name": "kelurahan",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "camatid": {
+          "name": "camatid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nomor_induk_desa": {
+          "name": "nomor_induk_desa",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ref_desa_camatid_idx": {
+          "name": "ref_desa_camatid_idx",
+          "columns": [
+            {
+              "expression": "camatid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ref_desa_camatid_ref_kecamatan_camatid_fk": {
+          "name": "ref_desa_camatid_ref_kecamatan_camatid_fk",
+          "tableFrom": "ref_desa",
+          "tableTo": "ref_kecamatan",
+          "columnsFrom": [
+            "camatid"
+          ],
+          "columnsTo": [
+            "camatid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_fungsi_struktur": {
+      "name": "ref_fungsi_struktur",
+      "schema": "",
+      "columns": {
+        "id_fungsi_struktur": {
+          "name": "id_fungsi_struktur",
+          "type": "varchar(16)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kode_fungsi": {
+          "name": "kode_fungsi",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nama_fungsi_struktur": {
+          "name": "nama_fungsi_struktur",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "user_insert": {
+          "name": "user_insert",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_insert": {
+          "name": "date_insert",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_update": {
+          "name": "user_update",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_update": {
+          "name": "date_update",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ref_fungsi_struktur_nama_fungsi_struktur_unique": {
+          "name": "ref_fungsi_struktur_nama_fungsi_struktur_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nama_fungsi_struktur"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_kabupaten": {
+      "name": "ref_kabupaten",
+      "schema": "",
+      "columns": {
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kabupaten": {
+          "name": "kabupaten",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kota": {
+          "name": "kota",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ibukota": {
+          "name": "ibukota",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid": {
+          "name": "oid",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "lat": {
+          "name": "lat",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lng": {
+          "name": "lng",
+          "type": "numeric(10, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated": {
+          "name": "updated",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ref_kabupaten_propid_idx": {
+          "name": "ref_kabupaten_propid_idx",
+          "columns": [
+            {
+              "expression": "propid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ref_kabupaten_propid_ref_propinsi_propid_fk": {
+          "name": "ref_kabupaten_propid_ref_propinsi_propid_fk",
+          "tableFrom": "ref_kabupaten",
+          "tableTo": "ref_propinsi",
+          "columnsFrom": [
+            "propid"
+          ],
+          "columnsTo": [
+            "propid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_kecamatan": {
+      "name": "ref_kecamatan",
+      "schema": "",
+      "columns": {
+        "camatid": {
+          "name": "camatid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nama_kecamatan": {
+          "name": "nama_kecamatan",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kodepos": {
+          "name": "kodepos",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kabid": {
+          "name": "kabid",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "updated": {
+          "name": "updated",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "ref_kecamatan_kabid_idx": {
+          "name": "ref_kecamatan_kabid_idx",
+          "columns": [
+            {
+              "expression": "kabid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ref_kecamatan_kabid_ref_kabupaten_kabid_fk": {
+          "name": "ref_kecamatan_kabid_ref_kabupaten_kabid_fk",
+          "tableFrom": "ref_kecamatan",
+          "tableTo": "ref_kabupaten",
+          "columnsFrom": [
+            "kabid"
+          ],
+          "columnsTo": [
+            "kabid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_pekerjaan": {
+      "name": "ref_pekerjaan",
+      "schema": "",
+      "columns": {
+        "kerjaid": {
+          "name": "kerjaid",
+          "type": "varchar(3)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "pekerjaan": {
+          "name": "pekerjaan",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ref_propinsi": {
+      "name": "ref_propinsi",
+      "schema": "",
+      "columns": {
+        "propid": {
+          "name": "propid",
+          "type": "varchar(4)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "propinsi": {
+          "name": "propinsi",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ibukota": {
+          "name": "ibukota",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ajis_kantor": {
+      "name": "ajis_kantor",
+      "schema": "",
+      "columns": {
+        "oid": {
+          "name": "oid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kantor": {
+          "name": "kantor",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_telp": {
+          "name": "no_telp",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid_parent": {
+          "name": "oid_parent",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid_parent_second": {
+          "name": "oid_parent_second",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jenis": {
+          "name": "jenis",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_ids": {
+          "name": "external_ids",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kantor": {
+      "name": "kantor",
+      "schema": "",
+      "columns": {
+        "oid": {
+          "name": "oid",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kantor": {
+          "name": "kantor",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oid_parent": {
+          "name": "oid_parent",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "level": {
+          "name": "level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "id_office": {
+          "name": "id_office",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "omid": {
+          "name": "omid",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "external_ids": {
+          "name": "external_ids",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.map_kantor": {
+      "name": "map_kantor",
+      "schema": "",
+      "columns": {
+        "id_kantor_zains": {
+          "name": "id_kantor_zains",
+          "type": "varchar(10)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kantor_id": {
+          "name": "kantor_id",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nama_kantor": {
+          "name": "nama_kantor",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_kantor_parent": {
+          "name": "id_kantor_parent",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_kantor_level": {
+          "name": "id_kantor_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coa": {
+          "name": "coa",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coa_outlet": {
+          "name": "coa_outlet",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aktif": {
+          "name": "aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
