@@ -2,19 +2,18 @@
  * db/schema/survey.ts — home survey (PRD §4 menu 2) and CAJ data lending (menu 4).
  *
  * Conversions:
- *   · ajis_survey PK (id_survey, id_anak) → id_survey bigserial (§6.4)
+ *   · ajis_survey PK (id_survey, id_anak) → id_survey identity PK (§6.4)
  *   · enum('tidak','ada') bantuan_rutin_dari_lembaga_lain → boolean (§6.2 row 4)
  *   · enum('yatim','piatu','dhuafa') asnaf_anak → varchar + CHECK
  *   · enum('y','n') status_pinjam / status_terpasangkan / cancel → boolean (§6.2)
  *   · double biaya_pendidikan / jml_bantuan → numeric (§6.1)
  *   · KEY nama_lengkap(1) was a one-character prefix index, effectively useless →
  *     GIN trigram (§7.1)
- *   · ajis_peminjam PK (id, id_peminjam) → bigserial, id_peminjam UNIQUE
+ *   · ajis_peminjam PK (id, id_peminjam) → identity PK, id_peminjam UNIQUE
  *   · ajis_batas_expired_peminjaman → an app_setting row (§6.5)
  */
 import { sql } from 'drizzle-orm';
 import {
-  bigserial,
   boolean,
   date,
   index,
@@ -23,13 +22,13 @@ import {
   text,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { audit, checkOneOfNullable, externalIds, kantorId, money } from './_shared';
+import { audit, checkOneOfNullable, externalIds, kantorId, money, pk } from './_shared';
 import { ajisAnak } from './anak';
 
 export const ajisSurvey = pgTable(
   'ajis_survey',
   {
-    idSurvey: bigserial('id_survey', { mode: 'number' }).primaryKey(),
+    idSurvey: pk('id_survey'),
     tglSurvey: date('tgl_survey'),
     petugasSurvey: varchar('petugas_survey', { length: 30 }),
     idAnak: varchar('id_anak', { length: 25 })
@@ -112,7 +111,7 @@ export const ajisSurvey = pgTable(
 export const ajisPeminjam = pgTable(
   'ajis_peminjam',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     idPeminjam: varchar('id_peminjam', { length: 50 }).notNull().unique(),
     namaLengkap: varchar('nama_lengkap', { length: 100 }),
     jabatan: varchar('jabatan', { length: 25 }),
@@ -129,7 +128,7 @@ export const ajisPeminjam = pgTable(
 export const ajisPeminjamanAnak = pgTable(
   'ajis_peminjaman_anak',
   {
-    idPeminjaman: bigserial('id_peminjaman', { mode: 'number' }).primaryKey(),
+    idPeminjaman: pk('id_peminjaman'),
     idPeminjam: varchar('id_peminjam', { length: 50 }).references(() => ajisPeminjam.idPeminjam),
     namaPeminjam: varchar('nama_peminjam', { length: 100 }),
     idAnak: varchar('id_anak', { length: 25 }).references(() => ajisAnak.idAnak),

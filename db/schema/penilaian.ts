@@ -3,7 +3,7 @@
  *
  * Conversions:
  *   · PK (id_anak, semesterid, aspek) was >250 bytes wide and the table had NO
- *     secondary index at all → bigserial PK, that triple as UNIQUE, plus the
+ *     secondary index at all → identity PK, that triple as UNIQUE, plus the
  *     three §7.2 indexes
  *   · tampil int → boolean
  *   · id_item_penilaian is a real integer FK now; ajis_view_penilaian used to
@@ -12,7 +12,6 @@
  */
 import {
   bigint,
-  bigserial,
   boolean,
   index,
   pgTable,
@@ -22,14 +21,14 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { externalIds, kantorId } from './_shared';
+import { externalIds, kantorId, pk } from './_shared';
 import { ajisAnak } from './anak';
 import { ajisItemPenilaian, ajisSemester } from './setting';
 
 export const ajisPenilaian = pgTable(
   'ajis_penilaian',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     idAnak: varchar('id_anak', { length: 25 })
       .notNull()
       .references(() => ajisAnak.idAnak),

@@ -1,6 +1,6 @@
 {
-  "id": "8c34ecc1-3cbe-4f12-8696-3de822a50b0d",
-  "prevId": "6b6a5307-d302-481b-a086-3b0e5e208ac2",
+  "id": "92004c8b-1d97-4388-80f4-86f884486e37",
+  "prevId": "36c6d5fd-0af2-4f49-81d5-d4c2a52b8227",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -8,10 +8,27 @@
       "name": "ref_desa",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_desa_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "desaid": {
           "name": "desaid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "nama_desa": {
@@ -71,28 +88,36 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ref_desa_camatid_ref_kecamatan_camatid_fk": {
           "name": "ref_desa_camatid_ref_kecamatan_camatid_fk",
           "tableFrom": "ref_desa",
-          "tableTo": "ref_kecamatan",
           "columnsFrom": [
             "camatid"
           ],
+          "tableTo": "ref_kecamatan",
           "columnsTo": [
             "camatid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_desa_desaid_unique": {
+          "name": "ref_desa_desaid_unique",
+          "columns": [
+            "desaid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -103,9 +128,20 @@
       "columns": {
         "id_fungsi_struktur": {
           "name": "id_fungsi_struktur",
-          "type": "varchar(16)",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ref_fungsi_struktur_id_fungsi_struktur_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "kode_fungsi": {
           "name": "kode_fungsi",
@@ -157,10 +193,10 @@
       "uniqueConstraints": {
         "ref_fungsi_struktur_nama_fungsi_struktur_unique": {
           "name": "ref_fungsi_struktur_nama_fungsi_struktur_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "nama_fungsi_struktur"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -171,10 +207,27 @@
       "name": "ref_kabupaten",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_kabupaten_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "kabid": {
           "name": "kabid",
           "type": "varchar(4)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "propid": {
@@ -246,28 +299,36 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ref_kabupaten_propid_ref_propinsi_propid_fk": {
           "name": "ref_kabupaten_propid_ref_propinsi_propid_fk",
           "tableFrom": "ref_kabupaten",
-          "tableTo": "ref_propinsi",
           "columnsFrom": [
             "propid"
           ],
+          "tableTo": "ref_propinsi",
           "columnsTo": [
             "propid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_kabupaten_kabid_unique": {
+          "name": "ref_kabupaten_kabid_unique",
+          "columns": [
+            "kabid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -276,10 +337,27 @@
       "name": "ref_kecamatan",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_kecamatan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "camatid": {
           "name": "camatid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "nama_kecamatan": {
@@ -326,28 +404,36 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ref_kecamatan_kabid_ref_kabupaten_kabid_fk": {
           "name": "ref_kecamatan_kabid_ref_kabupaten_kabid_fk",
           "tableFrom": "ref_kecamatan",
-          "tableTo": "ref_kabupaten",
           "columnsFrom": [
             "kabid"
           ],
+          "tableTo": "ref_kabupaten",
           "columnsTo": [
             "kabid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_kecamatan_camatid_unique": {
+          "name": "ref_kecamatan_camatid_unique",
+          "columns": [
+            "camatid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -356,10 +442,27 @@
       "name": "ref_pekerjaan",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_pekerjaan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "kerjaid": {
           "name": "kerjaid",
           "type": "varchar(3)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "pekerjaan": {
@@ -379,7 +482,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_pekerjaan_kerjaid_unique": {
+          "name": "ref_pekerjaan_kerjaid_unique",
+          "columns": [
+            "kerjaid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -388,10 +499,27 @@
       "name": "ref_propinsi",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_propinsi_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "propid": {
           "name": "propid",
           "type": "varchar(4)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "propinsi": {
@@ -417,7 +545,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_propinsi_propid_unique": {
+          "name": "ref_propinsi_propid_unique",
+          "columns": [
+            "propid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -426,10 +562,27 @@
       "name": "ajis_kantor",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ajis_kantor_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "oid": {
           "name": "oid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "kantor": {
@@ -478,7 +631,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ajis_kantor_oid_unique": {
+          "name": "ajis_kantor_oid_unique",
+          "columns": [
+            "oid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -487,10 +648,27 @@
       "name": "kantor",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "kantor_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "oid": {
           "name": "oid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "kantor": {
@@ -546,7 +724,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "kantor_oid_unique": {
+          "name": "kantor_oid_unique",
+          "columns": [
+            "oid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -555,10 +741,27 @@
       "name": "map_kantor",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "map_kantor_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "id_kantor_zains": {
           "name": "id_kantor_zains",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "kantor_id": {
@@ -608,7 +811,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "map_kantor_id_kantor_zains_unique": {
+          "name": "map_kantor_id_kantor_zains_unique",
+          "columns": [
+            "id_kantor_zains"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -619,9 +830,20 @@
       "columns": {
         "id_harga": {
           "name": "id_harga",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_harga_id_harga_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "program_donasi": {
           "name": "program_donasi",
@@ -690,9 +912,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -708,9 +930,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_item_hafalan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "jenis": {
           "name": "jenis",
@@ -737,9 +970,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -755,9 +988,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_item_penilaian_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "item_penilaian": {
           "name": "item_penilaian",
@@ -805,9 +1049,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_semester_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "semesterid": {
           "name": "semesterid",
@@ -979,9 +1234,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_semester_onprogress_idx": {
           "name": "ajis_semester_onprogress_idx",
@@ -994,10 +1249,10 @@
             }
           ],
           "isUnique": false,
-          "where": "onprogress",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "onprogress",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -1005,10 +1260,10 @@
       "uniqueConstraints": {
         "ajis_semester_semesterid_unique": {
           "name": "ajis_semester_semesterid_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "semesterid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1019,10 +1274,27 @@
       "name": "app_setting",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "app_setting_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "key": {
           "name": "key",
           "type": "varchar(100)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "value": {
@@ -1048,7 +1320,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "app_setting_key_unique": {
+          "name": "app_setting_key_unique",
+          "columns": [
+            "key"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1059,9 +1339,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "setting_program_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_program": {
           "name": "id_program",
@@ -1261,9 +1552,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -1271,10 +1562,10 @@
       "uniqueConstraints": {
         "setting_program_id_program_unique": {
           "name": "setting_program_id_program_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "id_program"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1300,9 +1591,20 @@
       "columns": {
         "id_group_user": {
           "name": "id_group_user",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_group_user_id_group_user_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "group_user": {
           "name": "group_user",
@@ -1330,10 +1632,10 @@
       "uniqueConstraints": {
         "ajis_group_user_group_user_unique": {
           "name": "ajis_group_user_group_user_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "group_user"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1346,9 +1648,20 @@
       "columns": {
         "id_user": {
           "name": "id_user",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_user_id_user_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "username": {
           "name": "username",
@@ -1436,9 +1749,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_user_aktif_idx": {
           "name": "ajis_user_aktif_idx",
@@ -1451,42 +1764,42 @@
             }
           ],
           "isUnique": false,
-          "where": "aktif",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "aktif",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_user_id_group_user_ajis_group_user_id_group_user_fk": {
           "name": "ajis_user_id_group_user_ajis_group_user_id_group_user_fk",
           "tableFrom": "ajis_user",
-          "tableTo": "ajis_group_user",
           "columnsFrom": [
             "id_group_user"
           ],
+          "tableTo": "ajis_group_user",
           "columnsTo": [
             "id_group_user"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_user_username_unique": {
           "name": "ajis_user_username_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "username"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "ajis_user_email_unique": {
           "name": "ajis_user_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1497,6 +1810,23 @@
       "name": "ajis_user_akses",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ajis_user_akses_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "userid": {
           "name": "userid",
           "type": "bigint",
@@ -1522,36 +1852,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_user_akses_userid_ajis_user_id_user_fk": {
           "name": "ajis_user_akses_userid_ajis_user_id_user_fk",
           "tableFrom": "ajis_user_akses",
-          "tableTo": "ajis_user",
           "columnsFrom": [
             "userid"
           ],
+          "tableTo": "ajis_user",
           "columnsTo": [
             "id_user"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
-      "compositePrimaryKeys": {
-        "ajis_user_akses_userid_levelid_pk": {
-          "name": "ajis_user_akses_userid_levelid_pk",
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ajis_user_akses_natural_uq": {
+          "name": "ajis_user_akses_natural_uq",
           "columns": [
             "userid",
             "levelid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1562,9 +1893,20 @@
       "columns": {
         "id_wilayah_pembinaan": {
           "name": "id_wilayah_pembinaan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_wilayah_pembinaan_id_wilayah_pembinaan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "nama_wilayah": {
           "name": "nama_wilayah",
@@ -1688,35 +2030,35 @@
             }
           ],
           "isUnique": false,
-          "where": "aktif",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "aktif",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_wilayah_pembinaan_kantor_id_ajis_kantor_oid_fk": {
           "name": "ajis_wilayah_pembinaan_kantor_id_ajis_kantor_oid_fk",
           "tableFrom": "ajis_wilayah_pembinaan",
-          "tableTo": "ajis_kantor",
           "columnsFrom": [
             "kantor_id"
           ],
+          "tableTo": "ajis_kantor",
           "columnsTo": [
             "oid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_wilayah_pembinaan_nama_wilayah_unique": {
           "name": "ajis_wilayah_pembinaan_nama_wilayah_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "nama_wilayah"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1734,9 +2076,20 @@
       "columns": {
         "id_penugasan": {
           "name": "id_penugasan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "sdm_penugasan_id_penugasan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_sdm": {
           "name": "id_sdm",
@@ -1758,7 +2111,7 @@
         },
         "id_fungsi_struktur": {
           "name": "id_fungsi_struktur",
-          "type": "varchar(16)",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -1805,9 +2158,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "sdm_penugasan_wilayah_idx": {
           "name": "sdm_penugasan_wilayah_idx",
@@ -1826,63 +2179,63 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "sdm_penugasan_id_sdm_sdm_wilayah_id_sdm_fk": {
           "name": "sdm_penugasan_id_sdm_sdm_wilayah_id_sdm_fk",
           "tableFrom": "sdm_penugasan",
-          "tableTo": "sdm_wilayah",
           "columnsFrom": [
             "id_sdm"
           ],
+          "tableTo": "sdm_wilayah",
           "columnsTo": [
             "id_sdm"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "sdm_penugasan_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk": {
           "name": "sdm_penugasan_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk",
           "tableFrom": "sdm_penugasan",
-          "tableTo": "ajis_wilayah_pembinaan",
           "columnsFrom": [
             "id_wilayah_pembinaan"
           ],
+          "tableTo": "ajis_wilayah_pembinaan",
           "columnsTo": [
             "id_wilayah_pembinaan"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "sdm_penugasan_kantor_id_ajis_kantor_oid_fk": {
           "name": "sdm_penugasan_kantor_id_ajis_kantor_oid_fk",
           "tableFrom": "sdm_penugasan",
-          "tableTo": "ajis_kantor",
           "columnsFrom": [
             "kantor_id"
           ],
+          "tableTo": "ajis_kantor",
           "columnsTo": [
             "oid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "sdm_penugasan_id_fungsi_struktur_ref_fungsi_struktur_id_fungsi_struktur_fk": {
           "name": "sdm_penugasan_id_fungsi_struktur_ref_fungsi_struktur_id_fungsi_struktur_fk",
           "tableFrom": "sdm_penugasan",
-          "tableTo": "ref_fungsi_struktur",
           "columnsFrom": [
             "id_fungsi_struktur"
           ],
+          "tableTo": "ref_fungsi_struktur",
           "columnsTo": [
             "id_fungsi_struktur"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1902,9 +2255,20 @@
       "columns": {
         "id_sdm": {
           "name": "id_sdm",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "sdm_wilayah_id_sdm_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "nik": {
           "name": "nik",
@@ -2077,9 +2441,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -2087,10 +2451,10 @@
       "uniqueConstraints": {
         "sdm_wilayah_nik_unique": {
           "name": "sdm_wilayah_nik_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "nik"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2110,10 +2474,27 @@
       "name": "ajis_anak",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ajis_anak_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "id_anak": {
           "name": "id_anak",
           "type": "varchar(25)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "nik": {
@@ -2830,9 +3211,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_anak_caj_idx": {
           "name": "ajis_anak_caj_idx",
@@ -2851,10 +3232,10 @@
             }
           ],
           "isUnique": false,
-          "where": "status_anak_juara = 'caj' AND aktif",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "status_anak_juara = 'caj' AND aktif",
+          "concurrently": false
         },
         "ajis_anak_nia_rfo_book_idx": {
           "name": "ajis_anak_nia_rfo_book_idx",
@@ -2867,9 +3248,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_anak_sdm_idx": {
           "name": "ajis_anak_sdm_idx",
@@ -2882,9 +3263,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_anak_nama_trgm_idx": {
           "name": "ajis_anak_nama_trgm_idx",
@@ -2898,60 +3279,67 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_anak_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk": {
           "name": "ajis_anak_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk",
           "tableFrom": "ajis_anak",
-          "tableTo": "ajis_wilayah_pembinaan",
           "columnsFrom": [
             "id_wilayah_pembinaan"
           ],
+          "tableTo": "ajis_wilayah_pembinaan",
           "columnsTo": [
             "id_wilayah_pembinaan"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_anak_kantor_id_ajis_kantor_oid_fk": {
           "name": "ajis_anak_kantor_id_ajis_kantor_oid_fk",
           "tableFrom": "ajis_anak",
-          "tableTo": "ajis_kantor",
           "columnsFrom": [
             "kantor_id"
           ],
+          "tableTo": "ajis_kantor",
           "columnsTo": [
             "oid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_anak_id_sdm_sdm_wilayah_id_sdm_fk": {
           "name": "ajis_anak_id_sdm_sdm_wilayah_id_sdm_fk",
           "tableFrom": "ajis_anak",
-          "tableTo": "sdm_wilayah",
           "columnsFrom": [
             "id_sdm"
           ],
+          "tableTo": "sdm_wilayah",
           "columnsTo": [
             "id_sdm"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "ajis_anak_id_anak_unique": {
+          "name": "ajis_anak_id_anak_unique",
+          "columns": [
+            "id_anak"
+          ],
+          "nullsNotDistinct": false
+        },
         "ajis_anak_nik_unique": {
           "name": "ajis_anak_nik_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "nik"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2977,9 +3365,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_data_prestasi_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -3079,24 +3478,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_data_prestasi_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_data_prestasi_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_data_prestasi",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3111,9 +3510,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_opname_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "tahun": {
           "name": "tahun",
@@ -3249,27 +3659,6 @@
         }
       },
       "indexes": {
-        "ajis_opname_natural_idx": {
-          "name": "ajis_opname_natural_idx",
-          "columns": [
-            {
-              "expression": "tahun",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id_pemasangan_baru",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "ajis_opname_pemasangan_idx": {
           "name": "ajis_opname_pemasangan_idx",
           "columns": [
@@ -3281,9 +3670,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_opname_saldo_habis_idx": {
           "name": "ajis_opname_saldo_habis_idx",
@@ -3302,29 +3691,38 @@
             }
           ],
           "isUnique": false,
-          "where": "saldo_akhir_genap <= 0",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "saldo_akhir_genap <= 0",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_opname_id_pemasangan_baru_ajis_pemasangan_id_pemasangan_baru_fk": {
           "name": "ajis_opname_id_pemasangan_baru_ajis_pemasangan_id_pemasangan_baru_fk",
           "tableFrom": "ajis_opname",
-          "tableTo": "ajis_pemasangan",
           "columnsFrom": [
             "id_pemasangan_baru"
           ],
+          "tableTo": "ajis_pemasangan",
           "columnsTo": [
             "id_pemasangan_baru"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ajis_opname_natural_uq": {
+          "name": "ajis_opname_natural_uq",
+          "columns": [
+            "tahun",
+            "id_pemasangan_baru"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3335,9 +3733,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_pemasangan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pemasangan_baru": {
           "name": "id_pemasangan_baru",
@@ -3673,9 +4082,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_aktif_idx": {
           "name": "ajis_pemasangan_aktif_idx",
@@ -3694,10 +4103,10 @@
             }
           ],
           "isUnique": false,
-          "where": "status_pasangan",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "status_pasangan",
+          "concurrently": false
         },
         "ajis_pemasangan_anak_idx": {
           "name": "ajis_pemasangan_anak_idx",
@@ -3716,9 +4125,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_donatur_idx": {
           "name": "ajis_pemasangan_donatur_idx",
@@ -3737,9 +4146,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_nia_rfo_idx": {
           "name": "ajis_pemasangan_nia_rfo_idx",
@@ -3758,9 +4167,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_keyset_idx": {
           "name": "ajis_pemasangan_keyset_idx",
@@ -3779,9 +4188,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_nama_anak_trgm_idx": {
           "name": "ajis_pemasangan_nama_anak_trgm_idx",
@@ -3795,9 +4204,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_nama_donatur_trgm_idx": {
           "name": "ajis_pemasangan_nama_donatur_trgm_idx",
@@ -3811,73 +4220,73 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_pemasangan_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_pemasangan_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_pemasangan",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_pemasangan_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk": {
           "name": "ajis_pemasangan_id_wilayah_pembinaan_ajis_wilayah_pembinaan_id_wilayah_pembinaan_fk",
           "tableFrom": "ajis_pemasangan",
-          "tableTo": "ajis_wilayah_pembinaan",
           "columnsFrom": [
             "id_wilayah_pembinaan"
           ],
+          "tableTo": "ajis_wilayah_pembinaan",
           "columnsTo": [
             "id_wilayah_pembinaan"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_pemasangan_kantor_id_ajis_kantor_oid_fk": {
           "name": "ajis_pemasangan_kantor_id_ajis_kantor_oid_fk",
           "tableFrom": "ajis_pemasangan",
-          "tableTo": "ajis_kantor",
           "columnsFrom": [
             "kantor_id"
           ],
+          "tableTo": "ajis_kantor",
           "columnsTo": [
             "oid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_pemasangan_id_sdm_sdm_wilayah_id_sdm_fk": {
           "name": "ajis_pemasangan_id_sdm_sdm_wilayah_id_sdm_fk",
           "tableFrom": "ajis_pemasangan",
-          "tableTo": "sdm_wilayah",
           "columnsFrom": [
             "id_sdm"
           ],
+          "tableTo": "sdm_wilayah",
           "columnsTo": [
             "id_sdm"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_pemasangan_id_pemasangan_baru_unique": {
           "name": "ajis_pemasangan_id_pemasangan_baru_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "id_pemasangan_baru"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -3890,9 +4299,20 @@
       "columns": {
         "id_log": {
           "name": "id_log",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_pemasangan_log_id_log_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pemasangan_baru": {
           "name": "id_pemasangan_baru",
@@ -4147,9 +4567,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pemasangan_log_anak_idx": {
           "name": "ajis_pemasangan_log_anak_idx",
@@ -4162,9 +4582,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -4180,9 +4600,20 @@
       "columns": {
         "id_input_donasi": {
           "name": "id_input_donasi",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_input_donasi_id_input_donasi_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pemasangan_baru": {
           "name": "id_pemasangan_baru",
@@ -4395,9 +4826,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_input_donasi_anak_idx": {
           "name": "ajis_input_donasi_anak_idx",
@@ -4416,9 +4847,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_input_donasi_kantor_idx": {
           "name": "ajis_input_donasi_kantor_idx",
@@ -4443,9 +4874,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_input_donasi_transid_idx": {
           "name": "ajis_input_donasi_transid_idx",
@@ -4464,9 +4895,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_input_donasi_tgl_brin": {
           "name": "ajis_input_donasi_tgl_brin",
@@ -4479,24 +4910,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "brin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_input_donasi_id_pemasangan_baru_ajis_pemasangan_id_pemasangan_baru_fk": {
           "name": "ajis_input_donasi_id_pemasangan_baru_ajis_pemasangan_id_pemasangan_baru_fk",
           "tableFrom": "ajis_input_donasi",
-          "tableTo": "ajis_pemasangan",
           "columnsFrom": [
             "id_pemasangan_baru"
           ],
+          "tableTo": "ajis_pemasangan",
           "columnsTo": [
             "id_pemasangan_baru"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -4516,9 +4947,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_penyaluran_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_penyaluran": {
           "name": "id_penyaluran",
@@ -4841,9 +5283,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_penyaluran_kantor_idx": {
           "name": "ajis_penyaluran_kantor_idx",
@@ -4862,9 +5304,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_penyaluran_pending_idx": {
           "name": "ajis_penyaluran_pending_idx",
@@ -4889,10 +5331,10 @@
             }
           ],
           "isUnique": false,
-          "where": "NOT status_tersalurkan",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "NOT status_tersalurkan",
+          "concurrently": false
         },
         "ajis_penyaluran_tgl_brin": {
           "name": "ajis_penyaluran_tgl_brin",
@@ -4905,37 +5347,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "brin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_penyaluran_id_pemasangan_baru_ajis_pemasangan_id_pemasangan_baru_fk": {
           "name": "ajis_penyaluran_id_pemasangan_baru_ajis_pemasangan_id_pemasangan_baru_fk",
           "tableFrom": "ajis_penyaluran",
-          "tableTo": "ajis_pemasangan",
           "columnsFrom": [
             "id_pemasangan_baru"
           ],
+          "tableTo": "ajis_pemasangan",
           "columnsTo": [
             "id_pemasangan_baru"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_penyaluran_natural_uq": {
           "name": "ajis_penyaluran_natural_uq",
-          "nullsNotDistinct": false,
           "columns": [
             "id_penyaluran",
             "id_pemasangan_baru",
             "bulan",
             "tahun"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -4953,9 +5395,20 @@
       "columns": {
         "id_ajuan": {
           "name": "id_ajuan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_view_ajuan_id_ajuan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "tgl_ajuan": {
           "name": "tgl_ajuan",
@@ -5156,10 +5609,10 @@
             }
           ],
           "isUnique": false,
-          "where": "approve_funding = 't'",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "approve_funding = 't'",
+          "concurrently": false
         },
         "ajis_view_ajuan_scope_idx": {
           "name": "ajis_view_ajuan_scope_idx",
@@ -5178,9 +5631,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_view_ajuan_anak_idx": {
           "name": "ajis_view_ajuan_anak_idx",
@@ -5193,9 +5646,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -5216,9 +5669,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "transaksi_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "transid": {
           "name": "transid",
@@ -5565,9 +6029,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "transaksi_live_idx": {
           "name": "transaksi_live_idx",
@@ -5586,10 +6050,10 @@
             }
           ],
           "isUnique": false,
-          "where": "approved_trans AND NOT deleted_trans",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "approved_trans AND NOT deleted_trans",
+          "concurrently": false
         },
         "transaksi_oid_idx": {
           "name": "transaksi_oid_idx",
@@ -5608,9 +6072,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "transaksi_tgl_brin": {
           "name": "transaksi_tgl_brin",
@@ -5623,9 +6087,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "brin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -5633,11 +6097,11 @@
       "uniqueConstraints": {
         "transaksi_natural_uq": {
           "name": "transaksi_natural_uq",
-          "nullsNotDistinct": false,
           "columns": [
             "transid",
             "detailid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -5655,9 +6119,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_dokumentasi_pembinaan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "semesterid": {
           "name": "semesterid",
@@ -5701,27 +6176,27 @@
         "ajis_dokumentasi_pembinaan_semesterid_ajis_semester_semesterid_fk": {
           "name": "ajis_dokumentasi_pembinaan_semesterid_ajis_semester_semesterid_fk",
           "tableFrom": "ajis_dokumentasi_pembinaan",
-          "tableTo": "ajis_semester",
           "columnsFrom": [
             "semesterid"
           ],
+          "tableTo": "ajis_semester",
           "columnsTo": [
             "semesterid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_dokumentasi_natural_uq": {
           "name": "ajis_dokumentasi_natural_uq",
-          "nullsNotDistinct": false,
           "columns": [
             "semesterid",
             "kantor_id",
             "id_wilayah_pembinaan"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -5734,9 +6209,20 @@
       "columns": {
         "id_hafalan": {
           "name": "id_hafalan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_hafalan_id_hafalan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -5811,62 +6297,62 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_hafalan_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_hafalan_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_hafalan",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_hafalan_semesterid_ajis_semester_semesterid_fk": {
           "name": "ajis_hafalan_semesterid_ajis_semester_semesterid_fk",
           "tableFrom": "ajis_hafalan",
-          "tableTo": "ajis_semester",
           "columnsFrom": [
             "semesterid"
           ],
+          "tableTo": "ajis_semester",
           "columnsTo": [
             "semesterid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_hafalan_id_item_hafalan_ajis_item_hafalan_id_fk": {
           "name": "ajis_hafalan_id_item_hafalan_ajis_item_hafalan_id_fk",
           "tableFrom": "ajis_hafalan",
-          "tableTo": "ajis_item_hafalan",
           "columnsFrom": [
             "id_item_hafalan"
           ],
+          "tableTo": "ajis_item_hafalan",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_hafalan_natural_uq": {
           "name": "ajis_hafalan_natural_uq",
-          "nullsNotDistinct": false,
           "columns": [
             "id_anak",
             "semesterid",
             "konten_uji"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -5879,9 +6365,20 @@
       "columns": {
         "id_row": {
           "name": "id_row",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_pembinaan_baru_id_row_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pembinaan": {
           "name": "id_pembinaan",
@@ -6168,9 +6665,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pembinaan_scope_idx": {
           "name": "ajis_pembinaan_scope_idx",
@@ -6201,9 +6698,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pembinaan_semester_idx": {
           "name": "ajis_pembinaan_semester_idx",
@@ -6222,9 +6719,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pembinaan_sesi_idx": {
           "name": "ajis_pembinaan_sesi_idx",
@@ -6237,9 +6734,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_pembinaan_tgl_brin": {
           "name": "ajis_pembinaan_tgl_brin",
@@ -6252,37 +6749,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "brin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_pembinaan_baru_semesterid_ajis_semester_semesterid_fk": {
           "name": "ajis_pembinaan_baru_semesterid_ajis_semester_semesterid_fk",
           "tableFrom": "ajis_pembinaan_baru",
-          "tableTo": "ajis_semester",
           "columnsFrom": [
             "semesterid"
           ],
+          "tableTo": "ajis_semester",
           "columnsTo": [
             "semesterid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_pembinaan_baru_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_pembinaan_baru_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_pembinaan_baru",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -6297,9 +6794,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_penilaian_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -6447,9 +6955,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_penilaian_semester_kantor_idx": {
           "name": "ajis_penilaian_semester_kantor_idx",
@@ -6468,9 +6976,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_penilaian_item_idx": {
           "name": "ajis_penilaian_item_idx",
@@ -6489,62 +6997,62 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_penilaian_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_penilaian_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_penilaian",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_penilaian_semesterid_ajis_semester_semesterid_fk": {
           "name": "ajis_penilaian_semesterid_ajis_semester_semesterid_fk",
           "tableFrom": "ajis_penilaian",
-          "tableTo": "ajis_semester",
           "columnsFrom": [
             "semesterid"
           ],
+          "tableTo": "ajis_semester",
           "columnsTo": [
             "semesterid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_penilaian_id_item_penilaian_ajis_item_penilaian_id_fk": {
           "name": "ajis_penilaian_id_item_penilaian_ajis_item_penilaian_id_fk",
           "tableFrom": "ajis_penilaian",
-          "tableTo": "ajis_item_penilaian",
           "columnsFrom": [
             "id_item_penilaian"
           ],
+          "tableTo": "ajis_item_penilaian",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "ajis_penilaian_natural_uq": {
           "name": "ajis_penilaian_natural_uq",
-          "nullsNotDistinct": false,
           "columns": [
             "id_anak",
             "semesterid",
             "aspek"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -6557,9 +7065,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_peminjam_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_peminjam": {
           "name": "id_peminjam",
@@ -6646,9 +7165,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -6656,10 +7175,10 @@
       "uniqueConstraints": {
         "ajis_peminjam_id_peminjam_unique": {
           "name": "ajis_peminjam_id_peminjam_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "id_peminjam"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -6672,9 +7191,20 @@
       "columns": {
         "id_peminjaman": {
           "name": "id_peminjaman",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_peminjaman_anak_id_peminjaman_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_peminjam": {
           "name": "id_peminjam",
@@ -6848,10 +7378,10 @@
             }
           ],
           "isUnique": false,
-          "where": "status_pinjam AND NOT cancel",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "status_pinjam AND NOT cancel",
+          "concurrently": false
         },
         "ajis_peminjaman_peminjam_idx": {
           "name": "ajis_peminjaman_peminjam_idx",
@@ -6870,9 +7400,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_peminjaman_expired_idx": {
           "name": "ajis_peminjaman_expired_idx",
@@ -6885,10 +7415,10 @@
             }
           ],
           "isUnique": false,
-          "where": "status_pinjam AND NOT cancel",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "status_pinjam AND NOT cancel",
+          "concurrently": false
         },
         "ajis_peminjaman_anak_idx": {
           "name": "ajis_peminjaman_anak_idx",
@@ -6901,37 +7431,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_peminjaman_anak_id_peminjam_ajis_peminjam_id_peminjam_fk": {
           "name": "ajis_peminjaman_anak_id_peminjam_ajis_peminjam_id_peminjam_fk",
           "tableFrom": "ajis_peminjaman_anak",
-          "tableTo": "ajis_peminjam",
           "columnsFrom": [
             "id_peminjam"
           ],
+          "tableTo": "ajis_peminjam",
           "columnsTo": [
             "id_peminjam"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "ajis_peminjaman_anak_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_peminjaman_anak_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_peminjaman_anak",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -6946,9 +7476,20 @@
       "columns": {
         "id_survey": {
           "name": "id_survey",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_survey_id_survey_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "tgl_survey": {
           "name": "tgl_survey",
@@ -7305,9 +7846,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_survey_scope_idx": {
           "name": "ajis_survey_scope_idx",
@@ -7332,9 +7873,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "ajis_survey_nama_trgm_idx": {
           "name": "ajis_survey_nama_trgm_idx",
@@ -7348,24 +7889,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "gin",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "ajis_survey_id_anak_ajis_anak_id_anak_fk": {
           "name": "ajis_survey_id_anak_ajis_anak_id_anak_fk",
           "tableFrom": "ajis_survey",
-          "tableTo": "ajis_anak",
           "columnsFrom": [
             "id_anak"
           ],
+          "tableTo": "ajis_anak",
           "columnsTo": [
             "id_anak"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -7383,10 +7924,27 @@
       "name": "manual_laporan",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "manual_laporan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "laporanid": {
           "name": "laporanid",
           "type": "varchar(50)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "versi_struktur": {
@@ -7983,9 +8541,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "manual_laporan_scope_idx": {
           "name": "manual_laporan_scope_idx",
@@ -8004,9 +8562,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "manual_laporan_anak_idx": {
           "name": "manual_laporan_anak_idx",
@@ -8025,28 +8583,36 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "manual_laporan_semesterid_ajis_semester_semesterid_fk": {
           "name": "manual_laporan_semesterid_ajis_semester_semesterid_fk",
           "tableFrom": "manual_laporan",
-          "tableTo": "ajis_semester",
           "columnsFrom": [
             "semesterid"
           ],
+          "tableTo": "ajis_semester",
           "columnsTo": [
             "semesterid"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "manual_laporan_laporanid_unique": {
+          "name": "manual_laporan_laporanid_unique",
+          "columns": [
+            "laporanid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {
         "manual_laporan_versi_check": {
@@ -8090,9 +8656,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "manual_laporan_pembinaan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "laporanid": {
           "name": "laporanid",
@@ -8168,35 +8745,35 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "manual_laporan_pembinaan_laporanid_manual_laporan_laporanid_fk": {
           "name": "manual_laporan_pembinaan_laporanid_manual_laporan_laporanid_fk",
           "tableFrom": "manual_laporan_pembinaan",
-          "tableTo": "manual_laporan",
           "columnsFrom": [
             "laporanid"
           ],
+          "tableTo": "manual_laporan",
           "columnsTo": [
             "laporanid"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "manual_laporan_pembinaan_natural_uq": {
           "name": "manual_laporan_pembinaan_natural_uq",
-          "nullsNotDistinct": false,
           "columns": [
             "laporanid",
             "detailid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -8209,9 +8786,20 @@
       "columns": {
         "id_prestasi": {
           "name": "id_prestasi",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "manual_laporan_prestasi_id_prestasi_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -8353,9 +8941,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -8371,9 +8959,20 @@
       "columns": {
         "id_materi": {
           "name": "id_materi",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "materi_id_materi_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "detailid": {
           "name": "detailid",
@@ -8442,9 +9041,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -8457,10 +9056,10 @@
   },
   "enums": {},
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

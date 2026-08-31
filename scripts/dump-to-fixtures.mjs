@@ -174,8 +174,10 @@ const TABLES = {
     externalIds: ['oid_rz', 'id_kantor_postgree', 'id_ijgs_anak', 'upload_gdrive'],
   },
   ajis_data_prestasi: {
+    // `id` is kept, not omitted: it is the only unique thing about these rows, so
+    // without it ON CONFLICT has no target and re-seeding would duplicate them.
     target: 'ajis_data_prestasi', conflict: '(id)',
-    booleans: { show: INT01 }, dates: ['tgl'], omit: ['id'],
+    booleans: { show: INT01 }, dates: ['tgl'],
   },
   ajis_pemasangan: {
     target: 'ajis_pemasangan', conflict: '(id_pemasangan_baru)',
@@ -258,7 +260,7 @@ const TABLES = {
     ints: ['id_wilayah_pembinaan'],
     dates: ['tgl_ajuan', 'tgl_eksekusi', 'tgl_approve_funding'],
     drop: ['jcustid'],
-    omit: ['id_ajuan'],
+    // id_ajuan kept for the same reason as ajis_data_prestasi.id above
   },
   ajis_pembinaan_baru: {
     target: 'ajis_pembinaan_baru', conflict: '(id_row)',

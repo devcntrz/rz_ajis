@@ -1,6 +1,6 @@
 {
-  "id": "efae9330-6a97-45d4-9cfc-3e1662302cd5",
-  "prevId": "8c34ecc1-3cbe-4f12-8696-3de822a50b0d",
+  "id": "a58e0e21-2940-4356-bc61-6e96b24bf1bf",
+  "prevId": "92004c8b-1d97-4388-80f4-86f884486e37",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -8,10 +8,27 @@
       "name": "ref_desa",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_desa_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "desaid": {
           "name": "desaid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "nama_desa": {
@@ -92,7 +109,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_desa_desaid_unique": {
+          "name": "ref_desa_desaid_unique",
+          "columns": [
+            "desaid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -103,9 +128,20 @@
       "columns": {
         "id_fungsi_struktur": {
           "name": "id_fungsi_struktur",
-          "type": "varchar(16)",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ref_fungsi_struktur_id_fungsi_struktur_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "kode_fungsi": {
           "name": "kode_fungsi",
@@ -171,10 +207,27 @@
       "name": "ref_kabupaten",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_kabupaten_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "kabid": {
           "name": "kabid",
           "type": "varchar(4)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "propid": {
@@ -267,7 +320,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_kabupaten_kabid_unique": {
+          "name": "ref_kabupaten_kabid_unique",
+          "columns": [
+            "kabid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -276,10 +337,27 @@
       "name": "ref_kecamatan",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_kecamatan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "camatid": {
           "name": "camatid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "nama_kecamatan": {
@@ -347,7 +425,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_kecamatan_camatid_unique": {
+          "name": "ref_kecamatan_camatid_unique",
+          "columns": [
+            "camatid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -356,10 +442,27 @@
       "name": "ref_pekerjaan",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_pekerjaan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "kerjaid": {
           "name": "kerjaid",
           "type": "varchar(3)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "pekerjaan": {
@@ -379,7 +482,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_pekerjaan_kerjaid_unique": {
+          "name": "ref_pekerjaan_kerjaid_unique",
+          "columns": [
+            "kerjaid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -388,10 +499,27 @@
       "name": "ref_propinsi",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ref_propinsi_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "propid": {
           "name": "propid",
           "type": "varchar(4)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "propinsi": {
@@ -417,7 +545,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ref_propinsi_propid_unique": {
+          "name": "ref_propinsi_propid_unique",
+          "columns": [
+            "propid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -426,10 +562,27 @@
       "name": "ajis_kantor",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ajis_kantor_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "oid": {
           "name": "oid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "kantor": {
@@ -478,7 +631,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ajis_kantor_oid_unique": {
+          "name": "ajis_kantor_oid_unique",
+          "columns": [
+            "oid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -487,10 +648,27 @@
       "name": "kantor",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "kantor_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "oid": {
           "name": "oid",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "kantor": {
@@ -546,7 +724,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "kantor_oid_unique": {
+          "name": "kantor_oid_unique",
+          "columns": [
+            "oid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -555,10 +741,27 @@
       "name": "map_kantor",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "map_kantor_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "id_kantor_zains": {
           "name": "id_kantor_zains",
           "type": "varchar(10)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "kantor_id": {
@@ -608,7 +811,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "map_kantor_id_kantor_zains_unique": {
+          "name": "map_kantor_id_kantor_zains_unique",
+          "columns": [
+            "id_kantor_zains"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -619,9 +830,20 @@
       "columns": {
         "id_harga": {
           "name": "id_harga",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_harga_id_harga_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "program_donasi": {
           "name": "program_donasi",
@@ -708,9 +930,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_item_hafalan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "jenis": {
           "name": "jenis",
@@ -755,9 +988,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_item_penilaian_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "item_penilaian": {
           "name": "item_penilaian",
@@ -805,9 +1049,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_semester_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "semesterid": {
           "name": "semesterid",
@@ -1019,10 +1274,27 @@
       "name": "app_setting",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "app_setting_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "key": {
           "name": "key",
           "type": "varchar(100)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "value": {
@@ -1048,7 +1320,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "app_setting_key_unique": {
+          "name": "app_setting_key_unique",
+          "columns": [
+            "key"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1059,9 +1339,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "setting_program_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_program": {
           "name": "id_program",
@@ -1300,9 +1591,20 @@
       "columns": {
         "id_group_user": {
           "name": "id_group_user",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_group_user_id_group_user_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "group_user": {
           "name": "group_user",
@@ -1346,9 +1648,20 @@
       "columns": {
         "id_user": {
           "name": "id_user",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_user_id_user_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "username": {
           "name": "username",
@@ -1497,6 +1810,23 @@
       "name": "ajis_user_akses",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ajis_user_akses_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "userid": {
           "name": "userid",
           "type": "bigint",
@@ -1542,16 +1872,17 @@
           "onDelete": "cascade"
         }
       },
-      "compositePrimaryKeys": {
-        "ajis_user_akses_userid_levelid_pk": {
-          "name": "ajis_user_akses_userid_levelid_pk",
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ajis_user_akses_natural_uq": {
+          "name": "ajis_user_akses_natural_uq",
           "columns": [
             "userid",
             "levelid"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1562,9 +1893,20 @@
       "columns": {
         "id_wilayah_pembinaan": {
           "name": "id_wilayah_pembinaan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_wilayah_pembinaan_id_wilayah_pembinaan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "nama_wilayah": {
           "name": "nama_wilayah",
@@ -1734,9 +2076,20 @@
       "columns": {
         "id_penugasan": {
           "name": "id_penugasan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "sdm_penugasan_id_penugasan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_sdm": {
           "name": "id_sdm",
@@ -1758,7 +2111,7 @@
         },
         "id_fungsi_struktur": {
           "name": "id_fungsi_struktur",
-          "type": "varchar(16)",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -1902,9 +2255,20 @@
       "columns": {
         "id_sdm": {
           "name": "id_sdm",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "sdm_wilayah_id_sdm_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "nik": {
           "name": "nik",
@@ -2110,10 +2474,27 @@
       "name": "ajis_anak",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "ajis_anak_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "id_anak": {
           "name": "id_anak",
           "type": "varchar(25)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "nik": {
@@ -2946,6 +3327,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "ajis_anak_id_anak_unique": {
+          "name": "ajis_anak_id_anak_unique",
+          "columns": [
+            "id_anak"
+          ],
+          "nullsNotDistinct": false
+        },
         "ajis_anak_nik_unique": {
           "name": "ajis_anak_nik_unique",
           "columns": [
@@ -2977,9 +3365,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_data_prestasi_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -3111,9 +3510,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_opname_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "tahun": {
           "name": "tahun",
@@ -3249,27 +3659,6 @@
         }
       },
       "indexes": {
-        "ajis_opname_natural_idx": {
-          "name": "ajis_opname_natural_idx",
-          "columns": [
-            {
-              "expression": "tahun",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id_pemasangan_baru",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
         "ajis_opname_pemasangan_idx": {
           "name": "ajis_opname_pemasangan_idx",
           "columns": [
@@ -3324,7 +3713,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "ajis_opname_natural_uq": {
+          "name": "ajis_opname_natural_uq",
+          "columns": [
+            "tahun",
+            "id_pemasangan_baru"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3335,9 +3733,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_pemasangan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pemasangan_baru": {
           "name": "id_pemasangan_baru",
@@ -3890,9 +4299,20 @@
       "columns": {
         "id_log": {
           "name": "id_log",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_pemasangan_log_id_log_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pemasangan_baru": {
           "name": "id_pemasangan_baru",
@@ -4180,9 +4600,20 @@
       "columns": {
         "id_input_donasi": {
           "name": "id_input_donasi",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_input_donasi_id_input_donasi_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pemasangan_baru": {
           "name": "id_pemasangan_baru",
@@ -4516,9 +4947,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_penyaluran_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_penyaluran": {
           "name": "id_penyaluran",
@@ -4953,9 +5395,20 @@
       "columns": {
         "id_ajuan": {
           "name": "id_ajuan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_view_ajuan_id_ajuan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "tgl_ajuan": {
           "name": "tgl_ajuan",
@@ -5216,9 +5669,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "transaksi_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "transid": {
           "name": "transid",
@@ -5655,9 +6119,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_dokumentasi_pembinaan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "semesterid": {
           "name": "semesterid",
@@ -5734,9 +6209,20 @@
       "columns": {
         "id_hafalan": {
           "name": "id_hafalan",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_hafalan_id_hafalan_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -5879,9 +6365,20 @@
       "columns": {
         "id_row": {
           "name": "id_row",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_pembinaan_baru_id_row_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_pembinaan": {
           "name": "id_pembinaan",
@@ -6297,9 +6794,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_penilaian_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -6557,9 +7065,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_peminjam_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_peminjam": {
           "name": "id_peminjam",
@@ -6672,9 +7191,20 @@
       "columns": {
         "id_peminjaman": {
           "name": "id_peminjaman",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_peminjaman_anak_id_peminjaman_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_peminjam": {
           "name": "id_peminjam",
@@ -6946,9 +7476,20 @@
       "columns": {
         "id_survey": {
           "name": "id_survey",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "ajis_survey_id_survey_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "tgl_survey": {
           "name": "tgl_survey",
@@ -7383,10 +7924,27 @@
       "name": "manual_laporan",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "manual_laporan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
+        },
         "laporanid": {
           "name": "laporanid",
           "type": "varchar(50)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
         "versi_struktur": {
@@ -8046,7 +8604,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "manual_laporan_laporanid_unique": {
+          "name": "manual_laporan_laporanid_unique",
+          "columns": [
+            "laporanid"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {
         "manual_laporan_versi_check": {
@@ -8090,9 +8656,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "manual_laporan_pembinaan_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "laporanid": {
           "name": "laporanid",
@@ -8209,9 +8786,20 @@
       "columns": {
         "id_prestasi": {
           "name": "id_prestasi",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "manual_laporan_prestasi_id_prestasi_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "id_anak": {
           "name": "id_anak",
@@ -8371,9 +8959,20 @@
       "columns": {
         "id_materi": {
           "name": "id_materi",
-          "type": "bigserial",
+          "type": "bigint",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "identity": {
+            "name": "materi_id_materi_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
+          }
         },
         "detailid": {
           "name": "detailid",

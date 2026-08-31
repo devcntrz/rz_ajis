@@ -6,9 +6,9 @@
  *   · every double / int nominal column → numeric (§6.1, §2.1 rule 6)
  *   · ajis_input_donasi.transid was `text` — unindexable, so the join to
  *     transaksi.transid could never use an index. Now varchar(50) + index (§6.3)
- *   · ajis_penyaluran PK (id_row, id_penyaluran) → bigserial;
+ *   · ajis_penyaluran PK (id_row, id_penyaluran) → identity PK;
  *     natural key (id_penyaluran, id_pemasangan_baru, bulan, tahun) (§6.4)
- *   · transaksi PK (transid, detailid) → bigserial, that pair UNIQUE (§6.4)
+ *   · transaksi PK (transid, detailid) → identity PK, that pair UNIQUE (§6.4)
  *   · enum('n','y') status_akhir / status_tersalurkan / status_pasang /
  *     deleted_* / review / cicilan / approved_* → boolean (§6.2)
  *   · ajis_view_ajuan.approve_funding enum('t','n','y') → varchar(1) + CHECK —
@@ -23,7 +23,6 @@
 import { sql } from 'drizzle-orm';
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -35,13 +34,13 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { TNY } from '../../lib/enums';
-import { checkOneOfNullable, externalIds, kantorId, money } from './_shared';
+import { checkOneOfNullable, externalIds, kantorId, money, pk } from './_shared';
 import { ajisPemasangan } from './pemasangan';
 
 export const ajisInputDonasi = pgTable(
   'ajis_input_donasi',
   {
-    idInputDonasi: bigserial('id_input_donasi', { mode: 'number' }).primaryKey(),
+    idInputDonasi: pk('id_input_donasi'),
     idPemasanganBaru: varchar('id_pemasangan_baru', { length: 100 })
       .notNull()
       .references(() => ajisPemasangan.idPemasanganBaru),
@@ -93,7 +92,7 @@ export const ajisInputDonasi = pgTable(
 export const ajisPenyaluran = pgTable(
   'ajis_penyaluran',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     idPenyaluran: varchar('id_penyaluran', { length: 50 }).notNull(),
     idPemasanganBaru: varchar('id_pemasangan_baru', { length: 100 }).references(
       () => ajisPemasangan.idPemasanganBaru,
@@ -170,7 +169,7 @@ export const ajisPenyaluran = pgTable(
 export const transaksi = pgTable(
   'transaksi',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     transid: varchar('transid', { length: 50 }).notNull(),
     detailid: smallint('detailid').notNull(),
     // enum('cash','noncash','bank','pccash','pcnoncash')
@@ -250,7 +249,7 @@ export const transaksi = pgTable(
 export const ajisViewAjuan = pgTable(
   'ajis_view_ajuan',
   {
-    idAjuan: bigserial('id_ajuan', { mode: 'number' }).primaryKey(),
+    idAjuan: pk('id_ajuan'),
     tglAjuan: date('tgl_ajuan'),
     kantorId: kantorId(),
     namaKantor: varchar('nama_kantor', { length: 100 }),

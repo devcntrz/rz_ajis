@@ -13,6 +13,14 @@
  * 1. Idempotent. Each row is inserted with ON CONFLICT <natural key> DO NOTHING.
  *    Sequences are corrected at the end, because ON CONFLICT still burns a
  *    nextval — ten runs of a 5-row seed would otherwise leave a sequence at ~50.
+ *    The correction is the same code fix-sequences.mjs runs; there is one
+ *    implementation, in scripts/lib/sequences.mjs.
+ *
+ * 1a. Fixtures that carry a legacy id (ajis_pembinaan_baru.id_row = 4479886, and
+ *    11 others) insert it verbatim with OVERRIDING SYSTEM VALUE — every PK is
+ *    GENERATED ALWAYS, so Postgres would otherwise reject the value. Preserving the
+ *    legacy id keeps sample rows traceable back to the dump, and exercises exactly
+ *    the path the migration-day ETL will use.
  *
  * 2. Orphans are expected, not a failure. With only 5 sampled rows per table, a
  *    child row's parent frequently is not among the parent's 5 rows. Those rows
@@ -22,6 +30,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import pg from 'pg';
+import { identityColumns, resyncSequences } from './lib/sequences.mjs';
 
 const SEED_DIR = path.resolve('db/seed');
 const TRUNCATE = process.argv.includes('--truncate');
@@ -94,6 +103,11 @@ try {
     console.log(`· truncated ${present.length} tables`);
   }
 
+  // Which column of each table is GENERATED ALWAYS — read once, from the catalog.
+  const identityByTable = new Map(
+    (await identityColumns(client)).map((c) => [c.table, c.column]),
+  );
+
   for (const table of ORDER) {
     const fixture = fixtures.get(table);
     if (!fixture) continue;
@@ -101,13 +115,18 @@ try {
     let ok = 0;
     let skipped = 0;
     const reasons = new Map();
+    const identityCol = identityByTable.get(table);
 
     for (const row of fixture.rows) {
       const cols = Object.keys(row);
       if (!cols.length) continue;
+      // A GENERATED ALWAYS column rejects a supplied value unless we say otherwise.
+      const overriding = identityCol && cols.includes(identityCol)
+        ? 'OVERRIDING SYSTEM VALUE '
+        : '';
       const sql =
         `INSERT INTO "${table}" (${cols.map((c) => `"${c}"`).join(', ')}) ` +
-        `VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')}) ` +
+        `${overriding}VALUES (${cols.map((_, i) => `$${i + 1}`).join(', ')}) ` +
         `ON CONFLICT ${fixture.conflict} DO NOTHING`;
       const params = cols.map((c) => {
         const v = row[c];
@@ -136,25 +155,10 @@ try {
     if (skipped) orphans.push([table, skipped, reasons]);
   }
 
-  // ON CONFLICT DO NOTHING still consumes a nextval, so sequences drift upward on
-  // every re-run. Reset them, and park every sequence above 1000 so the ids
-  // reserved for fixtures can never collide with application inserts.
-  await client.query(`
-    DO $$
-    DECLARE r record;
-    BEGIN
-      FOR r IN
-        SELECT c.table_name, c.column_name,
-               pg_get_serial_sequence(quote_ident(c.table_name), c.column_name) AS seq
-        FROM information_schema.columns c
-        WHERE c.table_schema = 'public'
-          AND pg_get_serial_sequence(quote_ident(c.table_name), c.column_name) IS NOT NULL
-      LOOP
-        EXECUTE format(
-          'SELECT setval(%L, GREATEST(COALESCE((SELECT max(%I) FROM %I), 0), 1000), true)',
-          r.seq, r.column_name, r.table_name);
-      END LOOP;
-    END $$;`);
+  // Fixtures that carry legacy ids bypass the sequence entirely, and ON CONFLICT
+  // DO NOTHING still burns a nextval on every re-run. Both leave sequences out of
+  // step with the data, so resync before committing. Same code as db:fix-sequences.
+  await resyncSequences(client);
 
   await client.query('COMMIT');
 } catch (err) {

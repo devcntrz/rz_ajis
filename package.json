@@ -14,6 +14,7 @@
     "db:migrate:dry": "node --env-file=.env.local scripts/migrate.mjs --dry-run",
     "db:fixtures": "node scripts/dump-to-fixtures.mjs",
     "db:seed": "node --env-file=.env.local scripts/seed.mjs",
+    "db:fix-sequences": "node --env-file=.env.local scripts/fix-sequences.mjs",
     "db:reseed": "node --env-file=.env.local scripts/seed.mjs --truncate"
   },
   "dependencies": {

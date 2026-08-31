@@ -6,7 +6,7 @@
  *   · ajis_periode_penilaian (3 rows)                 → app_setting rows (§6.5)
  *   · program                                         → dropped, duplicate of
  *     setting_program; its kredit_account is absorbed here (§6.5)
- *   · setting_program PK (id_program, progid)         → bigserial, id_program UNIQUE (§6.4)
+ *   · setting_program PK (id_program, progid)         → identity PK, id_program UNIQUE (§6.4)
  *   · ajis_semester.semesterid                        → varchar(10) UNIQUE (§6.3) —
  *     legacy left it non-unique despite it being the join key everywhere
  *   · all double money columns                        → numeric (§6.1)
@@ -14,7 +14,6 @@
  */
 import { sql } from 'drizzle-orm';
 import {
-  bigserial,
   boolean,
   char,
   date,
@@ -25,14 +24,15 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { checkOneOfNullable, externalIds, money } from './_shared';
+import { checkOneOfNullable, externalIds, money, pk } from './_shared';
 
 /**
  * Key/value configuration plus sync watermarks (§5.7). Absorbs the two legacy
  * single-purpose config tables.
  */
 export const appSetting = pgTable('app_setting', {
-  key: varchar('key', { length: 100 }).primaryKey(),
+  id: pk(),
+  key: varchar('key', { length: 100 }).notNull().unique(),
   value: text('value'),
   keterangan: varchar('keterangan', { length: 200 }),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
@@ -41,7 +41,7 @@ export const appSetting = pgTable('app_setting', {
 export const settingProgram = pgTable(
   'setting_program',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     // natural key — legacy PK was the (id_program, progid) pair (§6.4)
     idProgram: integer('id_program').notNull().unique(),
     progid: varchar('progid', { length: 6 }).notNull(),
@@ -87,7 +87,7 @@ export const settingProgram = pgTable(
 export const ajisHarga = pgTable(
   'ajis_harga',
   {
-    idHarga: bigserial('id_harga', { mode: 'number' }).primaryKey(),
+    idHarga: pk('id_harga'),
     programDonasi: text('program_donasi'),
     program: text('program'),
     hargaProgram: money('harga_program'),
@@ -105,7 +105,7 @@ export const ajisHarga = pgTable(
 export const ajisSemester = pgTable(
   'ajis_semester',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     // §6.3: the join key everywhere, but legacy never made it unique
     semesterid: varchar('semesterid', { length: 10 }).notNull().unique(),
     semester: varchar('semester', { length: 100 }),
@@ -145,7 +145,7 @@ export const ajisSemester = pgTable(
 export const ajisItemHafalan = pgTable(
   'ajis_item_hafalan',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     // 2 = Quran, 3 = Shalat, 4 = Doa
     jenis: integer('jenis').notNull(),
     konten: varchar('konten', { length: 100 }).notNull(),
@@ -154,7 +154,7 @@ export const ajisItemHafalan = pgTable(
 );
 
 export const ajisItemPenilaian = pgTable('ajis_item_penilaian', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  id: pk(),
   itemPenilaian: text('item_penilaian'),
   parentId: varchar('parent_id', { length: 100 }),
   // legacy varchar(1) holding 'y' — a plain flag

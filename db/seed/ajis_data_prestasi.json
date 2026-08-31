@@ -4,6 +4,7 @@
   "conflict": "(id)",
   "rows": [
     {
+      "id": "81",
       "id_anak": "09207220007",
       "event_lomba": "ASOSIASI OLIMPIADE NUSANTARA",
       "tgl": "2026-02-12 17:00:00",
@@ -18,6 +19,7 @@
       "show": false
     },
     {
+      "id": "80",
       "id_anak": "09214220056",
       "event_lomba": "Olah raga ",
       "tgl": "2025-10-25 17:00:00",
@@ -32,6 +34,7 @@
       "show": true
     },
     {
+      "id": "79",
       "id_anak": "09214210094",
       "event_lomba": "Futsal antar Sekolah ",
       "tgl": "2025-12-10 17:00:00",
@@ -45,6 +48,7 @@
       "show": false
     },
     {
+      "id": "77",
       "id_anak": "09231170070",
       "tgl": "2024-01-03 17:00:00",
       "skala_prestasi_tingkat": "Sekolah",
@@ -54,6 +58,7 @@
       "show": false
     },
     {
+      "id": "76",
       "id_anak": "09198190088",
       "event_lomba": "MBQ As Suryaniyah",
       "tgl": "2023-10-20 17:00:00",

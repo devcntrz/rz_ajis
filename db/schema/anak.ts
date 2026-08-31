@@ -20,7 +20,6 @@
 import { sql } from 'drizzle-orm';
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -30,15 +29,17 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { JNS_KEL, STATUS_ANAK_JUARA, STATUS_TERSANTUNI } from '../../lib/enums';
-import { checkOneOfNullable, externalIds, kantorId, money } from './_shared';
+import { checkOneOfNullable, externalIds, kantorId, money, pk } from './_shared';
 import { ajisKantor } from './kantor';
 import { ajisWilayahPembinaan, sdmWilayah } from './sdm';
 
 export const ajisAnak = pgTable(
   'ajis_anak',
   {
-    // Natural key retained — referenced by business key across the whole schema.
-    idAnak: varchar('id_anak', { length: 25 }).primaryKey(),
+    id: pk(),
+    // The business key. Not the PK any more, but still what every other table's FK
+    // points at — so the ETL never has to translate ids.
+    idAnak: varchar('id_anak', { length: 25 }).notNull().unique(),
     nik: varchar('nik', { length: 50 }).unique(),
     namaLengkap: varchar('nama_lengkap', { length: 150 }).notNull(),
     namaPanggilan: varchar('nama_panggilan', { length: 50 }),
@@ -202,7 +203,7 @@ export const ajisAnak = pgTable(
 export const ajisDataPrestasi = pgTable(
   'ajis_data_prestasi',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     idAnak: varchar('id_anak', { length: 25 })
       .notNull()
       .references(() => ajisAnak.idAnak),

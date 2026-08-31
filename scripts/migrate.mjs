@@ -41,13 +41,29 @@ await client.connect();
 
 let failed = false;
 try {
+  // Identity, not bigserial — same rule as the schema itself, so `db:fix-sequences`
+  // and the "zero serial columns" assertion hold for the ledger too.
   await client.query(`
     CREATE TABLE IF NOT EXISTS ajis_migrations (
-      id          bigserial PRIMARY KEY,
+      id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
       tag         text NOT NULL UNIQUE,
       hash        text NOT NULL,
       applied_at  timestamptz NOT NULL DEFAULT now()
     )`);
+  // Upgrade a ledger created before that rule existed. No-op once converted.
+  await client.query(`
+    DO $$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.columns
+                  WHERE table_schema='public' AND table_name='ajis_migrations'
+                    AND column_name='id' AND column_default LIKE 'nextval%') THEN
+        ALTER TABLE ajis_migrations ALTER COLUMN id DROP DEFAULT;
+        DROP SEQUENCE IF EXISTS ajis_migrations_id_seq;
+        ALTER TABLE ajis_migrations ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY;
+        PERFORM setval(pg_get_serial_sequence('ajis_migrations','id'),
+                       GREATEST(COALESCE((SELECT max(id) FROM ajis_migrations), 0), 1), true);
+      END IF;
+    END $$;`);
 
   await client.query('SELECT pg_advisory_lock($1)', [LOCK_KEY]);
 

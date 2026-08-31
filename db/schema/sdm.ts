@@ -6,7 +6,7 @@
  *   · ajis_jabatan_sdm         → sdm_penugasan, the assignment record (§6.5)
  *   · id_sdm int vs varchar(50) on ajis_anak → bigint everywhere + FK (§6.3)
  *   · id_wilayah_pembinaan int(2)/varchar(16)/varchar(50) → bigint + FK (§6.3)
- *   · PK (id_wilayah_pembinaan, nama_wilayah) → bigserial, nama_wilayah UNIQUE (§6.4)
+ *   · PK (id_wilayah_pembinaan, nama_wilayah) → identity PK, nama_wilayah UNIQUE (§6.4)
  *   · aktif varchar(10) holding y/n → boolean (§6.2 row 5)
  *   · keaktifan_edukasi / status_approve enum('y','t') → varchar(1) + CHECK,
  *     NOT boolean: 't' means pending (§6.2)
@@ -15,7 +15,6 @@
 import { sql } from 'drizzle-orm';
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -24,14 +23,14 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { STATUS_APPROVE, KEAKTIFAN_EDUKASI, JNS_KEL } from '../../lib/enums';
-import { audit, checkOneOfNullable, kantorId } from './_shared';
+import { audit, checkOneOfNullable, fk, kantorId, pk } from './_shared';
 import { ajisKantor } from './kantor';
 import { refFungsiStruktur } from './ref';
 
 export const ajisWilayahPembinaan = pgTable(
   'ajis_wilayah_pembinaan',
   {
-    idWilayahPembinaan: bigserial('id_wilayah_pembinaan', { mode: 'number' }).primaryKey(),
+    idWilayahPembinaan: pk('id_wilayah_pembinaan'),
     namaWilayah: varchar('nama_wilayah', { length: 100 }).notNull().unique(),
     alamatWilayah: text('alamat_wilayah'),
     kantorId: kantorId().references(() => ajisKantor.oid),
@@ -59,7 +58,7 @@ export const ajisWilayahPembinaan = pgTable(
 export const sdmWilayah = pgTable(
   'sdm_wilayah',
   {
-    idSdm: bigserial('id_sdm', { mode: 'number' }).primaryKey(),
+    idSdm: pk('id_sdm'),
     nik: varchar('nik', { length: 50 }).unique(),
     namaLengkap: varchar('nama_lengkap', { length: 100 }),
     jenisKelamin: varchar('jenis_kelamin', { length: 1 }),
@@ -98,7 +97,7 @@ export const sdmWilayah = pgTable(
 export const sdmPenugasan = pgTable(
   'sdm_penugasan',
   {
-    idPenugasan: bigserial('id_penugasan', { mode: 'number' }).primaryKey(),
+    idPenugasan: pk('id_penugasan'),
     idSdm: bigint('id_sdm', { mode: 'number' })
       .notNull()
       .references(() => sdmWilayah.idSdm),
@@ -106,7 +105,9 @@ export const sdmPenugasan = pgTable(
       .notNull()
       .references(() => ajisWilayahPembinaan.idWilayahPembinaan),
     kantorId: kantorId().references(() => ajisKantor.oid),
-    idFungsiStruktur: varchar('id_fungsi_struktur', { length: 16 }).references(
+    // bigint, matching ref_fungsi_struktur's identity PK — the legacy column was
+    // int(16) AUTO_INCREMENT, not a code (§6.6)
+    idFungsiStruktur: fk('id_fungsi_struktur').references(
       () => refFungsiStruktur.idFungsiStruktur,
     ),
     keaktifanEdukasi: varchar('keaktifan_edukasi', { length: 1 }),

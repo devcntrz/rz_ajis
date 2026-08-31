@@ -3,10 +3,10 @@
  * the yearly balance stock-take.
  *
  * Conversions:
- *   · ajis_pemasangan 5-column PK → bigserial; id_pemasangan_baru becomes UNIQUE.
+ *   · ajis_pemasangan 5-column PK → identity PK; id_pemasangan_baru becomes UNIQUE.
  *     Legacy had it only as a non-unique KEY even though every other table joins
  *     to it — the single most consequential fix in §6.4.
- *   · ajis_opname 5-column PK → bigserial, natural key (tahun, id_pemasangan_baru)
+ *   · ajis_opname 5-column PK → identity PK, natural key (tahun, id_pemasangan_baru)
  *   · enum('y','n') status_pasangan, enum('n','y') status_saldo → boolean (§6.2)
  *   · year(4) tahun → smallint (§6.1)
  *   · int/double saldo & harga columns → numeric (§6.1)
@@ -20,7 +20,6 @@
 import { sql } from 'drizzle-orm';
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -31,7 +30,7 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { externalIds, kantorId, money } from './_shared';
+import { externalIds, kantorId, money, pk } from './_shared';
 import { ajisAnak } from './anak';
 import { ajisKantor } from './kantor';
 import { ajisWilayahPembinaan, sdmWilayah } from './sdm';
@@ -39,7 +38,7 @@ import { ajisWilayahPembinaan, sdmWilayah } from './sdm';
 export const ajisPemasangan = pgTable(
   'ajis_pemasangan',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     // The natural key. UNIQUE here is what makes the seed's ON CONFLICT and every
     // downstream join sound.
     idPemasanganBaru: varchar('id_pemasangan_baru', { length: 100 }).notNull().unique(),
@@ -127,7 +126,7 @@ export const ajisPemasangan = pgTable(
 export const ajisPemasanganLog = pgTable(
   'ajis_pemasangan_log',
   {
-    idLog: bigserial('id_log', { mode: 'number' }).primaryKey(),
+    idLog: pk('id_log'),
     idPemasanganBaru: varchar('id_pemasangan_baru', { length: 100 }).notNull(),
     tglPemasangan: date('tgl_pemasangan'),
     tglPemberhentianPemasangan: date('tgl_pemberhentian_pemasangan'),
@@ -178,7 +177,7 @@ export const ajisPemasanganLog = pgTable(
 export const ajisOpname = pgTable(
   'ajis_opname',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     tahun: smallint('tahun').notNull(),
     idPemasanganBaru: varchar('id_pemasangan_baru', { length: 100 })
       .notNull()

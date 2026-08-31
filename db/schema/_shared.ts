@@ -7,6 +7,31 @@
 import { sql, type SQL } from 'drizzle-orm';
 import { check, jsonb, numeric, timestamp, varchar, bigint } from 'drizzle-orm/pg-core';
 
+/**
+ * The surrogate primary key every table uses.
+ *
+ * `GENERATED ALWAYS`, not `bigserial`, and not `BY DEFAULT`. Three reasons:
+ *
+ *  1. The sequence is part of the column rather than a free-standing object, so it
+ *     cannot be orphaned, separately dropped, or left behind by a partial restore.
+ *  2. An INSERT that supplies an explicit id is REJECTED unless it says
+ *     `OVERRIDING SYSTEM VALUE`. That is the point: the only way to desync a
+ *     sequence is to load your own ids, and now every such place has to say so out
+ *     loud — the seed and the migration-day ETL both do, and both must follow with
+ *     `npm run db:fix-sequences`.
+ *  3. It is the SQL standard spelling; `serial` is a PostgreSQL legacy form.
+ *
+ * Natural/business keys are NOT primary keys — they are `NOT NULL UNIQUE`, and
+ * foreign keys reference them directly (Postgres allows an FK onto any UNIQUE
+ * column). That keeps legacy identifiers as the join keys, so the ETL never has to
+ * translate ids.
+ */
+export const pk = (name = 'id') =>
+  bigint(name, { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity();
+
+/** A bigint FK/lookup column pointing at another table's surrogate `pk()`. */
+export const fk = (name: string) => bigint(name, { mode: 'number' });
+
 /** Money. Always numeric, never double precision (PRD §2.1 rule 6). */
 export const money = (name: string) =>
   numeric(name, { precision: 20, scale: 2 });

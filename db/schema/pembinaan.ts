@@ -7,7 +7,7 @@
  * almost none of the real predicates; §7.2 replaces them.
  *
  * Conversions:
- *   · ajis_hafalan PK (id_anak, konten_uji) → id_hafalan bigserial with natural key
+ *   · ajis_hafalan PK (id_anak, konten_uji) → id_hafalan identity PK with natural key
  *     (id_anak, semesterid, konten_uji). This is a BUG FIX (§6.4): the legacy key
  *     omitted semesterid, so a child could never be re-tested on the same content
  *     in a later semester.
@@ -18,7 +18,6 @@
  */
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -29,14 +28,14 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { externalIds, kantorId } from './_shared';
+import { externalIds, kantorId, pk } from './_shared';
 import { ajisAnak } from './anak';
 import { ajisSemester, ajisItemHafalan } from './setting';
 
 export const ajisPembinaanBaru = pgTable(
   'ajis_pembinaan_baru',
   {
-    idRow: bigserial('id_row', { mode: 'number' }).primaryKey(),
+    idRow: pk('id_row'),
     // groups the rows of one session; one row per attending child
     idPembinaan: varchar('id_pembinaan', { length: 100 }).notNull(),
     tglPembinaan: date('tgl_pembinaan'),
@@ -107,7 +106,7 @@ export const ajisPembinaanBaru = pgTable(
 export const ajisHafalan = pgTable(
   'ajis_hafalan',
   {
-    idHafalan: bigserial('id_hafalan', { mode: 'number' }).primaryKey(),
+    idHafalan: pk('id_hafalan'),
     idAnak: varchar('id_anak', { length: 25 })
       .notNull()
       .references(() => ajisAnak.idAnak),
@@ -135,7 +134,7 @@ export const ajisHafalan = pgTable(
 export const ajisDokumentasiPembinaan = pgTable(
   'ajis_dokumentasi_pembinaan',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     semesterid: varchar('semesterid', { length: 10 })
       .notNull()
       .references(() => ajisSemester.semesterid),

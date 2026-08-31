@@ -11,19 +11,18 @@
 import { sql } from 'drizzle-orm';
 import {
   bigint,
-  bigserial,
   boolean,
   index,
   integer,
   pgTable,
-  primaryKey,
+  unique,
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { kantorId, wilayahId } from './_shared';
+import { kantorId, pk, wilayahId } from './_shared';
 
 export const ajisGroupUser = pgTable('ajis_group_user', {
-  idGroupUser: bigserial('id_group_user', { mode: 'number' }).primaryKey(),
+  idGroupUser: pk('id_group_user'),
   // 'superadmin' | 'spmd' | 'mentor_wilayah' (§3.1)
   groupUser: varchar('group_user', { length: 20 }).notNull().unique(),
   keterangan: varchar('keterangan', { length: 100 }),
@@ -33,7 +32,7 @@ export const ajisGroupUser = pgTable('ajis_group_user', {
 export const ajisUser = pgTable(
   'ajis_user',
   {
-    idUser: bigserial('id_user', { mode: 'number' }).primaryKey(),
+    idUser: pk('id_user'),
     username: varchar('username', { length: 50 }).notNull().unique(),
     // The SSO match key (§3.3). No auto-provisioning: no row, no access.
     email: varchar('email', { length: 100 }).unique(),
@@ -58,13 +57,15 @@ export const ajisUser = pgTable(
 export const ajisUserAkses = pgTable(
   'ajis_user_akses',
   {
+    id: pk(),
     userid: bigint('userid', { mode: 'number' })
       .notNull()
       .references(() => ajisUser.idUser, { onDelete: 'cascade' }),
     levelid: integer('levelid').notNull(),
   },
   (t) => [
-    primaryKey({ columns: [t.userid, t.levelid] }),
+    // was the legacy composite PK; now the natural key
+    unique('ajis_user_akses_natural_uq').on(t.userid, t.levelid),
     index('ajis_user_akses_levelid_idx').on(t.levelid),
   ],
 );

@@ -11,12 +11,17 @@
  *   · pekerjaan                     → ref_pekerjaan (§6.6)
  *   · ajis_fungsi_struktur          → ref_fungsi_struktur (§6.6)
  *   · UNIQUE KEY kid / pid          → dropped, redundant left-prefix of the PK (§7.1)
+ *
+ * Every table has a surrogate `id` identity PK; the legacy code (`propid`, `kabid`,
+ * `camatid`, `desaid`, `kerjaid`) is kept as NOT NULL UNIQUE and remains the FK
+ * target, so the hierarchy still joins on the codes the rest of the world uses.
  */
 import { boolean, date, index, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
-import { coord, audit } from './_shared';
+import { coord, audit, pk } from './_shared';
 
 export const refPropinsi = pgTable('ref_propinsi', {
-  propid: varchar('propid', { length: 4 }).primaryKey(),
+  id: pk(),
+  propid: varchar('propid', { length: 4 }).notNull().unique(),
   propinsi: varchar('propinsi', { length: 50 }).notNull(),
   ibukota: varchar('ibukota', { length: 50 }),
   aktif: boolean('aktif').notNull().default(true),
@@ -25,7 +30,8 @@ export const refPropinsi = pgTable('ref_propinsi', {
 export const refKabupaten = pgTable(
   'ref_kabupaten',
   {
-    kabid: varchar('kabid', { length: 4 }).primaryKey(),
+    id: pk(),
+    kabid: varchar('kabid', { length: 4 }).notNull().unique(),
     propid: varchar('propid', { length: 4 })
       .notNull()
       .references(() => refPropinsi.propid),
@@ -45,7 +51,8 @@ export const refKabupaten = pgTable(
 export const refKecamatan = pgTable(
   'ref_kecamatan',
   {
-    camatid: varchar('camatid', { length: 10 }).primaryKey(),
+    id: pk(),
+    camatid: varchar('camatid', { length: 10 }).notNull().unique(),
     namaKecamatan: varchar('nama_kecamatan', { length: 50 }).notNull(),
     kodepos: varchar('kodepos', { length: 10 }),
     kabid: varchar('kabid', { length: 4 })
@@ -60,7 +67,8 @@ export const refKecamatan = pgTable(
 export const refDesa = pgTable(
   'ref_desa',
   {
-    desaid: varchar('desaid', { length: 10 }).primaryKey(),
+    id: pk(),
+    desaid: varchar('desaid', { length: 10 }).notNull().unique(),
     namaDesa: varchar('nama_desa', { length: 50 }).notNull(),
     // enum('y','n') → boolean: true = kelurahan, false = desa
     kelurahan: boolean('kelurahan').notNull().default(false),
@@ -78,14 +86,23 @@ export const refDesa = pgTable(
 
 /** Reconstructed from modules/ajis/class/ClassPekerjaan.php (§6.6). */
 export const refPekerjaan = pgTable('ref_pekerjaan', {
-  kerjaid: varchar('kerjaid', { length: 3 }).primaryKey(),
+  id: pk(),
+  kerjaid: varchar('kerjaid', { length: 3 }).notNull().unique(),
   pekerjaan: varchar('pekerjaan', { length: 100 }).notNull(),
   aktif: boolean('aktif').notNull().default(true),
 });
 
-/** Was ajis_fungsi_struktur; excluded from the dump, reconstructed from AjisClassIfa.php (§6.6). */
+/**
+ * Was ajis_fungsi_struktur; excluded from the dump's INSERTs, reconstructed from
+ * AjisClassIfa.php (§6.6).
+ *
+ * `id_fungsi_struktur` was `int(16) NOT NULL AUTO_INCREMENT` in the legacy DDL
+ * (refs/sipc_ijf_sample.sql:179) — a surrogate auto-increment, so it is the identity
+ * PK here. There is no separate natural key to preserve: `nama_fungsi_struktur` was
+ * already UNIQUE and stays that way.
+ */
 export const refFungsiStruktur = pgTable('ref_fungsi_struktur', {
-  idFungsiStruktur: varchar('id_fungsi_struktur', { length: 16 }).primaryKey(),
+  idFungsiStruktur: pk('id_fungsi_struktur'),
   kodeFungsi: varchar('kode_fungsi', { length: 5 }).notNull(),
   namaFungsiStruktur: varchar('nama_fungsi_struktur', { length: 30 }).notNull().unique(),
   // legacy varchar(10) holding 'y'/'n' (§6.2 row 5)

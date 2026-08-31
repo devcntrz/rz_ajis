@@ -4,6 +4,7 @@
   "conflict": "(id_ajuan)",
   "rows": [
     {
+      "id_ajuan": "10162",
       "tgl_ajuan": "2026-06-11 17:00:00",
       "nama_kantor": "RZ - Yogyakarta",
       "id_wilayah_pembinaan": 142,
@@ -32,6 +33,7 @@
       "id_pemasangan_baru": "0921520005910030700000972026"
     },
     {
+      "id_ajuan": "10163",
       "tgl_ajuan": "2026-06-11 17:00:00",
       "nama_kantor": "RZ - Yogyakarta",
       "id_wilayah_pembinaan": 159,
@@ -60,6 +62,7 @@
       "id_pemasangan_baru": "0921518016810030700017172026"
     },
     {
+      "id_ajuan": "10160",
       "tgl_ajuan": "2026-06-11 17:00:00",
       "nama_kantor": "RZ - Bandar Lampung",
       "id_wilayah_pembinaan": 65,
@@ -88,6 +91,7 @@
       "id_pemasangan_baru": "1023617003912491300000592026"
     },
     {
+      "id_ajuan": "10154",
       "tgl_ajuan": "2026-06-08 17:00:00",
       "nama_kantor": "RZ - Medan",
       "id_wilayah_pembinaan": 47,
@@ -116,6 +120,7 @@
       "id_pemasangan_baru": "0920722006610191000001602026"
     },
     {
+      "id_ajuan": "10157",
       "tgl_ajuan": "2026-06-08 17:00:00",
       "nama_kantor": "RZ - Medan",
       "id_wilayah_pembinaan": 21,

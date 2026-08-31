@@ -9,10 +9,11 @@
  * replacing the legacy practice of copying hcm_kantor into this database.
  */
 import { boolean, integer, pgTable, varchar } from 'drizzle-orm/pg-core';
-import { externalIds, kantorId } from './_shared';
+import { externalIds, kantorId, pk } from './_shared';
 
 export const kantor = pgTable('kantor', {
-  oid: varchar('oid', { length: 10 }).primaryKey(),
+  id: pk(),
+  oid: varchar('oid', { length: 10 }).notNull().unique(),
   kantor: varchar('kantor', { length: 50 }),
   alamat: varchar('alamat', { length: 100 }),
   oidParent: varchar('oid_parent', { length: 10 }),
@@ -25,9 +26,10 @@ export const kantor = pgTable('kantor', {
 });
 
 export const ajisKantor = pgTable('ajis_kantor', {
-  // legacy PK was a surrogate `id`; `oid` is what every other table actually joins on,
-  // so it becomes the primary key and the fat KEY(oid)/KEY(kantor) pair goes away.
-  oid: varchar('oid', { length: 10 }).primaryKey(),
+  id: pk(),
+  // `oid` is what every other table joins on, so it stays UNIQUE and remains the FK
+  // target. The fat legacy KEY(oid)/KEY(kantor) pair goes away.
+  oid: varchar('oid', { length: 10 }).notNull().unique(),
   kantor: varchar('kantor', { length: 30 }),
   alamat: varchar('alamat', { length: 50 }),
   noTelp: varchar('no_telp', { length: 15 }),
@@ -40,8 +42,9 @@ export const ajisKantor = pgTable('ajis_kantor', {
 
 /** New in §5.5 — the only sanctioned place an AJIS query learns a zains office id. */
 export const mapKantor = pgTable('map_kantor', {
+  id: pk(),
   // hcm_kantor.id_kantor in zains_rz
-  idKantorZains: varchar('id_kantor_zains', { length: 10 }).primaryKey(),
+  idKantorZains: varchar('id_kantor_zains', { length: 10 }).notNull().unique(),
   kantorId: kantorId().notNull(),
   namaKantor: varchar('nama_kantor', { length: 100 }),
   idKantorParent: varchar('id_kantor_parent', { length: 10 }),

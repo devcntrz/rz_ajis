@@ -14,13 +14,12 @@
  *   · double(20,2) dana_* → numeric(20,2) (§6.1)
  *   · laporanid varchar(50) here vs varchar(12) on manual_laporan_pembinaan →
  *     varchar(50) + FK (§6.3)
- *   · manual_laporan_prestasi.id_prestasi int without AUTO_INCREMENT → bigserial (§6.4)
- *   · materi.id_materi likewise → bigserial; the menu is a read-only archive
+ *   · manual_laporan_prestasi.id_prestasi int without AUTO_INCREMENT → identity PK (§6.4)
+ *   · materi.id_materi likewise → identity PK; the menu is a read-only archive
  *   · redundant KEY laporanid dropped (§7.1)
  */
 import {
   bigint,
-  bigserial,
   boolean,
   date,
   index,
@@ -32,13 +31,15 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { TNY, VERSI_STRUKTUR } from '../../lib/enums';
-import { checkOneOfNullable, externalIds, kantorId, money } from './_shared';
+import { checkOneOfNullable, externalIds, kantorId, money, pk } from './_shared';
 import { ajisSemester } from './setting';
 
 export const manualLaporan = pgTable(
   'manual_laporan',
   {
-    laporanid: varchar('laporanid', { length: 50 }).primaryKey(),
+    id: pk(),
+    // business key; manual_laporan_pembinaan's FK still points here
+    laporanid: varchar('laporanid', { length: 50 }).notNull().unique(),
     // 'baru' | 'lama' — marks rows merged in from manual_laporan_lama (§6.5)
     versiStruktur: varchar('versi_struktur', { length: 5 }).notNull().default('baru'),
 
@@ -167,7 +168,7 @@ export const manualLaporan = pgTable(
 export const manualLaporanPembinaan = pgTable(
   'manual_laporan_pembinaan',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    id: pk(),
     // widened from varchar(12) to match manual_laporan.laporanid (§6.3)
     laporanid: varchar('laporanid', { length: 50 })
       .notNull()
@@ -191,7 +192,7 @@ export const manualLaporanPrestasi = pgTable(
   'manual_laporan_prestasi',
   {
     // legacy int had no AUTO_INCREMENT — ids were generated in PHP (§6.4)
-    idPrestasi: bigserial('id_prestasi', { mode: 'number' }).primaryKey(),
+    idPrestasi: pk('id_prestasi'),
     idAnak: varchar('id_anak', { length: 25 }),
     namaAnak: varchar('nama_anak', { length: 150 }),
     jnsKel: varchar('jns_kel', { length: 1 }),
@@ -220,7 +221,7 @@ export const manualLaporanPrestasi = pgTable(
 export const materi = pgTable(
   'materi',
   {
-    idMateri: bigserial('id_materi', { mode: 'number' }).primaryKey(),
+    idMateri: pk('id_materi'),
     detailid: varchar('detailid', { length: 50 }),
     materi: text('materi'),
     tanggal: date('tanggal'),

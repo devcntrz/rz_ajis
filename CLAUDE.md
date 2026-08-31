@@ -29,6 +29,22 @@ The app is mid-migration and has **two connections** (PRD §5.1):
 - Porting a query from MySQL to Postgres: `?` → `$1`, and `IN (?)` → **`= ANY($1::text[])`** — the naive `IN ($1)` compiles and silently returns nothing.
 - `insertId` has no Postgres analogue; use `RETURNING id` with `executeReturning()`.
 
+**Primary keys.** Every table's PK is `bigint GENERATED ALWAYS AS IDENTITY`. Never
+write `serial`/`bigserial`, and never `pgEnum` or `uuid`. In `db/schema/*.ts` use the
+`pk()` helper from `db/schema/_shared.ts`.
+
+Natural/business keys (`ajis_anak.id_anak`, `ajis_kantor.oid`, `id_pemasangan_baru`,
+`semesterid`, …) are **not** PKs — they are `NOT NULL UNIQUE`, and foreign keys point
+at them directly. Keep it that way: it is what lets the migration-day ETL load legacy
+rows without translating ids. This uniformity extends PRD §6.4 to all 41 tables by
+deliberate decision; it is not drift.
+
+**Loading rows with your own ids.** `GENERATED ALWAYS` rejects an explicit id unless
+the statement says `OVERRIDING SYSTEM VALUE`. Any code that does so — the seed, and
+later the ETL — must follow with `npm run db:fix-sequences`, or the next ordinary
+INSERT collides. `npm run db:fix-sequences -- --check` reports drift and exits 1;
+run it after any restore or bulk load. See the restore runbook in `db/README.md`.
+
 **On the Postgres track, migrations and seeding are allowed** — that is how the schema is built:
 
 ```
