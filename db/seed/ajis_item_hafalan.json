@@ -1,0 +1,32 @@
+{
+  "table": "ajis_item_hafalan",
+  "source": "ajis_item_hafalan",
+  "conflict": "(id)",
+  "rows": [
+    {
+      "id": "138",
+      "jenis": 4,
+      "konten": "Akhir Majelis"
+    },
+    {
+      "id": "137",
+      "jenis": 4,
+      "konten": "Meminta Ilmu"
+    },
+    {
+      "id": "136",
+      "jenis": 4,
+      "konten": "Keluar Masjid"
+    },
+    {
+      "id": "135",
+      "jenis": 4,
+      "konten": "Masuk Masjid"
+    },
+    {
+      "id": "134",
+      "jenis": 4,
+      "konten": "Keluar Toilet"
+    }
+  ]
+}

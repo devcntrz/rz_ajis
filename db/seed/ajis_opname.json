@@ -1,0 +1,81 @@
+{
+  "table": "ajis_opname",
+  "source": "ajis_opname",
+  "conflict": "(tahun, id_pemasangan_baru)",
+  "rows": [
+    {
+      "tahun": 2018,
+      "id_program": 0,
+      "id_pemasangan_baru": "2018000",
+      "saldo_awal_ganjil": "0",
+      "saldo_akhir_ganjil": "0",
+      "saldo_awal_genap": "0",
+      "saldo_akhir_genap": "0",
+      "external_ids": {
+        "jcustid": "0"
+      }
+    },
+    {
+      "tahun": 2018,
+      "id_donatur": "1001070000114",
+      "program_donasi": "Beasiswa Anak Juara SD",
+      "id_program": 97,
+      "id_pemasangan_baru": "10010700001142018097",
+      "saldo_awal_ganjil": "0",
+      "saldo_akhir_ganjil": "0",
+      "saldo_awal_genap": "0",
+      "saldo_akhir_genap": "0",
+      "kantor_id": "09-199",
+      "external_ids": {
+        "jcustid": "1"
+      }
+    },
+    {
+      "tahun": 2018,
+      "id_donatur": "1006100000220",
+      "program_donasi": "Beasiswa Anak Juara SD",
+      "id_program": 97,
+      "id_pemasangan_baru": "10061000002202018097",
+      "saldo_awal_ganjil": "0",
+      "saldo_akhir_ganjil": "0",
+      "saldo_awal_genap": "0",
+      "saldo_akhir_genap": "0",
+      "kantor_id": "09-213",
+      "external_ids": {
+        "jcustid": "1"
+      }
+    },
+    {
+      "tahun": 2018,
+      "id_anak": "09194160003",
+      "id_donatur": "1001140001511",
+      "program_donasi": "Beasiswa Anak Juara SD",
+      "id_program": 97,
+      "id_pemasangan_baru": "0919416000310011400015112018097",
+      "saldo_awal_ganjil": "0",
+      "saldo_akhir_ganjil": "0",
+      "saldo_awal_genap": "0",
+      "saldo_akhir_genap": "0",
+      "kantor_id": "09-194",
+      "external_ids": {
+        "jcustid": "1"
+      }
+    },
+    {
+      "tahun": 2018,
+      "id_anak": "09194160004",
+      "id_donatur": "1024100000142",
+      "program_donasi": "Beasiswa Anak Juara SMP",
+      "id_program": 100,
+      "id_pemasangan_baru": "0919416000410241000001422018100",
+      "saldo_awal_ganjil": "180000",
+      "saldo_akhir_ganjil": "0",
+      "saldo_awal_genap": "0",
+      "saldo_akhir_genap": "0",
+      "kantor_id": "09-194",
+      "external_ids": {
+        "jcustid": "1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "table": "ajis_user",
+  "source": "ajis_user",
+  "conflict": "(username)",
+  "rows": [
+    {
+      "username": "smk.koperasi",
+      "nik": "0",
+      "kantor_id": "09-215",
+      "nama_kantor": "RZ - Yogyakarta",
+      "nama_wilayah": "SMK Koperasi Yogyakarta",
+      "aktif": true,
+      "date_insert": "2026-06-24 17:00:00",
+      "id_group_user": 9,
+      "id_wilayah_pembinaan": 651
+    },
+    {
+      "username": "cnt",
+      "nik": "0",
+      "kantor_id": "09-219",
+      "nama_kantor": "RZ - Pusat",
+      "aktif": true,
+      "date_insert": "2025-10-29 17:00:00",
+      "id_group_user": 1,
+      "id_wilayah_pembinaan": 626
+    },
+    {
+      "username": "Sempaja_Utara",
+      "nik": "0",
+      "kantor_id": "09-221",
+      "nama_kantor": "RZ - Samarinda",
+      "nama_wilayah": "Samarinda Utara_Sempaja Utara",
+      "aktif": true,
+      "date_insert": "2025-07-10 17:00:00",
+      "id_group_user": 9,
+      "id_wilayah_pembinaan": 645
+    },
+    {
+      "username": "Rumah_Literasi",
+      "nik": "0",
+      "kantor_id": "09-218",
+      "nama_kantor": "RZ - Makassar",
+      "nama_wilayah": "Rumah Literasi",
+      "aktif": true,
+      "date_insert": "2025-01-19 17:00:00",
+      "id_group_user": 9,
+      "id_wilayah_pembinaan": 647
+    },
+    {
+      "username": "irvantestos",
+      "nik": "0",
+      "kantor_id": "pusat",
+      "aktif": true,
+      "date_insert": "2024-10-27 17:00:00",
+      "id_group_user": 1
+    }
+  ]
+}

@@ -16,11 +16,49 @@ The app is written in **TypeScript**, deployed on **Vercel**, and connects to an
 ## 2. Strict Rules — Always Follow
 
 ### 2.1 Database Rules
-- **NEVER use an ORM.** All database queries must be written as raw SQL strings using `mysql2/promise`.
-- **NEVER run migrations.** The schema already exists. Do not CREATE, ALTER, or DROP any tables.
-- **NEVER seed data.** Do not write seed scripts or INSERT test data into production tables.
+
+The app is mid-migration and has **two connections** (PRD §5.1):
+
+| Connection | Helper | Access | Contents |
+|---|---|---|---|
+| **Neon Postgres — primary** | `lib/pg.ts` | read/write | The converted AJIS schema (PRD §6). Placeholders are `$1, $2`. |
+| **MySQL — legacy** | `lib/db.ts` | read/write today, becoming SELECT-only `zains_rz` | The transition pages still in service. Placeholders are `?`. |
+
+- **NEVER use an ORM at runtime.** All queries are raw SQL strings — `pg` for Postgres, `mysql2/promise` for MySQL. Drizzle exists **only** to generate migrations from `db/schema/*.ts`; importing it (or anything under `db/schema/`) from `app/`, `lib/`, `components/` or `hooks/` is an eslint error.
 - Always use parameterized queries. Never interpolate user input directly into SQL strings.
-- Use the `query<T>()` and `queryOne<T>()` helpers from `lib/db.ts`.
+- Porting a query from MySQL to Postgres: `?` → `$1`, and `IN (?)` → **`= ANY($1::text[])`** — the naive `IN ($1)` compiles and silently returns nothing.
+- `insertId` has no Postgres analogue; use `RETURNING id` with `executeReturning()`.
+
+**Primary keys.** Every table's PK is `bigint GENERATED ALWAYS AS IDENTITY`. Never
+write `serial`/`bigserial`, and never `pgEnum` or `uuid`. In `db/schema/*.ts` use the
+`pk()` helper from `db/schema/_shared.ts`.
+
+Natural/business keys (`ajis_anak.id_anak`, `ajis_kantor.oid`, `id_pemasangan_baru`,
+`semesterid`, …) are **not** PKs — they are `NOT NULL UNIQUE`, and foreign keys point
+at them directly. Keep it that way: it is what lets the migration-day ETL load legacy
+rows without translating ids. This uniformity extends PRD §6.4 to all 41 tables by
+deliberate decision; it is not drift.
+
+**Loading rows with your own ids.** `GENERATED ALWAYS` rejects an explicit id unless
+the statement says `OVERRIDING SYSTEM VALUE`. Any code that does so — the seed, and
+later the ETL — must follow with `npm run db:fix-sequences`, or the next ordinary
+INSERT collides. `npm run db:fix-sequences -- --check` reports drift and exits 1;
+run it after any restore or bulk load. See the restore runbook in `db/README.md`.
+
+**On the Postgres track, migrations and seeding are allowed** — that is how the schema is built:
+
+```
+npm run db:generate        diff db/schema/*.ts → a new db/migrations/*.sql
+npm run db:custom          hand-written migration (extensions, matviews, CONCURRENTLY)
+npm run db:migrate         apply pending migrations; re-running is a no-op
+npm run db:fixtures        refresh db/seed/*.json from refs/sipc_ijf_sample.sql
+npm run db:seed            load fixtures; idempotent
+```
+
+- **Never edit a migration that has already been applied.** The runner hashes each file and fails with a "hash drift" error. Add a new migration instead.
+- **Never run `drizzle-kit push`.** It applies DDL directly and desyncs the journal from what `scripts/migrate.mjs` believes has been applied. There is deliberately no `db:push` script.
+- On the **legacy MySQL** database the old rules still hold: no migrations, no seeding, no schema changes.
+- `.env.local` is a `vercel env pull` of the **production** environment, so `DATABASE_URL` points at the production Neon branch and `VERCEL_ENV` reads `production` even under `next dev`. Guard on `NODE_ENV`, not `VERCEL_ENV`. `npm run db:reseed` (which truncates) refuses to run against it — by design.
 
 ```typescript
 // CORRECT
@@ -32,6 +70,28 @@ const rows = await query<Anak>(
 // WRONG — never do this
 const rows = await db.anak.findMany({ where: { id_wilayah_pembinaan: wilayahId } });
 ```
+
+### 2.1a Authentication — legacy scheme, on MySQL
+
+Login is **username + password against MySQL `ajis_user`**, unchanged from the
+legacy system. This is a deliberate divergence from PRD §3.3, which specifies
+Google SSO matched on `ajis_user.email`: SSO is a later step, and the Postgres
+`ajis_user` table already carries the `email UNIQUE` column it will need.
+
+- `POST /api/anakjuara/auth/login` — compares with MySQL's own `MD5()` so the
+  existing 32-char hashes keep working. Filters `aktif = 'y'`.
+- `POST /api/anakjuara/auth/logout` — destroys the cookie.
+- Session is `iron-session` in the `ajis_session` cookie, 7 days, signed with
+  `SESSION_SECRET`. Shape is `SessionData` in `lib/auth.ts`.
+- `middleware.ts` redirects unauthenticated page requests to `/login`, and
+  authenticated requests for `/login` back to `/`.
+- **`middleware.ts` does not cover `/api`.** Every route handler must therefore
+  call `getSession()` / `requireSession()` itself — the middleware is not a
+  substitute (see §2.2).
+
+MD5 is not an acceptable long-term password hash. It is retained only because the
+stored hashes are MD5 and the migration to SSO removes the password column
+entirely (§3.3). Do not build new features on it.
 
 ### 2.2 API Rules
 - All API routes live under `app/api/anakjuara/`.
@@ -59,7 +119,13 @@ const rows = await db.anak.findMany({ where: { id_wilayah_pembinaan: wilayahId }
 
 | File | Purpose |
 |---|---|
-| `lib/db.ts` | MySQL connection pool — use `query<T>()` and `queryOne<T>()` |
+| `lib/pg.ts` | **Neon Postgres pool (primary)** — `query<T>()`, `queryOne<T>()`, `execute()`, `executeReturning()`, `withTransaction()`. Placeholders `$1`. |
+| `lib/db.ts` | MySQL pool (legacy / future `zains_rz`) — same API, placeholders `?` |
+| `lib/enums.ts` | Allowed values for every legacy enum kept as varchar+CHECK. Shared by `db/schema` and Zod validators. |
+| `db/schema/*.ts` | Drizzle schema — **migration input only**, never imported at runtime |
+| `db/migrations/` | Generated + hand-written SQL, applied by `scripts/migrate.mjs` |
+| `db/seed/*.json` | Reviewed seed fixtures produced by `scripts/dump-to-fixtures.mjs` |
+| `components/layout/navConfig.ts` | Single source for both nav components: the `transisi` and `produksi` menu groups |
 | `lib/auth.ts` | Session management with `iron-session` |
 | `lib/cache.ts` | `unstable_cache` wrappers for read-heavy data |
 | `lib/utils.ts` | `scoreToNilai()`, `fmtTgl()`, `calcAge()`, `inits()` |
@@ -73,7 +139,7 @@ const rows = await db.anak.findMany({ where: { id_wilayah_pembinaan: wilayahId }
 
 ## 4. Database Schema Quick Reference
 
-### Tables Used (do not modify)
+### Legacy MySQL tables (do not modify)
 ```sql
 ajis_anak              -- child records (id_anak, nama_lengkap, jns_kel, ...)
 ajis_pembinaan_baru    -- coaching sessions (id_pembinaan, tgl_pembinaan, ...)

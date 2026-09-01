@@ -1,0 +1,37 @@
+{
+  "table": "ref_propinsi",
+  "source": "ref_propinsi",
+  "conflict": "(propid)",
+  "rows": [
+    {
+      "propid": "9400",
+      "propinsi": "Papua",
+      "ibukota": "\tJayapura\t",
+      "aktif": true
+    },
+    {
+      "propid": "8200",
+      "propinsi": "Maluku Utara",
+      "ibukota": "\tSofifi/Ternate\t",
+      "aktif": true
+    },
+    {
+      "propid": "8100",
+      "propinsi": "Maluku",
+      "ibukota": "\tAmbon\t",
+      "aktif": true
+    },
+    {
+      "propid": "7600",
+      "propinsi": "Sulawesi Barat",
+      "ibukota": "\tMamuju\t",
+      "aktif": true
+    },
+    {
+      "propid": "7500",
+      "propinsi": "Gorontalo",
+      "ibukota": "\tGorontalo\t",
+      "aktif": true
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "table": "ref_kabupaten",
+  "source": "ref_kabupaten",
+  "conflict": "(kabid)",
+  "rows": [
+    {
+      "kabid": "1278",
+      "propid": "1200",
+      "kabupaten": "Serdang Bedagai",
+      "kota": false,
+      "aktif": true,
+      "lat": "0",
+      "lng": "0"
+    },
+    {
+      "kabid": "1101",
+      "propid": "1100",
+      "kabupaten": "Kab. Simeulue",
+      "kota": false,
+      "ibukota": "Sinabung",
+      "oid": "05-012",
+      "aktif": true,
+      "lat": "2.583333",
+      "lng": "96.083336"
+    },
+    {
+      "kabid": "1102",
+      "propid": "1100",
+      "kabupaten": "Kab. Aceh Singkil",
+      "kota": false,
+      "ibukota": "Singkil",
+      "oid": "05-012",
+      "aktif": true,
+      "lat": "2.371511",
+      "lng": "97.770081"
+    },
+    {
+      "kabid": "1103",
+      "propid": "1100",
+      "kabupaten": "Kab. Aceh Selatan",
+      "kota": false,
+      "ibukota": "Tapakutan",
+      "oid": "05-012",
+      "aktif": true,
+      "lat": "3.266619",
+      "lng": "97.183319"
+    },
+    {
+      "kabid": "1104",
+      "propid": "1100",
+      "kabupaten": "Kab. Aceh Tenggara",
+      "kota": false,
+      "ibukota": "Kutacane",
+      "oid": "05-012",
+      "aktif": true,
+      "lat": "3.480802",
+      "lng": "97.807159"
+    }
+  ]
+}

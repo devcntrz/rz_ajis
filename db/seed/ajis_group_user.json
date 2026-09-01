@@ -1,0 +1,32 @@
+{
+  "table": "ajis_group_user",
+  "source": "ajis_group_user",
+  "conflict": "(group_user)",
+  "rows": [
+    {
+      "group_user": "RZ",
+      "keterangan": "RZ",
+      "aktif": true
+    },
+    {
+      "group_user": "Zisco Leader",
+      "keterangan": "Zisco Leader RZ",
+      "aktif": true
+    },
+    {
+      "group_user": "Wilayah Binaan",
+      "keterangan": "Mentor",
+      "aktif": true
+    },
+    {
+      "group_user": "PMD Cabang",
+      "keterangan": "PMD Cabang",
+      "aktif": true
+    },
+    {
+      "group_user": "PMD",
+      "keterangan": "Pusat",
+      "aktif": true
+    }
+  ]
+}

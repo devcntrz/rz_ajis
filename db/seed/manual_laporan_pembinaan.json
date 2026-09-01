@@ -1,0 +1,62 @@
+{
+  "table": "manual_laporan_pembinaan",
+  "source": "manual_laporan_pembinaan",
+  "conflict": "(laporanid, detailid)",
+  "rows": [
+    {
+      "laporanid": "180404000107",
+      "detailid": 1,
+      "id_anak": "09199170225",
+      "semesterid": "09",
+      "tanggal": "2017-07-15 17:00:00",
+      "materi": "Halal Bihalal dan Evaluasi Ramadhan",
+      "date_insert": "2018-04-03 17:00:00",
+      "user_insert": "irvan",
+      "aktif": true
+    },
+    {
+      "laporanid": "180404000107",
+      "detailid": 5,
+      "id_anak": "09199170225",
+      "semesterid": "09",
+      "tanggal": "2017-09-16 17:00:00",
+      "materi": "Keutamaan Birrul Walidain",
+      "date_insert": "2018-04-03 17:00:00",
+      "user_insert": "irvan",
+      "aktif": true
+    },
+    {
+      "laporanid": "180404000107",
+      "detailid": 3,
+      "id_anak": "09199170225",
+      "semesterid": "09",
+      "tanggal": "2017-08-12 17:00:00",
+      "materi": "Membangun Cita-cita dengan konsep Khoirun Nass Anf",
+      "date_insert": "2018-04-03 17:00:00",
+      "user_insert": "irvan",
+      "aktif": true
+    },
+    {
+      "laporanid": "180404000107",
+      "detailid": 12,
+      "id_anak": "09199170225",
+      "semesterid": "09",
+      "tanggal": "2017-12-16 17:00:00",
+      "materi": "Bahaya Perayaan Malam Tahun Baru Masehi",
+      "date_insert": "2018-04-03 17:00:00",
+      "user_insert": "irvan",
+      "aktif": true
+    },
+    {
+      "laporanid": "180404000107",
+      "detailid": 2,
+      "id_anak": "09199170225",
+      "semesterid": "09",
+      "tanggal": "2017-07-22 17:00:00",
+      "materi": "Bersahabat Dengan Lingkungan",
+      "date_insert": "2018-04-03 17:00:00",
+      "user_insert": "irvan",
+      "aktif": true
+    }
+  ]
+}

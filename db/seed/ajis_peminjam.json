@@ -1,0 +1,52 @@
+{
+  "table": "ajis_peminjam",
+  "source": "ajis_peminjam",
+  "conflict": "(id_peminjam)",
+  "rows": [
+    {
+      "id_peminjam": "1122024836866",
+      "nama_lengkap": "Angga Prayuda",
+      "jabatan": "Ziswaf Consultant",
+      "kantor": "RZ - Medan",
+      "hp": "62895614006804",
+      "email": "angga.prayuda@rumahzakat.org",
+      "date_insert": "2025-06-06 17:00:00",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_peminjam": "1082023835416",
+      "nama_lengkap": "Randy Yan Pahlepi",
+      "jabatan": "Program Implementator",
+      "kantor": "RZ Medan",
+      "hp": "081360777628",
+      "email": "randy.yan@rumahzakat.org",
+      "date_insert": "2024-09-09 17:00:00",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_peminjam": "1062005025035",
+      "nama_lengkap": "Ganjar Nugraha",
+      "date_insert": "2020-07-08 17:00:00",
+      "date_update": "1899-11-29 16:52:48",
+      "external_ids": {
+        "id_user_erpwh": "140"
+      }
+    },
+    {
+      "id_peminjam": "87654321",
+      "nama_lengkap": "khairani efendi s",
+      "jabatan": "TU dan Finance",
+      "kantor": "SDJ Tangerang",
+      "hp": "085261885352",
+      "date_insert": "2020-02-06 17:00:00",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_peminjam": "12345678",
+      "nama_lengkap": "Ardiansyah Pratomo Saputra",
+      "jabatan": "Funding",
+      "date_insert": "2019-02-14 17:00:00",
+      "date_update": "1899-11-29 16:52:48"
+    }
+  ]
+}

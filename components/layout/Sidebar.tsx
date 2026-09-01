@@ -1,31 +1,14 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Home, Users, ClipboardList, Award, ChevronRight, GraduationCap, RefreshCw, Wallet,
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { GroupSwitcher } from './GroupSwitcher';
+import { activeHref, groupForPath, visibleItems, type NavItem } from './navConfig';
 
 const T = {
   primary: '#BF4E02', primaryDk: '#8F3A01', primaryLt: '#D96A1A',
   white: '#FFFFFF',
 };
-
-interface NavItem {
-  href: string;
-  icon: typeof Home;
-  label: string;
-  groups?: number[];
-}
-
-const navItems: NavItem[] = [
-  { href: '/', icon: Home, label: 'Beranda' },
-  { href: '/anak', icon: Users, label: 'Pengajuan Beasiswa' },
-  { href: '/anak-juara', icon: GraduationCap, label: 'Anak Juara', groups: [1, 2] },
-  { href: '/ajuan-pergantian', icon: RefreshCw, label: 'Ajuan Pergantian', groups: [1, 2] },
-  { href: '/transaksi', icon: Wallet, label: 'Transaksi', groups: [1, 2] },
-  { href: '/pembinaan', icon: ClipboardList, label: 'Pembinaan' },
-  { href: '/penilaian', icon: Award, label: 'Penilaian' },
-];
 
 interface SidebarProps {
   idGroupUser: number;
@@ -33,9 +16,19 @@ interface SidebarProps {
 
 export function Sidebar({ idGroupUser }: SidebarProps) {
   const pathname = usePathname();
-  const visible = navItems.filter(
-    item => !item.groups || item.groups.includes(idGroupUser),
-  );
+  // The path decides the group, not stored state: a deep link must never open the
+  // sidebar on the group that does not contain the page being viewed.
+  const group = groupForPath(pathname);
+  const items = visibleItems(group, idGroupUser);
+  const active = activeHref(items, pathname);
+
+  // Group consecutive items by section, preserving the config's order.
+  const sections: { name?: string; items: NavItem[] }[] = [];
+  for (const item of items) {
+    const last = sections[sections.length - 1];
+    if (last && last.name === item.section) last.items.push(item);
+    else sections.push({ name: item.section, items: [item] });
+  }
 
   return (
     <nav className="sidebar">
@@ -49,28 +42,60 @@ export function Sidebar({ idGroupUser }: SidebarProps) {
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,.7)', marginTop: 2, fontWeight: 500 }}>
           Information System
         </div>
+        <GroupSwitcher group={group} />
       </div>
 
-      <div style={{ flex: 1, padding: '12px 10px' }}>
-        {visible.map(({ href, icon: Icon, label }) => {
-          const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
-          return (
-            <Link key={href} href={href} style={{ textDecoration: 'none', display: 'block', marginBottom: 2 }}>
+      <div style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
+        {sections.map((section, si) => (
+          <div key={section.name ?? si} style={{ marginBottom: section.name ? 10 : 0 }}>
+            {section.name && (
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 12px', borderRadius: 10,
-                background: active ? 'rgba(255,255,255,.22)' : 'transparent',
-                color: active ? T.white : 'rgba(255,255,255,.78)',
-                fontWeight: active ? 700 : 500, fontSize: 14,
-                transition: 'background .15s',
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: '.06em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,.5)',
+                padding: '10px 12px 5px',
               }}>
-                <Icon size={17} strokeWidth={active ? 2.5 : 2} style={{ flexShrink: 0 }} />
-                <span style={{ flex: 1 }}>{label}</span>
-                {active && <ChevronRight size={14} />}
+                {section.name}
               </div>
-            </Link>
-          );
-        })}
+            )}
+
+            {section.items.map(({ href, icon: Icon, label, ready }) => {
+              const isActive = href === active;
+              return (
+                <Link key={href} href={href} style={{ textDecoration: 'none', display: 'block', marginBottom: 2 }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '9px 12px', borderRadius: 10,
+                    background: isActive ? 'rgba(255,255,255,.22)' : 'transparent',
+                    color: isActive ? T.white : 'rgba(255,255,255,.78)',
+                    fontWeight: isActive ? 700 : 500, fontSize: 14,
+                    transition: 'background .15s',
+                  }}>
+                    <Icon size={17} strokeWidth={isActive ? 2.5 : 2} style={{ flexShrink: 0 }} />
+                    <span style={{ flex: 1, opacity: ready === false ? 0.72 : 1 }}>{label}</span>
+                    {ready === false && (
+                      <span
+                        title="Halaman belum tersedia"
+                        style={{
+                          fontSize: 9, fontWeight: 700, letterSpacing: '.03em',
+                          padding: '2px 5px', borderRadius: 5,
+                          background: 'rgba(255,255,255,.16)',
+                          color: 'rgba(255,255,255,.72)',
+                          flexShrink: 0,
+                        }}
+                      >
+                        SOON
+                      </span>
+                    )}
+                    {isActive && <ChevronRight size={14} style={{ flexShrink: 0 }} />}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       <div style={{

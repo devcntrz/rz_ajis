@@ -1,0 +1,54 @@
+{
+  "table": "sdm_penugasan",
+  "source": "ajis_jabatan_sdm",
+  "conflict": "(id_penugasan)",
+  "rows": [
+    {
+      "id_wilayah_pembinaan": 651,
+      "id_penugasan": "5285",
+      "id_sdm": 2462,
+      "keaktifan_edukasi": "y",
+      "id_fungsi_struktur": "2",
+      "date_insert": "1899-11-29 16:52:48",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_wilayah_pembinaan": 1,
+      "kantor_id": "09-218",
+      "id_penugasan": "1522",
+      "id_sdm": 6,
+      "keaktifan_edukasi": "y",
+      "id_fungsi_struktur": "15",
+      "date_insert": "1899-11-29 16:52:48",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_wilayah_pembinaan": 185,
+      "kantor_id": "10-230",
+      "id_penugasan": "2014",
+      "id_sdm": 142,
+      "keaktifan_edukasi": "y",
+      "id_fungsi_struktur": "1",
+      "date_insert": "1899-11-29 16:52:48",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_wilayah_pembinaan": 1,
+      "kantor_id": "09-218",
+      "id_penugasan": "1521",
+      "id_sdm": 6,
+      "keaktifan_edukasi": "y",
+      "date_insert": "1899-11-29 16:52:48",
+      "date_update": "1899-11-29 16:52:48"
+    },
+    {
+      "id_wilayah_pembinaan": 1,
+      "id_penugasan": "4837",
+      "id_sdm": 7,
+      "keaktifan_edukasi": "y",
+      "id_fungsi_struktur": "1",
+      "date_insert": "1899-11-29 16:52:48",
+      "date_update": "1899-11-29 16:52:48"
+    }
+  ]
+}
