@@ -79,6 +79,8 @@ const transisi: NavItem[] = [
   { href: '/anak-juara', icon: GraduationCap, label: 'Anak Juara', labelShort: 'AJ', groups: [1, 2], ready: true },
   { href: '/ajuan-pergantian', icon: RefreshCw, label: 'Ajuan Pergantian', labelShort: 'Ajuan', groups: [1, 2], ready: true },
   { href: '/transaksi', icon: Wallet, label: 'Transaksi', labelShort: 'Transaksi', groups: [1, 2], ready: true },
+  { href: '/input-donasi', icon: HandCoins, label: 'Input Donasi', labelShort: 'Donasi', groups: [1, 2], ready: true },
+  { href: '/penyaluran', icon: Send, label: 'Penyaluran', labelShort: 'Salur', groups: [1, 2], ready: true },
   { href: '/pembinaan', icon: ClipboardList, label: 'Pembinaan', labelShort: 'Pembinaan', ready: true },
   { href: '/penilaian', icon: Award, label: 'Penilaian', labelShort: 'Penilaian', ready: true },
 ];
