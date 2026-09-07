@@ -1,6 +1,7 @@
 'use client';
 import useSWR from 'swr';
 import { isListPageReady, parseRequestedPage } from '@/lib/pagination';
+import { LIST_SWR_OPTIONS } from '@/lib/swrConfig';
 import type { AjuanGantiAnak } from '@/types/ajuan';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -30,7 +31,7 @@ export function useAjuanList(
     page: number;
     limit: number;
     error?: string;
-  }>(key, fetcher);
+  }>(key, fetcher, LIST_SWR_OPTIONS);
 
   const responsePage = data?.page ?? 0;
   const isReady = isListPageReady(requestedPage, responsePage, isLoading, isValidating);

@@ -103,10 +103,12 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
   const { data: detailRes, isLoading: detailLoading } = useSWR<{ data: DetailPayload }>(
     `/api/anakjuara/ajuan-ganti-anak/${row.id_ajuan}/detail`,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
   const { data: donasiRes, isLoading: donasiLoading } = useSWR<{ data: DonasiPindahRow[] }>(
     `/api/anakjuara/ajuan-ganti-anak/${row.id_ajuan}/donasi-pindah`,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   const detail = detailRes?.data;

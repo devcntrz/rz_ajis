@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f /Users/irvan/Documents/projects/rz_ajis/verify_fix.mjs /Users/irvan/Documents/projects/rz_ajis/check_*.mjs 2>/dev/null *)"
+    ],
+    "additionalDirectories": [
+      "/Users/irvan/Documents/projects/rz_ajis"
+    ]
+  }
+}

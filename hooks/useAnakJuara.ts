@@ -1,6 +1,7 @@
 'use client';
 import useSWR from 'swr';
 import { isListPageReady, parseRequestedPage } from '@/lib/pagination';
+import { LIST_SWR_OPTIONS } from '@/lib/swrConfig';
 import type { AnakJuaraRow } from '@/types/anak-juara';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
@@ -30,7 +31,7 @@ export function useAnakJuara(
     page: number;
     limit: number;
     error?: string;
-  }>(key, fetcher);
+  }>(key, fetcher, LIST_SWR_OPTIONS);
 
   const responsePage = data?.page ?? 0;
   const isReady = isListPageReady(requestedPage, responsePage, isLoading, isValidating);

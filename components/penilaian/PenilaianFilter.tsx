@@ -22,6 +22,7 @@ export function PenilaianFilter({ onFilterChange, semester, setSemester }: Penil
   const { data: wilayahRes } = useSWR<{ data: Array<{ id_wilayah_pembinaan: number; nama_wilayah: string }> }>(
     '/api/anakjuara/wilayah',
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
   const wilayahList = wilayahRes?.data ?? [];
 

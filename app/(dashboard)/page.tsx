@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const { data: res, error, isLoading } = useSWR<{ data: DashboardData }>(
     '/api/anakjuara/dashboard',
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   if (isLoading) {
