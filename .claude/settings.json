@@ -3,7 +3,11 @@
     "allow": [
       "Bash(rm -f /Users/irvan/Documents/projects/rz_ajis/verify_fix.mjs /Users/irvan/Documents/projects/rz_ajis/check_*.mjs 2>/dev/null *)",
       "Bash(sed -i '' \"s/import { NextRequest, NextResponse } from 'next\\\\/server';/import { NextRequest } from 'next\\\\/server';/\" app/api/anakjuara/penyaluran/export/route.ts app/api/anakjuara/penyaluran/anak/export/route.ts)",
-      "Bash(sed -i '' \"s/import { NextResponse } from 'next\\\\/server';//\" \"app/api/anakjuara/penyaluran/[idPenyaluran]/export/route.ts\")"
+      "Bash(sed -i '' \"s/import { NextResponse } from 'next\\\\/server';//\" \"app/api/anakjuara/penyaluran/[idPenyaluran]/export/route.ts\")",
+      "Bash(node timing_test.mjs)",
+      "Bash(node meta_test.mjs)",
+      "Bash(pkill -f timing_test.mjs)",
+      "Bash(pkill -f bounded_test.mjs)"
     ],
     "additionalDirectories": [
       "/Users/irvan/Documents/projects/rz_ajis"

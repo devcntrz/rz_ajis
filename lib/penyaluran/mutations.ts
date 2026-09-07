@@ -21,6 +21,7 @@ import {
 import type { SessionData } from '@/lib/auth';
 import { RuleError, periode } from '@/lib/transaksi/rules';
 import { kandidatSalur, alreadySalur } from '@/lib/penyaluran/candidates';
+import { revalidatePenyaluranCache } from '@/lib/penyaluran/queries';
 import type { NewBulkInput, EditRowInput, TeknisInput } from '@/lib/penyaluran/schema';
 import type { NewBulkResult } from '@/types/penyaluran';
 
@@ -86,6 +87,9 @@ export async function createBulkPenyaluran(
     );
 
     return { id_penyaluran: idPenyaluran, jumlah_anak: final.length, dilewati: kandidat.length - final.length };
+  }).then(async result => {
+    await revalidatePenyaluranCache(result.id_penyaluran);
+    return result;
   });
 }
 
@@ -149,6 +153,9 @@ export async function createSingleRow(
     );
 
     return { id_row: result.insertId };
+  }).then(async result => {
+    await revalidatePenyaluranCache(idPenyaluran);
+    return result;
   });
 }
 
@@ -171,6 +178,7 @@ export async function deleteRow(idPenyaluran: string, idRow: number): Promise<vo
     );
     if (res.affectedRows === 0) throw new RuleError('Baris penyaluran tidak ditemukan.');
   });
+  await revalidatePenyaluranCache(idPenyaluran);
 }
 
 async function txExecuteWrap(sql: string, params: unknown[]) {
@@ -214,6 +222,7 @@ export async function editRow(
       [...params, idPenyaluran, idRow],
     );
   });
+  await revalidatePenyaluranCache(idPenyaluran);
 }
 
 /** Update Tgl-SDM (Teknis Penyaluran) — seluruh batch. */
@@ -241,6 +250,10 @@ export async function teknisPenyaluran(
     if (res.affectedRows === 0) throw new RuleError('Batch penyaluran tidak ditemukan.');
 
     return { id_penyaluran: nextId };
+  }).then(async result => {
+    await revalidatePenyaluranCache(idPenyaluran);
+    if (result.id_penyaluran !== idPenyaluran) await revalidatePenyaluranCache(result.id_penyaluran);
+    return result;
   });
 }
 
@@ -251,4 +264,5 @@ export async function pascaPenyaluran(idPenyaluran: string): Promise<void> {
     [idPenyaluran],
   );
   if (res.affectedRows === 0) throw new RuleError('Batch penyaluran tidak ditemukan.');
+  await revalidatePenyaluranCache(idPenyaluran);
 }

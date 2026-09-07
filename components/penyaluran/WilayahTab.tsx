@@ -6,7 +6,9 @@ import { Sel } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
-import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
+import { SimplePager } from '@/components/ui/SimplePager';
+import { ErrorRetry } from '@/components/ui/ErrorRetry';
+import type { PageSizeOption } from '@/components/ui/DesktopPagination';
 import { NewBulkWizard } from '@/components/penyaluran/NewBulkWizard';
 import { BatchDetailModal } from '@/components/penyaluran/BatchDetailModal';
 import { useBatchList, usePenyaluranLookup } from '@/hooks/usePenyaluran';
@@ -21,9 +23,11 @@ export function WilayahTab() {
   const [kantorId, setKantorId] = useState('');
   const [wilayahId, setWilayahId] = useState('');
   const [bulan, setBulan] = useState('');
-  const [tahun, setTahun] = useState('');
+  // Defaults to the current year so the first paint stays scoped — an unfiltered grid
+  // aggregates the whole ajis_penyaluran table (see lib/penyaluran/queries.ts).
+  const [tahun, setTahun] = useState(String(new Date().getFullYear()));
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const limit: PageSizeOption = DEFAULT_PAGE_SIZE;
   const [showNewBulk, setShowNewBulk] = useState(false);
   const [selected, setSelected] = useState<PenyaluranBatch | null>(null);
 
@@ -96,9 +100,10 @@ export function WilayahTab() {
           </Sel>
         </div>
         <div style={{ minWidth: 100 }}>
+          {/* No "Semua" option: an unfiltered year scans the entire table server-side
+              (lib/penyaluran/queries.ts::defaultTahun), so the picker always names one. */}
           <FLabel>Tahun</FLabel>
           <Sel value={tahun} onChange={e => { setTahun(e.target.value); setPage(1); }}>
-            <option value="">Semua</option>
             {[0, 1, 2].map(d => {
               const y = new Date().getFullYear() - d;
               return <option key={y} value={String(y)}>{y}</option>;
@@ -111,24 +116,30 @@ export function WilayahTab() {
         <a href={exportUrl}><Btn variant="outline"><Download size={15} /> Export</Btn></a>
       </div>
 
-      <div className="datagrid-desktop">
-        <DataTable<PenyaluranBatch>
-          columns={columns}
-          data={list.isReady ? list.data : []}
-          loading={!list.isReady}
-          rowKey={r => r.id_penyaluran}
-          onRowClick={r => setSelected(r)}
-          gridLines
-          minWidth={1600}
-          emptyText="Tidak ada batch penyaluran untuk filter ini."
+      {list.error ? (
+        <ErrorRetry
+          message={list.error.message || 'Gagal memuat data batch penyaluran.'}
+          onRetry={refresh}
         />
-      </div>
+      ) : (
+        <div className="datagrid-desktop">
+          <DataTable<PenyaluranBatch>
+            columns={columns}
+            data={list.isReady ? list.data : []}
+            loading={!list.isReady}
+            rowKey={r => r.id_penyaluran}
+            onRowClick={r => setSelected(r)}
+            gridLines
+            minWidth={1600}
+            emptyText="Tidak ada batch penyaluran untuk filter ini."
+          />
+        </div>
+      )}
 
-      {list.total > 0 && (
-        <DesktopPagination
-          page={page} limit={limit} total={list.total}
-          onPageChange={setPage}
-          onLimitChange={next => { setLimit(next); setPage(1); }}
+      {list.data.length > 0 && (
+        <SimplePager
+          page={page} hasMore={list.hasMore} onPageChange={setPage}
+          shownCount={list.data.length}
         />
       )}
 
