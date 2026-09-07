@@ -7,7 +7,9 @@ import { Input, Sel } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
 import { DataTable } from '@/components/ui/DataTable';
 import { RowActions } from '@/components/ui/RowActions';
-import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
+import { SimplePager } from '@/components/ui/SimplePager';
+import { ErrorRetry } from '@/components/ui/ErrorRetry';
+import type { PageSizeOption } from '@/components/ui/DesktopPagination';
 import { EditRowModal } from '@/components/penyaluran/EditRowModal';
 import { useAnakGridList, usePenyaluranLookup } from '@/hooks/usePenyaluran';
 import { DEFAULT_PAGE_SIZE } from '@/lib/pagination';
@@ -18,22 +20,35 @@ const T = { green: '#1A7A45', gray: '#7A6055' };
 
 export function AnakTab() {
   const { kantor, wilayah } = usePenyaluranLookup();
+  // Staged like TransaksiFilter: the grid refetches on "Cari", not on every keystroke —
+  // an unstaged `q` used to trigger a LIKE scan per keypress.
+  const [qDraft, setQDraft] = useState('');
   const [q, setQ] = useState('');
   const [kantorId, setKantorId] = useState('');
   const [wilayahId, setWilayahId] = useState('');
+  const [bulan, setBulan] = useState('');
+  // No "Semua" option: an unfiltered year scans the whole table server-side
+  // (lib/penyaluran/queries.ts::defaultTahun), which is what made this grid feel stuck.
+  const [tahun, setTahun] = useState(String(new Date().getFullYear()));
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const limit: PageSizeOption = DEFAULT_PAGE_SIZE;
   const [editRow, setEditRow] = useState<PenyaluranRow | null>(null);
 
-  const list = useAnakGridList({ q, kantor_id: kantorId, id_wilayah_pembinaan: wilayahId, page, limit });
+  const list = useAnakGridList({
+    q, kantor_id: kantorId, id_wilayah_pembinaan: wilayahId, bulan, tahun, page, limit,
+  });
   const refresh = useCallback(() => list.mutate(), [list]);
   const filteredWilayah = kantorId ? wilayah.filter(w => w.kantor_id === kantorId) : wilayah;
+
+  const search = () => { setQ(qDraft); setPage(1); };
 
   const exportUrl = (() => {
     const qs = new URLSearchParams();
     if (q) qs.set('q', q);
     if (kantorId) qs.set('kantor_id', kantorId);
     if (wilayahId) qs.set('id_wilayah_pembinaan', wilayahId);
+    if (bulan) qs.set('bulan', bulan);
+    if (tahun) qs.set('tahun', tahun);
     return `/api/anakjuara/penyaluran/anak/export${qs.toString() ? `?${qs}` : ''}`;
   })();
 
@@ -87,7 +102,7 @@ export function AnakTab() {
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div style={{ flex: '2 1 220px', minWidth: 200 }}>
           <FLabel>Cari</FLabel>
-          <Input value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') setPage(1); }} placeholder="Nama/ID anak, donatur…" />
+          <Input value={qDraft} onChange={e => setQDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') search(); }} placeholder="Nama/ID anak, donatur…" />
         </div>
         <div style={{ minWidth: 160 }}>
           <FLabel>Kantor</FLabel>
@@ -105,27 +120,49 @@ export function AnakTab() {
             ))}
           </Sel>
         </div>
-        <Btn variant="primary" onClick={() => setPage(1)}><Search size={15} /> Cari</Btn>
+        <div style={{ minWidth: 100 }}>
+          <FLabel>Bulan</FLabel>
+          <Sel value={bulan} onChange={e => { setBulan(e.target.value); setPage(1); }}>
+            <option value="">Semua</option>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(b => <option key={b} value={String(b)}>{b}</option>)}
+          </Sel>
+        </div>
+        <div style={{ minWidth: 100 }}>
+          <FLabel>Tahun</FLabel>
+          <Sel value={tahun} onChange={e => { setTahun(e.target.value); setPage(1); }}>
+            {[0, 1, 2].map(d => {
+              const y = new Date().getFullYear() - d;
+              return <option key={y} value={String(y)}>{y}</option>;
+            })}
+          </Sel>
+        </div>
+        <Btn variant="primary" onClick={search}><Search size={15} /> Cari</Btn>
         <a href={exportUrl}><Btn variant="outline"><Download size={15} /> Export</Btn></a>
       </div>
 
-      <div className="datagrid-desktop">
-        <DataTable<PenyaluranRow>
-          columns={columns}
-          data={list.isReady ? list.data : []}
-          loading={!list.isReady}
-          rowKey={r => `${r.id_penyaluran}::${r.id_row}`}
-          gridLines
-          minWidth={1700}
-          emptyText="Tidak ada baris penyaluran untuk filter ini."
+      {list.error ? (
+        <ErrorRetry
+          message={list.error.message || 'Gagal memuat data penyaluran anak.'}
+          onRetry={refresh}
         />
-      </div>
+      ) : (
+        <div className="datagrid-desktop">
+          <DataTable<PenyaluranRow>
+            columns={columns}
+            data={list.isReady ? list.data : []}
+            loading={!list.isReady}
+            rowKey={r => `${r.id_penyaluran}::${r.id_row}`}
+            gridLines
+            minWidth={1700}
+            emptyText="Tidak ada baris penyaluran untuk filter ini."
+          />
+        </div>
+      )}
 
-      {list.total > 0 && (
-        <DesktopPagination
-          page={page} limit={limit} total={list.total}
-          onPageChange={setPage}
-          onLimitChange={next => { setLimit(next); setPage(1); }}
+      {list.data.length > 0 && (
+        <SimplePager
+          page={page} hasMore={list.hasMore} onPageChange={setPage}
+          shownCount={list.data.length}
         />
       )}
 

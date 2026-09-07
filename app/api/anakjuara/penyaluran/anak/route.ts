@@ -10,9 +10,9 @@ export async function GET(req: NextRequest) {
     if (!g.ok) return g.response;
 
     const parsed = anakListQuery.parse(searchParamsToObject(req.nextUrl.searchParams));
-    const { rows, total } = await fetchAnakList(parsed, g.session);
+    const { rows, hasMore } = await fetchAnakList(parsed, g.session);
 
-    return NextResponse.json({ data: rows, total, page: parsed.page, limit: parsed.limit });
+    return NextResponse.json({ data: rows, hasMore, page: parsed.page, limit: parsed.limit });
   } catch (err) {
     return toErrorResponse('penyaluran anak list', err);
   }

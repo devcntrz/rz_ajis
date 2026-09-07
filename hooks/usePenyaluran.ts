@@ -28,13 +28,13 @@ export function useBatchList(params: Record<string, string | number> = {}, optio
   const key = enabled ? `${BASE}${qs ? `?${qs}` : ''}` : null;
 
   const { data, error, mutate, isLoading, isValidating } = useSWR<{
-    data: PenyaluranBatch[]; total: number; page: number; limit: number;
+    data: PenyaluranBatch[]; hasMore: boolean; page: number; limit: number;
   }>(key, fetcher, LIST_SWR_OPTIONS);
 
   const responsePage = data?.page ?? 0;
 
   return {
-    data: data?.data ?? [], total: data?.total ?? 0, page: responsePage, requestedPage,
+    data: data?.data ?? [], hasMore: data?.hasMore ?? false, page: responsePage, requestedPage,
     isReady: isListPageReady(requestedPage, responsePage, isLoading, isValidating),
     loading: isLoading, isValidating, error, mutate,
   };
@@ -47,13 +47,13 @@ export function useAnakGridList(params: Record<string, string | number> = {}, op
   const key = enabled ? `${BASE}/anak${qs ? `?${qs}` : ''}` : null;
 
   const { data, error, mutate, isLoading, isValidating } = useSWR<{
-    data: PenyaluranRow[]; total: number; page: number; limit: number;
+    data: PenyaluranRow[]; hasMore: boolean; page: number; limit: number;
   }>(key, fetcher, LIST_SWR_OPTIONS);
 
   const responsePage = data?.page ?? 0;
 
   return {
-    data: data?.data ?? [], total: data?.total ?? 0, page: responsePage, requestedPage,
+    data: data?.data ?? [], hasMore: data?.hasMore ?? false, page: responsePage, requestedPage,
     isReady: isListPageReady(requestedPage, responsePage, isLoading, isValidating),
     loading: isLoading, isValidating, error, mutate,
   };
