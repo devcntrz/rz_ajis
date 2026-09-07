@@ -52,6 +52,7 @@ export function usePembinaanDetail(id: string) {
   const { data, error, mutate } = useSWR<{ data: Pembinaan & { anak: PembinaanAnakRow[] } }>(
     id ? `/api/anakjuara/pembinaan/${id}` : null,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   return {

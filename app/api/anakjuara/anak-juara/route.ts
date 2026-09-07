@@ -72,15 +72,23 @@ export async function GET(req: NextRequest) {
       params.push(statusPasangan);
     }
     if (q) {
+      // `nama_donatur` is a denormalized per-row copy and is blank on some
+      // historical/current rows even though `id_donatur` is correct — so a
+      // name match must also pull in sibling rows sharing that id_donatur,
+      // or pairings with a blank nama_donatur get silently dropped.
       conditions.push(`(
         p.nama_anak LIKE ? OR p.id_anak LIKE ? OR
         p.nama_donatur LIKE ? OR p.id_donatur LIKE ? OR
         p.nama_kantor LIKE ? OR p.nama_wilayah LIKE ? OR
         p.nia_rfo LIKE ? OR p.nama_rfo LIKE ? OR
-        p.id_pemasangan_baru LIKE ?
+        p.id_pemasangan_baru LIKE ? OR
+        p.id_donatur IN (
+          SELECT DISTINCT id_donatur FROM ajis_pemasangan
+          WHERE nama_donatur LIKE ? AND nama_donatur != ''
+        )
       )`);
       const like = `%${q}%`;
-      params.push(like, like, like, like, like, like, like, like, like);
+      params.push(like, like, like, like, like, like, like, like, like, like);
     }
 
     const WHERE = conditions.join(' AND ');

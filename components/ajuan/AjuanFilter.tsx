@@ -51,6 +51,7 @@ export function AjuanFilter({ onFilterChange, idGroupUser }: AjuanFilterProps) {
   const { data: kantorRes } = useSWR<{ data: Array<{ id_kantor: string; nama_kantor: string }> }>(
     idGroupUser === 1 ? '/api/anakjuara/kantor' : null,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
   const kantorList = kantorRes?.data ?? [];
   const years = Array.from({ length: 6 }, (_, i) => String(Number(currentYear) - i));

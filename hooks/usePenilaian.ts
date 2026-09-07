@@ -14,7 +14,7 @@ export function usePenilaianList(params: { semester?: string; wilayah?: string; 
   const { data, error, mutate } = useSWR<{ data: Array<{ id_anak: string; nama_lengkap: string; jenjang_pendidikan: string; nama_wilayah: string; nama_kantor: string; record_count: number; nilai_capaian_avg: number }> }>(
     `/api/anakjuara/penilaian${queryString ? `?${queryString}` : ''}`,
     fetcher,
-    { keepPreviousData: true },
+    { keepPreviousData: true, revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   return {
@@ -29,6 +29,7 @@ export function usePenilaianDetail(anakId: string, semester: string) {
   const { data, error, mutate } = useSWR<{ data: PenilaianSummary & { nama_wilayah: string; nama_kantor: string; has_data: boolean } }>(
     anakId && semester ? `/api/anakjuara/penilaian/${anakId}/${semester}` : null,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   return {

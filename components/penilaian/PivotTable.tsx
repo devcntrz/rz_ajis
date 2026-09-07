@@ -36,6 +36,7 @@ export function PivotTable({ semester, wilayah, q }: PivotTableProps) {
   const { data: res, error, isLoading } = useSWR<{ data: PivotRow[] }>(
     `/api/anakjuara/penilaian?${queryParams.toString()}`,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   const rawData = res?.data ?? [];

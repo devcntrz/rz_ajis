@@ -39,6 +39,7 @@ export default function AnakDetailPage() {
   const { data: attendanceRes } = useSWR<{ data: any[] }>(
     activeTab === 'kehadiran' && id ? `/api/anakjuara/anak/${id}/kehadiran?semester=${semester}` : null,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
   const attendanceList = attendanceRes?.data ?? [];
 

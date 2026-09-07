@@ -47,10 +47,12 @@ export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilter
   const { data: wilayahRes } = useSWR<{ data: Array<{ id_wilayah_pembinaan: number; nama_wilayah: string }> }>(
     wilayahKey,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
   const { data: kantorRes } = useSWR<{ data: Array<{ id_kantor: string; nama_kantor: string }> }>(
     idGroupUser === 1 ? '/api/anakjuara/kantor' : null,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   const wilayahList = wilayahRes?.data ?? [];

@@ -8,6 +8,7 @@ export function useHafalanChecklist(idAnak: string, semester: string) {
   const { data, error, mutate } = useSWR<{ data: HafalanItem[] }>(
     idAnak && semester ? `/api/anakjuara/anak/${idAnak}/hafalan?semester=${semester}` : null,
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   return {
@@ -22,6 +23,7 @@ export function useHafalanMaster() {
   const { data, error } = useSWR<{ data: HafalanItem[] }>(
     '/api/anakjuara/hafalan/items',
     fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   return {
