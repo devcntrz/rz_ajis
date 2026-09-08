@@ -83,6 +83,8 @@ const transisi: NavItem[] = [
   { href: '/penyaluran', icon: Send, label: 'Penyaluran', labelShort: 'Salur', groups: [1, 2], ready: true },
   { href: '/pembinaan', icon: ClipboardList, label: 'Pembinaan', labelShort: 'Pembinaan', ready: true },
   { href: '/penilaian', icon: Award, label: 'Penilaian', labelShort: 'Penilaian', ready: true },
+  { href: '/laporan-semester', icon: FileBarChart, label: 'Laporan Semester', labelShort: 'Lapsem', section: 'Report Semester', groups: [1, 2], ready: true },
+  { href: '/semester', icon: Album, label: 'Semester', labelShort: 'Semester', section: 'Report Semester', groups: [1, 2], ready: true },
 ];
 
 /** The 22 menus of PRD §4, in the document's own order. */

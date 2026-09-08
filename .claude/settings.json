@@ -8,7 +8,12 @@
       "Bash(node meta_test.mjs)",
       "Bash(pkill -f timing_test.mjs)",
       "Bash(pkill -f bounded_test.mjs)",
-      "Bash(awk '{print $2}')"
+      "Bash(awk '{print $2}')",
+      "Bash(wc -l /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/class/LaporanPembinaanBaruClass.php /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/LaporanPembinaanBaru.php /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/ManualLaporanPembinaanBaru.php /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/class/ManualLaporanPembinaanBaruClass.php /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/class/SemesterClass.php 2>&1)",
+      "Read(//Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/class/**)",
+      "Bash(grep -n \"function LaporanPembinaanBaru_Read\\\\|function RekapTerbuat\\\\|function RekapTerbuatProject\\\\|function RekapTerbuat_Xls\" /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/class/LaporanPembinaanBaruClass.php)",
+      "Read(//Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/**)",
+      "Bash(test -f /Users/irvan/Documents/projects/ajis-rz-v1/modules/ajis/class/ManualLaporanPembinaanBaruClass.php && echo EXISTS || echo NOTFOUND *)"
     ],
     "additionalDirectories": [
       "/Users/irvan/Documents/projects/rz_ajis"

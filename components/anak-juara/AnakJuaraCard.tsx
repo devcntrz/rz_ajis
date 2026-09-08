@@ -12,9 +12,11 @@ interface AnakJuaraCardProps {
   onAjuan?: (row: AnakJuaraRow) => void;
   /** Opens the Update Opname modal straight from the card. */
   onOpname?: (row: AnakJuaraRow) => void;
+  /** Fires the "Generate Lapsem" action straight from the card. */
+  onGenerateLapsem?: (row: AnakJuaraRow) => void;
 }
 
-export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, onOpname }: AnakJuaraCardProps) {
+export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, onOpname, onGenerateLapsem }: AnakJuaraCardProps) {
   if (loading && data.length === 0) {
     return (
       <div className="datagrid-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -72,6 +74,7 @@ export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, on
                   items={[
                     { label: 'Ajuan Ganti Anak', onClick: () => onAjuan?.(r) },
                     { label: 'Update Opname', onClick: () => onOpname?.(r) },
+                    { label: 'Generate Lapsem', onClick: () => onGenerateLapsem?.(r) },
                   ]}
                 />
               </span>
