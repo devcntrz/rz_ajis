@@ -19,6 +19,8 @@ interface AnakJuaraTableProps {
   onAjuan?:    (row: AnakJuaraRow) => void;
   /** Opens the Update Opname modal straight from the row. */
   onOpname?:   (row: AnakJuaraRow) => void;
+  /** Fires the "Generate Lapsem" action straight from the row. */
+  onGenerateLapsem?: (row: AnakJuaraRow) => void;
   /** Per-page finance pivot, keyed by id_pemasangan_baru. Fills in after the grid. */
   keuangan?:        Record<string, KeuanganPivot>;
   keuanganLoading?: boolean;
@@ -37,7 +39,7 @@ function fmtRp(n: number | undefined) {
 
 export function AnakJuaraTable({
   data, loading, rowOffset = 0, selectedId, sortBy, sortDir, onSort, onSelect, onAjuan, onOpname,
-  keuangan = {}, keuanganLoading = false,
+  onGenerateLapsem, keuangan = {}, keuanganLoading = false,
 }: AnakJuaraTableProps) {
   const isSel = (r: AnakJuaraRow) =>
     !!selectedId && r.id_pemasangan_baru === selectedId;
@@ -171,6 +173,7 @@ export function AnakJuaraTable({
           items={[
             { label: 'Ajuan Ganti Anak', onClick: () => onAjuan?.(r) },
             { label: 'Update Opname', onClick: () => onOpname?.(r) },
+            { label: 'Generate Lapsem', onClick: () => onGenerateLapsem?.(r) },
           ]}
         />
       ),

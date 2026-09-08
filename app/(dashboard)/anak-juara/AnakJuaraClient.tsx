@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { Plus, Download } from 'lucide-react';
 import { useAnakJuara } from '@/hooks/useAnakJuara';
 import { useAnakJuaraKeuangan } from '@/hooks/useAnakJuaraKeuangan';
@@ -35,7 +36,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const [selected, setSelected] = useState<AnakJuaraRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [opnameRow, setOpnameRow] = useState<AnakJuaraRow | null>(null);
-  const [toast, setToast] = useState('');
+  const [ajuanToast, setAjuanToast] = useState('');
   const [exporting, setExporting] = useState(false);
   const [sortBy, setSortBy] = useState('nama_anak');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -66,6 +67,34 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const handleOpname = (r: AnakJuaraRow) => {
     setSelected(r);
     setOpnameRow(r);
+  };
+
+  const handleGenerateLapsem = async (r: AnakJuaraRow) => {
+    setSelected(r);
+    try {
+      const res = await fetch(`/api/anakjuara/anak-juara/${encodeURIComponent(r.id_anak)}/generate-lapsem`, {
+        method: 'POST',
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || 'Gagal membuat laporan semester.');
+        return;
+      }
+      const { laporanid, created } = json.data as { laporanid: string; created: boolean };
+      toast.success(
+        created
+          ? `Laporan semester ${laporanid} berhasil dibuat.`
+          : `Laporan semester ${laporanid} sudah ada untuk semester aktif.`,
+        {
+          action: {
+            label: 'Preview PDF',
+            onClick: () => window.open(`/api/anakjuara/laporan-semester/${encodeURIComponent(laporanid)}/preview`, '_blank'),
+          },
+        },
+      );
+    } catch {
+      toast.error('Gagal membuat laporan semester.');
+    }
   };
 
   const handleExport = async () => {
@@ -180,12 +209,12 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
         </div>
       </div>
 
-      {toast && (
+      {ajuanToast && (
         <div style={{
           background: '#E5F5ED', color: '#1A7A45', borderRadius: 10,
           padding: '10px 14px', fontSize: 13, fontWeight: 600,
         }}>
-          {toast}{' '}
+          {ajuanToast}{' '}
           <Link href="/ajuan-pergantian" style={{ color: '#BF4E02', fontWeight: 800 }}>
             Buka List Ajuan Pergantian →
           </Link>
@@ -215,6 +244,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           onSelect={setSelected}
           onAjuan={handleAjuan}
           onOpname={handleOpname}
+          onGenerateLapsem={handleGenerateLapsem}
           keuangan={keuangan}
           keuanganLoading={keuanganLoading}
         />
@@ -227,6 +257,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
         onSelect={setSelected}
         onAjuan={handleAjuan}
         onOpname={handleOpname}
+        onGenerateLapsem={handleGenerateLapsem}
       />
 
       {!isMobile && displayTotal > 0 && (
@@ -267,7 +298,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           onClose={() => setShowForm(false)}
           onSuccess={() => {
             setShowForm(false);
-            setToast('Ajuan berhasil disimpan.');
+            setAjuanToast('Ajuan berhasil disimpan.');
             desktopList.mutate();
             mobileList.mutate();
           }}
