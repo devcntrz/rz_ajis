@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
+import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { Btn } from '@/components/ui/Btn';
 
@@ -55,9 +56,18 @@ export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilter
     { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
-  const wilayahList = wilayahRes?.data ?? [];
-  const kantorList = kantorRes?.data ?? [];
+  const wilayahList = useMemo(() => wilayahRes?.data ?? [], [wilayahRes]);
+  const kantorList = useMemo(() => kantorRes?.data ?? [], [kantorRes]);
   const years = Array.from({ length: 6 }, (_, i) => String(Number(currentYear) - i));
+
+  const kantorOptions = useMemo(
+    () => kantorList.map(k => ({ value: k.id_kantor, label: k.nama_kantor })),
+    [kantorList],
+  );
+  const wilayahOptions = useMemo(
+    () => wilayahList.map(w => ({ value: String(w.id_wilayah_pembinaan), label: w.nama_wilayah })),
+    [wilayahList],
+  );
 
   // Cascade only: clear wilayah draft when kantor changes (does not fetch list yet until apply)
   useEffect(() => {
@@ -140,30 +150,29 @@ export function AnakJuaraFilter({ onFilterChange, idGroupUser }: AnakJuaraFilter
           {idGroupUser === 1 && (
             <div>
               <FLabel>Kantor</FLabel>
-              <Sel value={kantorId} onChange={e => setKantorId(e.target.value)}>
-                <option value="">Semua Kantor</option>
-                {kantorList.map(k => (
-                  <option key={k.id_kantor} value={k.id_kantor}>{k.nama_kantor}</option>
-                ))}
-              </Sel>
+              <SearchSelect
+                value={kantorId}
+                onChange={setKantorId}
+                options={kantorOptions}
+                allowEmpty
+                emptyLabel="Semua kantor"
+                clearable
+                placeholder="Ketik atau pilih kantor…"
+              />
             </div>
           )}
           <div>
             <FLabel>Wilayah</FLabel>
-            <Sel
+            <SearchSelect
               value={wilayah}
-              onChange={e => setWilayah(e.target.value)}
+              onChange={setWilayah}
+              options={wilayahOptions}
               disabled={idGroupUser === 1 && !kantorId}
-            >
-              <option value="">
-                {idGroupUser === 1 && !kantorId ? 'Pilih kantor dulu' : 'Semua Wilayah'}
-              </option>
-              {wilayahList.map(w => (
-                <option key={w.id_wilayah_pembinaan} value={String(w.id_wilayah_pembinaan)}>
-                  {w.nama_wilayah}
-                </option>
-              ))}
-            </Sel>
+              allowEmpty
+              emptyLabel="Semua wilayah"
+              clearable
+              placeholder={idGroupUser === 1 && !kantorId ? 'Pilih kantor dulu' : 'Ketik nama wilayah…'}
+            />
           </div>
         </div>
       )}

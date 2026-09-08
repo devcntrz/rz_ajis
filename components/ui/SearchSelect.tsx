@@ -1,5 +1,6 @@
 'use client';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, X } from 'lucide-react';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { SEARCH_SELECT_LIMIT, type SearchSelectOption } from '@/lib/searchSelect';
@@ -65,7 +66,9 @@ export function SearchSelect(props: SearchSelectProps) {
 
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const [query, setQuery] = useState('');
   const [committedLabel, setCommittedLabel] = useState('');
   const debouncedQuery = useDebouncedValue(query);
@@ -161,14 +164,49 @@ export function SearchSelect(props: SearchSelectProps) {
 
   useEffect(() => {
     function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setQuery('');
-      }
+      const t = e.target as Node;
+      // The dropdown is portaled to document.body (see below), so it sits outside
+      // rootRef's DOM subtree even though React still nests it there — both refs
+      // must be checked or a click on an option would look like an outside click.
+      if (rootRef.current?.contains(t) || listRef.current?.contains(t)) return;
+      setOpen(false);
+      setQuery('');
     }
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, []);
+
+  /**
+   * Dropdown is portaled to document.body and positioned from the input's own
+   * bounding rect (fixed positioning) instead of being laid out inline. An inline
+   * `position: absolute` list gets clipped by any ancestor with `overflow: auto` —
+   * which is exactly what Modal.tsx uses for its scrollable body, cutting the list
+   * off whenever a SearchSelect is used inside a dialog.
+   */
+  const place = useCallback(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setPos({ top: r.bottom + 4, left: r.left, width: r.width });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    place();
+  }, [open, place]);
+
+  useEffect(() => {
+    if (!open) return;
+    // Any scroll/resize can move the trigger; closing avoids a stale-positioned
+    // list rather than re-measuring on every scroll tick.
+    const onMove = () => setOpen(false);
+    window.addEventListener('scroll', onMove, true);
+    window.addEventListener('resize', onMove);
+    return () => {
+      window.removeEventListener('scroll', onMove, true);
+      window.removeEventListener('resize', onMove);
+    };
+  }, [open]);
 
   function pick(opt: SearchSelectOption) {
     onChange(opt.value);
@@ -235,12 +273,13 @@ export function SearchSelect(props: SearchSelectProps) {
         />
       </div>
 
-      {open && !disabled && (
+      {open && !disabled && pos && createPortal(
         <ul
+          ref={listRef}
           id={listId}
           role="listbox"
           style={{
-            position: 'absolute', zIndex: 50, top: '100%', left: 0, right: 0, marginTop: 4,
+            position: 'fixed', zIndex: 1000, top: pos.top, left: pos.left, width: pos.width,
             background: '#FFFFFF', border: '1.5px solid #F0C4A0', borderRadius: 8,
             boxShadow: '0 8px 24px rgba(26,10,0,.12)', maxHeight: 240, overflowY: 'auto',
             listStyle: 'none', margin: 0, padding: 4,
@@ -276,7 +315,8 @@ export function SearchSelect(props: SearchSelectProps) {
               </button>
             </li>
           ))}
-        </ul>
+        </ul>,
+        document.body,
       )}
     </div>
   );

@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { Btn } from '@/components/ui/Btn';
 import { Input, Sel } from '@/components/ui/Input';
+import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { useTransaksiOptions } from '@/hooks/useTransaksi';
 
@@ -34,6 +35,15 @@ export function TransaksiFilter({ value, onApply, isBranch }: Props) {
   const [draft, setDraft] = useState<Filters>(value);
   const [advanced, setAdvanced] = useState(false);
   const { kantorTransaksi, program } = useTransaksiOptions();
+
+  const programOptions = useMemo(
+    () => program.map(p => ({ value: p.progid, label: p.nama_program })),
+    [program],
+  );
+  const kantorOptions = useMemo(
+    () => kantorTransaksi.map(k => ({ value: k.oid, label: k.kantor })),
+    [kantorTransaksi],
+  );
 
   const set = (k: string, v: string) => setDraft(d => ({ ...d, [k]: v }));
 
@@ -111,12 +121,15 @@ export function TransaksiFilter({ value, onApply, isBranch }: Props) {
                 <option value="eq">=</option>
                 <option value="ne">≠</option>
               </Sel>
-              <Sel value={draft.progid ?? ''} onChange={e => set('progid', e.target.value)}>
-                <option value="">Semua program</option>
-                {program.map(p => (
-                  <option key={p.id_program} value={p.progid}>{p.nama_program}</option>
-                ))}
-              </Sel>
+              <SearchSelect
+                value={draft.progid ?? ''}
+                onChange={v => set('progid', v)}
+                options={programOptions}
+                allowEmpty
+                emptyLabel="Semua program"
+                clearable
+                placeholder="Ketik nama program…"
+              />
             </div>
           </div>
 
@@ -181,18 +194,28 @@ export function TransaksiFilter({ value, onApply, isBranch }: Props) {
 
           <div>
             <FLabel>Kantor transaksi</FLabel>
-            <Sel value={draft.oid_transaksi ?? ''} onChange={e => set('oid_transaksi', e.target.value)}>
-              <option value="">Semua</option>
-              {kantorTransaksi.map(k => <option key={k.oid} value={k.oid}>{k.kantor}</option>)}
-            </Sel>
+            <SearchSelect
+              value={draft.oid_transaksi ?? ''}
+              onChange={v => set('oid_transaksi', v)}
+              options={kantorOptions}
+              allowEmpty
+              emptyLabel="Semua kantor"
+              clearable
+              placeholder="Ketik atau pilih kantor…"
+            />
           </div>
 
           <div>
             <FLabel>Kantor donatur</FLabel>
-            <Sel value={draft.oid_donatur ?? ''} onChange={e => set('oid_donatur', e.target.value)}>
-              <option value="">Semua</option>
-              {kantorTransaksi.map(k => <option key={k.oid} value={k.oid}>{k.kantor}</option>)}
-            </Sel>
+            <SearchSelect
+              value={draft.oid_donatur ?? ''}
+              onChange={v => set('oid_donatur', v)}
+              options={kantorOptions}
+              allowEmpty
+              emptyLabel="Semua kantor"
+              clearable
+              placeholder="Ketik atau pilih kantor…"
+            />
           </div>
 
           <div>

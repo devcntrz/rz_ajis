@@ -1,14 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Modal } from '@/components/ui/Modal';
 import { Btn } from '@/components/ui/Btn';
 import { Sel } from '@/components/ui/Input';
+import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { fmtRp } from '@/lib/utils';
 import { useKandidat, usePenyaluranLookup } from '@/hooks/usePenyaluran';
 
-const T = { primary: '#BF4E02', gray: '#7A6055', primaryPale: '#FBF0E8', green: '#1A7A45' };
+const T = { primary: '#BF4E02', gray: '#7A6055', primaryPale: '#FBF0E8', green: '#1A7A45', red: '#B02020', redPale: '#FDEAEA' };
 
 interface Props { onClose: () => void; onSuccess: () => void; }
 
@@ -22,6 +23,15 @@ export function NewBulkWizard({ onClose, onSuccess }: Props) {
   const [saving, setSaving] = useState(false);
 
   const filteredWilayah = kantorId ? wilayah.filter(w => w.kantor_id === kantorId) : wilayah;
+
+  const kantorOptions = useMemo(
+    () => kantor.map(k => ({ value: k.oid, label: k.kantor })),
+    [kantor],
+  );
+  const wilayahOptions = useMemo(
+    () => filteredWilayah.map(w => ({ value: String(w.id_wilayah_pembinaan), label: w.nama_wilayah })),
+    [filteredWilayah],
+  );
 
   const kandidat = useKandidat(
     { kantorId, wilayahId, tahun: Number(tahun), bulan: Number(bulan), limit: 5000 },
@@ -60,19 +70,25 @@ export function NewBulkWizard({ onClose, onSuccess }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
           <div>
             <FLabel>Kantor</FLabel>
-            <Sel value={kantorId} onChange={e => { setKantorId(e.target.value); setWilayahId(''); setPreviewed(false); }}>
-              <option value="">Semua</option>
-              {kantor.map(k => <option key={k.oid} value={k.oid}>{k.kantor}</option>)}
-            </Sel>
+            <SearchSelect
+              value={kantorId}
+              onChange={v => { setKantorId(v); setWilayahId(''); setPreviewed(false); }}
+              options={kantorOptions}
+              allowEmpty
+              emptyLabel="Semua kantor"
+              clearable
+              placeholder="Ketik atau pilih kantor…"
+            />
           </div>
           <div>
             <FLabel>Wilayah</FLabel>
-            <Sel value={wilayahId} onChange={e => { setWilayahId(e.target.value); setPreviewed(false); }}>
-              <option value="">Pilih wilayah</option>
-              {filteredWilayah.map(w => (
-                <option key={w.id_wilayah_pembinaan} value={String(w.id_wilayah_pembinaan)}>{w.nama_wilayah}</option>
-              ))}
-            </Sel>
+            <SearchSelect
+              value={wilayahId}
+              onChange={v => { setWilayahId(v); setPreviewed(false); }}
+              options={wilayahOptions}
+              clearable
+              placeholder="Ketik nama wilayah…"
+            />
           </div>
           <div>
             <FLabel>Bulan</FLabel>
@@ -97,7 +113,17 @@ export function NewBulkWizard({ onClose, onSuccess }: Props) {
           {kandidat.loading ? 'Memuat kandidat…' : 'Preview Kandidat'}
         </Btn>
 
-        {previewed && (
+        {previewed && kandidat.error && (
+          <div style={{
+            background: T.redPale, color: T.red, borderRadius: 10, padding: 12, fontSize: 13,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+          }}>
+            <span>{kandidat.error.message || 'Gagal memuat kandidat.'}</span>
+            <Btn size="sm" variant="danger" onClick={() => kandidat.mutate()}>Coba Lagi</Btn>
+          </div>
+        )}
+
+        {previewed && !kandidat.error && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{
               background: T.primaryPale, borderRadius: 10, padding: 12, fontSize: 13,
@@ -106,18 +132,54 @@ export function NewBulkWizard({ onClose, onSuccess }: Props) {
               <span><strong>{kandidat.rows.length}</strong> anak layak salur</span>
               <span>Total: <strong style={{ color: T.green }}>{fmtRp(totalNominal)}</strong></span>
             </div>
-            <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid #F2EAE3', borderRadius: 8 }}>
-              {kandidat.rows.length === 0 && (
-                <div style={{ padding: 16, textAlign: 'center', color: T.gray, fontSize: 13 }}>
-                  Tidak ada anak layak salur untuk kriteria ini.
-                </div>
-              )}
-              {kandidat.rows.map(k => (
-                <div key={k.id_anak} style={{ padding: '8px 12px', borderBottom: '1px solid #F2EAE3', fontSize: 12.5 }}>
-                  <strong>{k.nama_anak}</strong> ({k.id_anak}) — {k.program_donasi} — {fmtRp(k.harga_program)}
-                </div>
-              ))}
-            </div>
+            {!kandidat.loading && kandidat.rows.length === 0 ? (
+              <div style={{
+                padding: 16, textAlign: 'center', color: T.gray, fontSize: 13,
+                border: '1px solid #F2EAE3', borderRadius: 8,
+              }}>
+                Tidak ada anak layak salur untuk kriteria ini.
+              </div>
+            ) : (
+              <div style={{ maxHeight: 320, overflowY: 'auto', border: '1px solid #F2EAE3', borderRadius: 10 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                  <thead>
+                    <tr style={{ background: T.primaryPale, textAlign: 'left', position: 'sticky', top: 0 }}>
+                      <th style={{ padding: 8, width: 32 }}>#</th>
+                      <th style={{ padding: 8 }}>Anak</th>
+                      <th style={{ padding: 8 }}>Jenjang</th>
+                      <th style={{ padding: 8 }}>Program</th>
+                      <th style={{ padding: 8, textAlign: 'right' }}>Nominal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {kandidat.rows.map((k, i) => (
+                      <tr key={k.id_anak} style={{ borderTop: '1px solid #F2EAE3' }}>
+                        <td style={{ padding: 8, color: T.gray }}>{i + 1}</td>
+                        <td style={{ padding: 8 }}>
+                          <strong>{k.nama_anak}</strong>
+                          <div style={{ fontSize: 11, color: T.gray }}>{k.id_anak}</div>
+                        </td>
+                        <td style={{ padding: 8 }}>{k.jenjang_pendidikan || '-'}</td>
+                        <td style={{ padding: 8 }}>{k.program_donasi || '-'}</td>
+                        <td style={{ padding: 8, textAlign: 'right', fontWeight: 700, color: T.green }}>
+                          {fmtRp(k.harga_program)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ borderTop: `2px solid ${T.primary}`, background: T.primaryPale }}>
+                      <td colSpan={4} style={{ padding: 8, fontWeight: 800 }}>
+                        Total ({kandidat.rows.length} anak)
+                      </td>
+                      <td style={{ padding: 8, textAlign: 'right', fontWeight: 800, color: T.green }}>
+                        {fmtRp(totalNominal)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
           </div>
         )}
 

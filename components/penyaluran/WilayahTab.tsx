@@ -1,8 +1,9 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Download, Plus } from 'lucide-react';
 import { Btn } from '@/components/ui/Btn';
 import { Sel } from '@/components/ui/Input';
+import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
@@ -37,6 +38,11 @@ export function WilayahTab() {
 
   const refresh = useCallback(() => list.mutate(), [list]);
   const filteredWilayah = kantorId ? wilayah.filter(w => w.kantor_id === kantorId) : wilayah;
+  const kantorOptions = useMemo(() => kantor.map(k => ({ value: k.oid, label: k.kantor })), [kantor]);
+  const wilayahOptions = useMemo(
+    () => filteredWilayah.map(w => ({ value: String(w.id_wilayah_pembinaan), label: w.nama_wilayah })),
+    [filteredWilayah],
+  );
 
   const exportUrl = (() => {
     const qs = new URLSearchParams();
@@ -78,19 +84,27 @@ export function WilayahTab() {
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div style={{ minWidth: 160 }}>
           <FLabel>Kantor</FLabel>
-          <Sel value={kantorId} onChange={e => { setKantorId(e.target.value); setWilayahId(''); setPage(1); }}>
-            <option value="">Semua</option>
-            {kantor.map(k => <option key={k.oid} value={k.oid}>{k.kantor}</option>)}
-          </Sel>
+          <SearchSelect
+            value={kantorId}
+            onChange={v => { setKantorId(v); setWilayahId(''); setPage(1); }}
+            options={kantorOptions}
+            allowEmpty
+            emptyLabel="Semua kantor"
+            clearable
+            placeholder="Ketik atau pilih kantor…"
+          />
         </div>
         <div style={{ minWidth: 160 }}>
           <FLabel>Wilayah</FLabel>
-          <Sel value={wilayahId} onChange={e => { setWilayahId(e.target.value); setPage(1); }}>
-            <option value="">Semua</option>
-            {filteredWilayah.map(w => (
-              <option key={w.id_wilayah_pembinaan} value={String(w.id_wilayah_pembinaan)}>{w.nama_wilayah}</option>
-            ))}
-          </Sel>
+          <SearchSelect
+            value={wilayahId}
+            onChange={v => { setWilayahId(v); setPage(1); }}
+            options={wilayahOptions}
+            allowEmpty
+            emptyLabel="Semua wilayah"
+            clearable
+            placeholder="Ketik nama wilayah…"
+          />
         </div>
         <div style={{ minWidth: 100 }}>
           <FLabel>Bulan</FLabel>

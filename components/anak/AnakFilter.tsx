@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import useSWR from 'swr';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { Input, Sel } from '@/components/ui/Input';
+import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { Btn } from '@/components/ui/Btn';
 
@@ -26,7 +27,11 @@ export function AnakFilter({ onFilterChange }: AnakFilterProps) {
     fetcher,
     { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
-  const wilayahList = wilayahRes?.data ?? [];
+  const wilayahList = useMemo(() => wilayahRes?.data ?? [], [wilayahRes]);
+  const wilayahOptions = useMemo(
+    () => wilayahList.map(w => ({ value: String(w.id_wilayah_pembinaan), label: w.nama_wilayah })),
+    [wilayahList],
+  );
   const onFilterChangeRef = useRef(onFilterChange);
   onFilterChangeRef.current = onFilterChange;
 
@@ -65,14 +70,15 @@ export function AnakFilter({ onFilterChange }: AnakFilterProps) {
         }}>
           <div>
             <FLabel>Wilayah</FLabel>
-            <Sel value={wilayah} onChange={e => setWilayah(e.target.value)}>
-              <option value="">Semua Wilayah</option>
-              {wilayahList.map(w => (
-                <option key={w.id_wilayah_pembinaan} value={String(w.id_wilayah_pembinaan)}>
-                  {w.nama_wilayah}
-                </option>
-              ))}
-            </Sel>
+            <SearchSelect
+              value={wilayah}
+              onChange={setWilayah}
+              options={wilayahOptions}
+              allowEmpty
+              emptyLabel="Semua wilayah"
+              clearable
+              placeholder="Ketik nama wilayah…"
+            />
           </div>
 
           <div>
