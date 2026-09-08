@@ -31,7 +31,10 @@ export const kandidatQuery = z.object({
   tahun:      z.coerce.number().int(),
   bulan:      z.coerce.number().int().min(1).max(12),
   q:          z.string().max(100).optional(),
-  limit:      z.coerce.number().int().min(1).max(1000).default(500),
+  // New Bulk preview requests up to 5000 (mirrors the cap createBulkPenyaluran itself
+  // uses when committing) — this used to be capped at 1000, so a real wilayah's preview
+  // silently 400'd and the wizard showed "0 anak layak salur" instead of an error.
+  limit:      z.coerce.number().int().min(1).max(5000).default(500),
 });
 export type KandidatQuery = z.infer<typeof kandidatQuery>;
 

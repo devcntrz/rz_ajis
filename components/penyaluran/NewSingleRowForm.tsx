@@ -63,7 +63,12 @@ export function NewSingleRowForm({ batch, onClose, onSuccess }: Props) {
         </div>
         <div style={{ maxHeight: 280, overflowY: 'auto', border: `1.5px solid ${T.grayLt}`, borderRadius: 8 }}>
           {kandidat.loading && <div style={{ padding: 12, fontSize: 12, color: T.gray }}>Mencari…</div>}
-          {!kandidat.loading && kandidat.rows.length === 0 && (
+          {kandidat.error && (
+            <div style={{ padding: 12, fontSize: 12, color: '#B02020' }}>
+              {kandidat.error.message || 'Gagal memuat kandidat.'}
+            </div>
+          )}
+          {!kandidat.loading && !kandidat.error && kandidat.rows.length === 0 && (
             <div style={{ padding: 12, fontSize: 12, color: T.gray }}>Tidak ada kandidat.</div>
           )}
           {kandidat.rows.map(k => (

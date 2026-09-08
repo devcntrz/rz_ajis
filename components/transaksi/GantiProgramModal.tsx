@@ -1,9 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Modal } from '@/components/ui/Modal';
 import { Btn } from '@/components/ui/Btn';
-import { Sel } from '@/components/ui/Input';
+import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { useTransaksiOptions } from '@/hooks/useTransaksi';
 import { fmtRp } from '@/lib/utils';
@@ -22,6 +22,10 @@ export function GantiProgramModal({ row, onClose, onSuccess }: Props) {
   const [saving, setSaving] = useState(false);
 
   const picked = program.find(p => String(p.id_program) === idProgram);
+  const programOptions = useMemo(
+    () => program.map(p => ({ value: String(p.id_program), label: `${p.nama_program} — ${fmtRp(p.harga_program)}` })),
+    [program],
+  );
 
   const submit = async () => {
     if (!idProgram) {
@@ -68,14 +72,14 @@ export function GantiProgramModal({ row, onClose, onSuccess }: Props) {
 
         <div>
           <FLabel>Program baru</FLabel>
-          <Sel value={idProgram} onChange={e => setIdProgram(e.target.value)} disabled={loading}>
-            <option value="">{loading ? 'Memuat…' : 'Pilih program'}</option>
-            {program.map(p => (
-              <option key={p.id_program} value={String(p.id_program)}>
-                {p.nama_program} — {fmtRp(p.harga_program)}
-              </option>
-            ))}
-          </Sel>
+          <SearchSelect
+            value={idProgram}
+            onChange={setIdProgram}
+            options={programOptions}
+            disabled={loading}
+            clearable
+            placeholder={loading ? 'Memuat…' : 'Ketik nama program…'}
+          />
         </div>
 
         {picked && (

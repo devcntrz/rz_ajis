@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
-import { Input, Sel } from '@/components/ui/Input';
+import { Input, SearchableSelect } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
 import { Btn } from '@/components/ui/Btn';
 
@@ -113,44 +113,53 @@ export function AjuanFilter({ onFilterChange, idGroupUser }: AjuanFilterProps) {
         }}>
           <div>
             <FLabel>Tahun</FLabel>
-            <Sel value={tahun} onChange={e => setTahun(e.target.value)}>
-              <option value="">Semua</option>
-              {years.map(y => <option key={y} value={y}>{y}</option>)}
-            </Sel>
+            <SearchableSelect 
+              value={tahun} 
+              onChange={setTahun} 
+              options={[{value: '', label: 'Semua'}, ...years.map(y => ({value: y, label: y}))]}
+            />
           </div>
           <div>
             <FLabel>Bulan</FLabel>
-            <Sel value={bulan} onChange={e => setBulan(e.target.value)}>
-              <option value="">Semua</option>
-              {BULAN.map(b => <option key={b.v} value={b.v}>{b.l}</option>)}
-            </Sel>
+            <SearchableSelect 
+              value={bulan} 
+              onChange={setBulan} 
+              options={[{value: '', label: 'Semua'}, ...BULAN.map(b => ({value: b.v, label: b.l}))]}
+            />
           </div>
           <div>
             <FLabel>Approve Funding</FLabel>
-            <Sel value={approve} onChange={e => setApprove(e.target.value)}>
-              <option value="">Semua</option>
-              <option value="t">Pending</option>
-              <option value="y">Disetujui</option>
-              <option value="n">Ditolak</option>
-            </Sel>
+            <SearchableSelect 
+              value={approve} 
+              onChange={setApprove} 
+              options={[
+                {value: '', label: 'Semua'},
+                {value: 't', label: 'Pending'},
+                {value: 'y', label: 'Disetujui'},
+                {value: 'n', label: 'Ditolak'}
+              ]}
+            />
           </div>
           <div>
             <FLabel>Eksekusi</FLabel>
-            <Sel value={eksekusi} onChange={e => setEksekusi(e.target.value)}>
-              <option value="">Semua</option>
-              <option value="n">Belum</option>
-              <option value="y">Sudah</option>
-            </Sel>
+            <SearchableSelect 
+              value={eksekusi} 
+              onChange={setEksekusi} 
+              options={[
+                {value: '', label: 'Semua'},
+                {value: 'n', label: 'Belum'},
+                {value: 'y', label: 'Sudah'}
+              ]}
+            />
           </div>
           {idGroupUser === 1 && (
             <div>
               <FLabel>Kantor</FLabel>
-              <Sel value={kantorId} onChange={e => setKantorId(e.target.value)}>
-                <option value="">Semua Kantor</option>
-                {kantorList.map(k => (
-                  <option key={k.id_kantor} value={k.id_kantor}>{k.nama_kantor}</option>
-                ))}
-              </Sel>
+              <SearchableSelect 
+                value={kantorId} 
+                onChange={setKantorId} 
+                options={[{value: '', label: 'Semua Kantor'}, ...kantorList.map(k => ({value: k.id_kantor, label: k.nama_kantor}))]}
+              />
             </div>
           )}
         </div>
