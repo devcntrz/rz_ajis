@@ -21,6 +21,7 @@ import {
   Album,
   Award,
   BookOpen,
+  Building,
   Building2,
   ClipboardList,
   Coins,
@@ -38,6 +39,7 @@ import {
   Send,
   Trophy,
   Users,
+  UserCog,
   UserSearch,
   Wallet,
   type LucideIcon,
@@ -91,18 +93,20 @@ const transisi: NavItem[] = [
 const produksi: NavItem[] = [
   { href: `${PROD_PREFIX}`, icon: Home, label: 'Beranda', labelShort: 'Beranda', section: 'Umum', ready: true },
 
-  { href: `${PROD_PREFIX}/profiling/pengajuan`, icon: Users, label: 'Pengajuan Beasiswa', labelShort: 'Pengajuan', section: 'Profiling', phase: 1, endpoint: 'GET/POST /api/anak', table: 'ajis_anak' },
-  { href: `${PROD_PREFIX}/profiling/survey`, icon: UserSearch, label: 'Data Hasil Survey', labelShort: 'Survey', section: 'Profiling', phase: 1, endpoint: 'GET/POST /api/survey', table: 'ajis_survey' },
+  { href: `${PROD_PREFIX}/profiling/pengajuan`, icon: Users, label: 'Pengajuan Beasiswa', labelShort: 'Pengajuan', section: 'Profiling', phase: 1, endpoint: 'GET/POST /api/anakjuara/pg/anak', table: 'ajis_anak', ready: true },
+  { href: `${PROD_PREFIX}/profiling/survey`, icon: UserSearch, label: 'Data Hasil Survey', labelShort: 'Survey', section: 'Profiling', phase: 1, endpoint: 'GET/POST /api/anakjuara/pg/survey', table: 'ajis_survey', ready: true },
   { href: `${PROD_PREFIX}/profiling/caj`, icon: GraduationCap, label: 'Calon Anak Juara', labelShort: 'CAJ', section: 'Profiling', phase: 1, endpoint: 'GET /api/anak?status=caj', table: 'ajis_anak' },
   { href: `${PROD_PREFIX}/profiling/peminjaman`, icon: Handshake, label: 'Peminjaman Data CAJ', labelShort: 'Pinjam', section: 'Profiling', phase: 1, endpoint: 'GET/POST /api/peminjaman', table: 'ajis_peminjaman_anak' },
 
   { href: `${PROD_PREFIX}/anak-juara`, icon: Trophy, label: 'Anak Juara', labelShort: 'AJ', section: 'Anak Juara', phase: 2, endpoint: 'GET /api/anak-juara', table: 'ajis_pemasangan + pivot keuangan' },
   { href: `${PROD_PREFIX}/anak-juara/ajuan`, icon: Repeat, label: 'List Ajuan Pergantian', labelShort: 'Ajuan', section: 'Anak Juara', phase: 1, endpoint: 'GET/POST /api/ajuan', table: 'ajis_view_ajuan' },
 
-  { href: `${PROD_PREFIX}/master/wilayah`, icon: MapPin, label: 'Data Wilayah', labelShort: 'Wilayah', section: 'Master', phase: 1, endpoint: 'GET/POST /api/wilayah', table: 'ajis_wilayah_pembinaan' },
+  { href: `${PROD_PREFIX}/master/wilayah`, icon: MapPin, label: 'Data Wilayah', labelShort: 'Wilayah', section: 'Master', phase: 1, endpoint: 'GET/POST /api/anakjuara/pg/wilayah', table: 'ajis_wilayah_pembinaan', ready: true },
+  { href: `${PROD_PREFIX}/master/kantor`, icon: Building, label: 'Master Kantor', labelShort: 'Kantor', section: 'Master', ready: true },
   { href: `${PROD_PREFIX}/master/sdm`, icon: Users, label: 'SDM Wilayah', labelShort: 'SDM', section: 'Master', phase: 1, endpoint: 'GET/POST /api/sdm', table: 'sdm_wilayah, sdm_penugasan' },
-  { href: `${PROD_PREFIX}/master/wilayah-admin`, icon: Building2, label: 'Setting Propinsi/Kab/Kec/Kel', labelShort: 'Ref', section: 'Master', phase: 1, endpoint: 'GET/POST /api/ref/{level}', table: 'ref_propinsi … ref_desa' },
+  { href: `${PROD_PREFIX}/master/wilayah-admin`, icon: Building2, label: 'Setting Propinsi/Kab/Kec/Kel', labelShort: 'Ref', section: 'Master', phase: 1, endpoint: 'GET/POST /api/anakjuara/pg/ref/{propinsi,kabupaten,kecamatan,desa}', table: 'ref_propinsi … ref_desa', ready: true },
   { href: `${PROD_PREFIX}/master/semester`, icon: Album, label: 'Semester', labelShort: 'Semester', section: 'Master', phase: 3, endpoint: 'GET/POST /api/semester', table: 'ajis_semester' },
+  { href: `${PROD_PREFIX}/master/user`, icon: UserCog, label: 'Manajemen User', labelShort: 'User', section: 'Master', ready: true },
 
   { href: `${PROD_PREFIX}/pembinaan`, icon: ClipboardList, label: 'Pembinaan Anak Juara', labelShort: 'Pembinaan', section: 'Pembinaan', phase: 3, endpoint: 'GET/POST /api/pembinaan', table: 'ajis_pembinaan_baru' },
 

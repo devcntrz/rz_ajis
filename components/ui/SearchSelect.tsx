@@ -28,6 +28,8 @@ interface SearchSelectBaseProps {
   allowEmpty?:    boolean;
   emptyLabel?:    string;
   style?:         React.CSSProperties;
+  /** Max rows fetched per request (async mode only). Defaults to SEARCH_SELECT_LIMIT (5). */
+  limit?:         number;
 }
 
 interface StaticSearchSelectProps extends SearchSelectBaseProps {
@@ -37,6 +39,14 @@ interface StaticSearchSelectProps extends SearchSelectBaseProps {
 interface AsyncSearchSelectProps extends SearchSelectBaseProps {
   fetchUrl: string;
   resolvedLabel?: string;
+  /**
+   * Row -> {value,label} for endpoints that don't match the legacy
+   * semesterid/nama_lengkap/id_anak/id_sdm field-sniffing below (e.g. the
+   * *-pg lookup endpoints, which return a plain array with feature-specific
+   * field names). Return null/undefined to skip a row. Omit to keep the
+   * original sniffing behavior for existing callers.
+   */
+  mapRow?: (row: Record<string, unknown>) => SearchSelectOption | null | undefined;
 }
 
 type SearchSelectProps = StaticSearchSelectProps | AsyncSearchSelectProps;
@@ -78,6 +88,14 @@ export function SearchSelect(props: SearchSelectProps) {
   const staticOptions = isAsync(props) ? [] : props.options;
   const fetchUrl = isAsync(props) ? props.fetchUrl : null;
   const resolvedLabel = isAsync(props) ? props.resolvedLabel : undefined;
+  const mapRow = isAsync(props) ? props.mapRow : undefined;
+  const fetchLimit = props.limit ?? SEARCH_SELECT_LIMIT;
+
+  function rowsFromJson(json: unknown): Array<Record<string, unknown>> {
+    if (Array.isArray(json)) return json as Array<Record<string, unknown>>;
+    const data = (json as { data?: unknown } | null)?.data;
+    return Array.isArray(data) ? (data as Array<Record<string, unknown>>) : [];
+  }
 
   const selectedStatic = staticOptions.find(o => o.value === value);
 
@@ -104,9 +122,17 @@ export function SearchSelect(props: SearchSelectProps) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${fetchUrl}?q=&limit=${SEARCH_SELECT_LIMIT}`);
+        const res = await fetch(`${fetchUrl}${fetchUrl.includes('?') ? '&' : '?'}q=&limit=${fetchLimit}`);
         const json = await res.json();
-        const rows = (json.data ?? []) as Array<Record<string, unknown>>;
+        const rows = rowsFromJson(json);
+        if (mapRow) {
+          const match = rows.map(mapRow).find(o => o && o.value === value);
+          if (!cancelled && match) {
+            setCommittedLabel(match.label);
+            onLabelChange?.(match.label);
+          }
+          return;
+        }
         const match = rows.find(r => String(r.semesterid) === value);
         if (!cancelled && match?.semester) {
           const label = semesterLabelFromRow(match);
@@ -118,7 +144,7 @@ export function SearchSelect(props: SearchSelectProps) {
       }
     })();
     return () => { cancelled = true; };
-  }, [value, fetchUrl, resolvedLabel, selectedStatic, onLabelChange]);
+  }, [value, fetchUrl, resolvedLabel, selectedStatic, onLabelChange, mapRow, fetchLimit]);
 
   const loadAsync = useCallback(async (q: string) => {
     if (!fetchUrl) return;
@@ -126,10 +152,16 @@ export function SearchSelect(props: SearchSelectProps) {
     try {
       const sep = fetchUrl.includes('?') ? '&' : '?';
       const res = await fetch(
-        `${fetchUrl}${sep}q=${encodeURIComponent(q)}&limit=${SEARCH_SELECT_LIMIT}`,
+        `${fetchUrl}${sep}q=${encodeURIComponent(q)}&limit=${fetchLimit}`,
       );
       const json = await res.json();
-      const rows = (json.data ?? []) as Array<Record<string, unknown>>;
+      const rows = rowsFromJson(json);
+      if (mapRow) {
+        setAsyncOptions(
+          rows.map(mapRow).filter((o): o is SearchSelectOption => !!o && !!o.value),
+        );
+        return;
+      }
       setAsyncOptions(
         rows.map(row => ({
           value: String(row.semesterid ?? row.value ?? row.id_anak ?? row.id_sdm ?? ''),
@@ -143,7 +175,7 @@ export function SearchSelect(props: SearchSelectProps) {
     } finally {
       setLoading(false);
     }
-  }, [fetchUrl]);
+  }, [fetchUrl, mapRow, fetchLimit]);
 
   useEffect(() => {
     if (!fetchUrl || !open) return;
