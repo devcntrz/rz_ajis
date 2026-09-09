@@ -5,6 +5,32 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-r
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 
+/**
+ * Builds the numbered-page list for the pagination bar: always page 1 and
+ * the last page, plus the current page ± 2 neighbors; any gap collapses
+ * into a single non-interactive '…' entry.
+ */
+export function buildPageList(current: number, total: number): (number | '…')[] {
+  if (total <= 1) return [1];
+
+  const pages = new Set<number>();
+  pages.add(1);
+  pages.add(total);
+  for (let p = current - 2; p <= current + 2; p++) {
+    if (p >= 1 && p <= total) pages.add(p);
+  }
+
+  const sorted = Array.from(pages).sort((a, b) => a - b);
+  const result: (number | '…')[] = [];
+  let prev: number | undefined;
+  for (const p of sorted) {
+    if (prev !== undefined && p - prev > 1) result.push('…');
+    result.push(p);
+    prev = p;
+  }
+  return result;
+}
+
 interface DesktopPaginationProps {
   page: number;
   limit: number;
@@ -71,9 +97,6 @@ export function DesktopPagination({
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12, color: '#7A6055', marginRight: 4 }}>
-          Halaman <strong style={{ color: '#1A0A00' }}>{safePage}</strong> / {totalPages}
-        </span>
         <Btn size="sm" disabled={safePage <= 1} onClick={() => onPageChange(1)}>
           <ChevronsLeft size={14} />
         </Btn>
@@ -81,6 +104,35 @@ export function DesktopPagination({
           <ChevronLeft size={14} />
           <span>Sebelumnya</span>
         </Btn>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {buildPageList(safePage, totalPages).map((p, i) =>
+            p === '…' ? (
+              <span key={`ellipsis-${i}`} style={{ fontSize: 12, color: '#7A6055', padding: '0 4px' }}>…</span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPageChange(p)}
+                aria-current={p === safePage ? 'page' : undefined}
+                style={{
+                  minWidth: 28,
+                  height: 28,
+                  padding: '0 6px',
+                  borderRadius: 8,
+                  border: p === safePage ? '1.5px solid #BF4E02' : '1.5px solid #F0C4A0',
+                  background: p === safePage ? '#BF4E02' : '#FFFFFF',
+                  color: p === safePage ? '#FFFFFF' : '#1A0A00',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                }}
+              >
+                {p}
+              </button>
+            )
+          )}
+        </div>
         <Btn size="sm" disabled={safePage >= totalPages} onClick={() => onPageChange(safePage + 1)}>
           <span>Berikutnya</span>
           <ChevronRight size={14} />

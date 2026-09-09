@@ -44,6 +44,13 @@ interface DataTableProps<T> {
    * while the narrower tables read better without the extra lines.
    */
   gridLines?:  boolean;
+  /**
+   * 1-based row number of the FIRST row currently displayed, i.e.
+   * `(page - 1) * limit + 1`. When provided, a narrow sticky "No" column is
+   * automatically prepended showing `rowNumberStart + index` for each row —
+   * callers don't need to build their own numbering column.
+   */
+  rowNumberStart?: number;
 }
 
 const T = {
@@ -70,11 +77,20 @@ function computeLayout<T>(columns: Column<T>[]): Layout[] {
 }
 
 export function DataTable<Row>({
-  columns, data, rowKey, onRowClick, selectedKey,
+  columns: columnsProp, data, rowKey, onRowClick, selectedKey,
   selectedTextColor = T.selectedText, rowTextColor,
   sortBy, sortDir = 'asc', onSort,
   minWidth = 900, loading, emptyText = 'Tidak ada data.', gridLines,
+  rowNumberStart,
 }: DataTableProps<Row>) {
+  const columns = React.useMemo<Column<Row>[]>(() => {
+    if (rowNumberStart == null) return columnsProp;
+    const noColumn: Column<Row> = {
+      key: '__row_no__', label: 'No', width: 48, sticky: true, align: 'center',
+      render: (_row, index) => rowNumberStart + index,
+    };
+    return [noColumn, ...columnsProp];
+  }, [columnsProp, rowNumberStart]);
   const layout = computeLayout(columns);
   const hasGroups = columns.some(c => c.group);
 
