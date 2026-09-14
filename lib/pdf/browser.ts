@@ -26,10 +26,11 @@ export async function launchBrowser(): Promise<Browser> {
       import('puppeteer-core'),
       import('@sparticuz/chromium'),
     ]);
+    chromium.setGraphicsMode = false;
     return puppeteer.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: true,
+      headless: 'shell',
     });
   }
 
@@ -49,7 +50,18 @@ export async function renderHtmlToPdf(
     // puppeteer-core's setContent only types `load` | `domcontentloaded`.
     await page.setContent(html, { waitUntil: 'load' });
     if (options?.waitForNetworkIdle) {
-      await page.waitForNetworkIdle({ idleTime: 500, timeout: 15_000 }).catch(() => undefined);
+      await page.evaluate(() =>
+        Promise.all(
+          Array.from(document.images).map(img =>
+            img.complete
+              ? undefined
+              : new Promise<void>(resolve => {
+                img.addEventListener('load', () => resolve(), { once: true });
+                img.addEventListener('error', () => resolve(), { once: true });
+              }),
+          ),
+        ),
+      ).catch(() => undefined);
     }
     const pdf = await page.pdf({
       format: 'A4',
