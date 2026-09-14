@@ -26,11 +26,10 @@ export async function launchBrowser(): Promise<Browser> {
       import('puppeteer-core'),
       import('@sparticuz/chromium'),
     ]);
-    chromium.setGraphicsMode = false;
     return puppeteer.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: 'shell',
+      headless: true,
     });
   }
 
@@ -40,29 +39,11 @@ export async function launchBrowser(): Promise<Browser> {
 }
 
 /** Renders an HTML string to a PDF buffer (A4, no extra margins — CSS controls layout). */
-export async function renderHtmlToPdf(
-  html: string,
-  options?: { waitForNetworkIdle?: boolean },
-): Promise<Buffer> {
+export async function renderHtmlToPdf(html: string): Promise<Buffer> {
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
-    // puppeteer-core's setContent only types `load` | `domcontentloaded`.
     await page.setContent(html, { waitUntil: 'load' });
-    if (options?.waitForNetworkIdle) {
-      await page.evaluate(() =>
-        Promise.all(
-          Array.from(document.images).map(img =>
-            img.complete
-              ? undefined
-              : new Promise<void>(resolve => {
-                img.addEventListener('load', () => resolve(), { once: true });
-                img.addEventListener('error', () => resolve(), { once: true });
-              }),
-          ),
-        ),
-      ).catch(() => undefined);
-    }
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
