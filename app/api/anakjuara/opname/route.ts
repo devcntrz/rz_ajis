@@ -7,7 +7,7 @@
  * route touches it only as a side effect of replacing a child.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { query, queryOne, withTransaction, txQueryOne, txExecute } from '@/lib/db';
+import { query, queryOne, withTransactionRetry, txQueryOne, txExecute } from '@/lib/db';
 import { getSession, requireGroup12, getKantorScope } from '@/lib/auth';
 import {
   buildKeuangan,
@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
      * MySQL reports 0 changed rows when the values happen to be identical, which would
      * be indistinguishable from "row missing" and would again create a duplicate.
      */
-    await withTransaction(async conn => {
+    await withTransactionRetry(async conn => {
       const existing = await txQueryOne<{ id_pemasangan_baru: string }>(
         conn,
         `SELECT id_pemasangan_baru FROM ajis_opname
@@ -331,7 +331,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('[opname post]', err);
-    const detail = err instanceof Error ? err.message : String(err);
+    const errno = (err as { errno?: number } | null)?.errno;
+    const detail = errno === 1205
+      ? 'Data sedang dikunci oleh proses lain, silakan coba simpan lagi.'
+      : err instanceof Error ? err.message : String(err);
     return NextResponse.json(
       { error: `Gagal menyimpan opname: ${detail}` },
       { status: 500 },

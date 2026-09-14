@@ -56,6 +56,32 @@ export async function withTransaction<T>(
   }
 }
 
+function isLockWaitTimeout(err: unknown): boolean {
+  const code = (err as { code?: string; errno?: number } | null)?.code;
+  const errno = (err as { code?: string; errno?: number } | null)?.errno;
+  return code === 'ER_LOCK_WAIT_TIMEOUT' || errno === 1205;
+}
+
+/**
+ * Same as withTransaction, but retries the whole transaction a few times when it
+ * fails purely on "Lock wait timeout exceeded" — a transient collision with another
+ * writer on the same row(s), not a data problem. Any other error still throws
+ * immediately, as does a lock timeout that persists past the last attempt.
+ */
+export async function withTransactionRetry<T>(
+  fn: (conn: TxConnection) => Promise<T>,
+  { retries = 3, delayMs = 300 }: { retries?: number; delayMs?: number } = {},
+): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await withTransaction(fn);
+    } catch (err) {
+      if (attempt >= retries || !isLockWaitTimeout(err)) throw err;
+      await new Promise(resolve => setTimeout(resolve, delayMs * (attempt + 1)));
+    }
+  }
+}
+
 export async function txQuery<T>(
   conn: TxConnection,
   sql: string,

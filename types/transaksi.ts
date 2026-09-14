@@ -141,3 +141,61 @@ export interface KantorOption {
   oid:    string;
   kantor: string;
 }
+
+/**
+ * A row fetched from the RZ partner `transaksiZ` API (Get Transid / Get Transid by
+ * tgl), pending the operator's selection before it is committed into `transaksi`.
+ */
+export interface TransidCandidate {
+  transid:          string;
+  detailid:         number;
+  jenis_transaksi:  string;
+  did:              string;
+  nama_donatur:     string;
+  id_program:       number;
+  nama_program:     string;
+  perkiraan_rp:     number;
+  tgl_transaksi:    string;
+  tgl_donasi:       string;
+  oid_transaksi:       string;
+  oid_donatur:         string;
+  id_kantor_transaksi: string;
+  id_kantor_donatur:   string;
+  kantor_transaksi:    string;
+  kantor_donatur:      string;
+  vbayarid:         string;
+  mbayarid:         string;
+  nik_rfo:          string;
+  nik_claim:        string;
+  approved_claim:   string;
+  approved_trans:   string;
+  atas_nama:        string;
+  keterangan:       string;
+  jml_mustahik:     string;
+}
+
+/**
+ * A row fetched from the RZ partner `internal/donatur` API (Get Donatur), pending
+ * the operator's selection before it is committed into `donatur`.
+ */
+export interface DonaturCandidate {
+  did:                string;
+  nama_lengkap:       string;
+  nama_publikasi:     string;
+  tgl_lahir:          string;
+  alamat_lengkap:     string;
+  alamat_silaturahmi: string;
+  jcustid:            string;
+  status:             string;
+  tgl_registrasi:     string;
+  aktif:              string;
+  telp:               string;
+  hp:                 string;
+  email:              string;
+  verifikasi1:        string;
+  jenis_kelamin:      string;
+  nia_rfo:            string;
+  nama_rfo:           string;
+  tgl_update:         string;
+  npwp:               string;
+}
