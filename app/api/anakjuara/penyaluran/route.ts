@@ -14,9 +14,11 @@ export async function GET(req: NextRequest) {
     if (!g.ok) return g.response;
 
     const parsed = batchListQuery.parse(searchParamsToObject(req.nextUrl.searchParams));
-    const { rows, hasMore } = await fetchBatchList(parsed, g.session);
+    const { rows, hasMore, total } = await fetchBatchList(parsed, g.session);
 
-    return NextResponse.json({ data: rows, hasMore, page: parsed.page, limit: parsed.limit });
+    return NextResponse.json({
+      data: rows, hasMore, total, page: parsed.page, limit: parsed.limit,
+    });
   } catch (err) {
     return toErrorResponse('penyaluran list', err);
   }

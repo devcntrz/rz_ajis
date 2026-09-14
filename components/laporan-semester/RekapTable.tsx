@@ -48,7 +48,8 @@ export function RekapTable({ data, loading }: RekapTableProps) {
       data={data}
       rowKey={r => r.oid}
       loading={loading}
-      minWidth={totalWidth}
+      rowNumberStart={1}
+      minWidth={totalWidth + 48}
       emptyText="Tidak ada data rekap untuk semester ini."
     />
   );

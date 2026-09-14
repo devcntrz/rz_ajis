@@ -10,9 +10,10 @@
  * change to the legacy table is allowed. Measured directly against production: a bare
  * `COUNT(*)` with no WHERE at all did not return within 30s. Two things follow from
  * that, applied throughout this file:
- *  1. Never run a separate COUNT query. `fetchBatchList`/`fetchAnakList` fetch one row
- *     past `limit` instead and report `hasMore` — an exact total is not worth a second
- *     full scan of the same filtered set.
+ *  1. `fetchAnakList` still uses limit+1 / `hasMore` (no COUNT). `fetchBatchList`
+ *     also returns an exact `total` via `COUNT(DISTINCT id_penyaluran)` because the
+ *     Wilayah grid now always scopes by tahun (and usually bulan), which keeps that
+ *     count off the unfiltered table-wide scan.
  *  2. Every read here is wrapped in `unstable_cache` (60s) so the unavoidable scan for
  *     a given filter combination runs at most once a minute for the whole app, not once
  *     per page view. Mutations call `revalidatePenyaluranCache()` so a user's own write
@@ -121,6 +122,15 @@ async function runBatchList(q: BatchListQuery, session: SessionData) {
   const hasMore = rows.length > q.limit;
   const page = rows.slice(0, q.limit);
 
+  // Export uses a huge limit and does not need a total; skip the extra scan.
+  const countRows = q.limit >= 1000
+    ? []
+    : await queryTimed<{ n: number }>(
+      `SELECT COUNT(DISTINCT ap.id_penyaluran) AS n FROM ajis_penyaluran ap WHERE ${WHERE}`,
+      params,
+    );
+  const total = Number(countRows[0]?.n ?? 0);
+
   // SDM names looked up only for the handful of batches on this page, not joined into
   // the table-wide aggregate above (that join used to run once per source row).
   const sdmIds = [...new Set(page.map(r => r.id_sdm).filter((id): id is string => !!id))];
@@ -136,7 +146,7 @@ async function runBatchList(q: BatchListQuery, session: SessionData) {
     ...r, nama_sdm: r.id_sdm ? sdmNames.get(String(r.id_sdm)) ?? null : null,
   }));
 
-  return { rows: withSdm, hasMore };
+  return { rows: withSdm, hasMore, total };
 }
 
 export async function fetchBatchList(q: BatchListQuery, session: SessionData) {
@@ -210,7 +220,17 @@ async function runAnakList(q: AnakListQuery, session: SessionData) {
   );
 
   const hasMore = rows.length > q.limit;
-  return { rows: rows.slice(0, q.limit), hasMore };
+  const pageRows = rows.slice(0, q.limit);
+
+  const countRows = q.limit >= 1000
+    ? []
+    : await queryTimed<{ n: number }>(
+      `SELECT COUNT(*) AS n FROM ajis_penyaluran ap WHERE ${WHERE}`,
+      params,
+    );
+  const total = Number(countRows[0]?.n ?? 0);
+
+  return { rows: pageRows, hasMore, total };
 }
 
 export async function fetchAnakList(q: AnakListQuery, session: SessionData) {

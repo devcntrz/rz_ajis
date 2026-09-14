@@ -4,6 +4,9 @@ import { guard, toErrorResponse } from '@/lib/transaksi/api';
 import { fetchAnakList } from '@/lib/penyaluran/queries';
 import { anakListQuery, searchParamsToObject } from '@/lib/penyaluran/schema';
 import { excelDownloadResponse, type ExcelColumn } from '@/lib/excel';
+import { labelBulan } from '@/lib/keuangan';
+
+const EXPORT_LIMIT = 20_000;
 
 const COLUMNS: ExcelColumn[] = [
   { key: 'id_penyaluran', header: 'ID Penyaluran' },
@@ -34,13 +37,16 @@ export async function GET(req: NextRequest) {
     if (!g.ok) return g.response;
 
     const sp = searchParamsToObject(req.nextUrl.searchParams);
-    const parsed = anakListQuery.parse({ ...sp, page: '1', limit: '20000' });
-    const { rows } = await fetchAnakList(parsed, g.session);
+    const filters = anakListQuery.omit({ page: true, limit: true }).parse(sp);
+    const { rows } = await fetchAnakList(
+      { ...filters, page: 1, limit: EXPORT_LIMIT },
+      g.session,
+    );
 
     const stamp = new Date().toISOString().slice(0, 10);
     return excelDownloadResponse(
       `penyaluran-anak-${stamp}.xlsx`, 'Penyaluran Anak', COLUMNS,
-      rows as unknown as Record<string, unknown>[],
+      rows.map(r => ({ ...r, bulan: labelBulan(r.bulan) })) as unknown as Record<string, unknown>[],
     );
   } catch (err) {
     return toErrorResponse('penyaluran anak export', err);

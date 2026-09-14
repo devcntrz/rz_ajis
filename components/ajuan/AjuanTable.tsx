@@ -36,16 +36,16 @@ type ColDef = {
 /**
  * Column widths are the single source of truth.
  * Sticky `left` is the cumulative sum of previous sticky widths (box-sizing: border-box).
- * Freeze through Nama Donatur (Status → Donatur group).
+ * Freeze through Kantor so cabang stays visible while scrolling.
  */
 const COLS: ColDef[] = [
-  { key: 'no',             label: '#',              width: 40,  sticky: true },
-  { key: 'approve',        label: 'Approve',        width: 92,  sticky: true },
-  { key: 'eksekusi',       label: 'Eksekusi',       width: 88,  sticky: true },
-  { key: 'tgl_ajuan',      label: 'Tgl Ajuan',      width: 104, sticky: true },
-  { key: 'tgl_approve',    label: 'Tgl Approve',    width: 104, sticky: true, sep: true },
+  { key: 'no',             label: '#',              width: 36,  sticky: true },
+  { key: 'approve',        label: 'Approve',        width: 72,  sticky: true },
+  { key: 'eksekusi',       label: 'Eksekusi',       width: 72,  sticky: true },
+  { key: 'tgl_ajuan',      label: 'Tgl Ajuan',      width: 88,  sticky: true },
+  { key: 'tgl_approve',    label: 'Tgl Approve',    width: 88,  sticky: true },
+  { key: 'kantor',         label: 'Kantor',         width: 120, sticky: true, sep: true },
   { key: 'tgl_eksekusi',   label: 'Tgl Eksekusi',   width: 104 },
-  { key: 'kantor',         label: 'Kantor',         width: 120 },
   { key: 'id_donatur',     label: 'ID Donatur',     width: 108 },
   { key: 'nama_donatur',   label: 'Nama Donatur',   width: 150 },
   { key: 'funding',        label: 'Funding',        width: 150 },
@@ -100,7 +100,11 @@ export function AjuanTable({
       border: `1.5px solid ${BORDER}`,
       overflow: 'hidden',
     }}>
-      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div style={{
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        maxHeight: 'calc(100vh - 280px)',
+      }}>
         <table
           style={{
             borderCollapse: 'separate',

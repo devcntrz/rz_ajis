@@ -19,8 +19,8 @@ export default function HafalanBarChart({ data }: HafalanBarChartProps) {
   }
 
   return (
-    <div style={{ width: '100%', height: 220 }}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: '100%', minWidth: 0, height: 220 }}>
+      <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#F2EAE3" horizontal={false} />
           <XAxis type="number" stroke="#7A6055" fontSize={11} tickLine={false} />

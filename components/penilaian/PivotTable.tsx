@@ -82,15 +82,15 @@ export function PivotTable({ semester, wilayah, q }: PivotTableProps) {
       background: '#FFFFFF', border: '1.5px solid #F0C4A0', borderRadius: 16,
       overflow: 'hidden',
     }}>
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ overflow: 'auto', maxHeight: 'calc(100vh - 280px)' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 1600 }}>
           <thead>
             {/* Header Labels */}
             <tr style={{ background: '#FBF0E8', borderBottom: '1.5px solid #F0C4A0' }}>
-              <th style={{ padding: '12px 10px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 90, position: 'sticky', left: 0, background: '#FBF0E8', zIndex: 10 }}>ID Anak</th>
-              <th style={{ padding: '12px 10px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 180, position: 'sticky', left: 90, background: '#FBF0E8', zIndex: 10, borderRight: '2px solid #F0C4A0' }}>Nama Lengkap</th>
+              <th style={{ padding: '12px 10px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 90, position: 'sticky', top: 0, left: 0, background: '#FBF0E8', zIndex: 10 }}>ID Anak</th>
+              <th style={{ padding: '12px 10px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 180, position: 'sticky', top: 0, left: 90, background: '#FBF0E8', zIndex: 10, borderRight: '2px solid #F0C4A0' }}>Nama Lengkap</th>
               {allColumns.map(col => (
-                <th key={col} style={{ padding: '12px 10px', fontSize: 10, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 140, textAlign: 'center' }}>
+                <th key={col} style={{ padding: '12px 10px', fontSize: 10, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 140, textAlign: 'center', position: 'sticky', top: 0, zIndex: 5, background: '#FBF0E8' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
                     <span style={{ height: 28, display: 'flex', alignItems: 'center', textAlign: 'center', lineHeight: 1.1 }}>{col}</span>
                     <select

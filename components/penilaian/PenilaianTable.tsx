@@ -20,10 +20,11 @@ interface PenilaianTableProps {
   data:       PenilaianRow[];
   loading:    boolean;
   semester:   string;
+  rowOffset?: number;
   onSync:     (idAnak: string) => Promise<void>;
 }
 
-export function PenilaianTable({ data, loading, semester, onSync }: PenilaianTableProps) {
+export function PenilaianTable({ data, loading, semester, rowOffset = 0, onSync }: PenilaianTableProps) {
   const router = useRouter();
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
@@ -144,7 +145,8 @@ export function PenilaianTable({ data, loading, semester, onSync }: PenilaianTab
       data={data}
       rowKey={r => r.id_anak}
       loading={loading}
-      minWidth={940}
+      rowNumberStart={rowOffset + 1}
+      minWidth={990}
     />
   );
 }

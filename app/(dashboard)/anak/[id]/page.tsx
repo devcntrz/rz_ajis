@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useParams, useRouter } from 'next/navigation';
 import { useAnakDetail } from '@/hooks/useAnakList';
@@ -11,9 +11,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Btn } from '@/components/ui/Btn';
 import { FLabel } from '@/components/ui/FLabel';
 import { Sel } from '@/components/ui/Input';
-import { KehadiranTable } from '@/components/anak/KehadiranTable';
+import { KehadiranTable, type KehadiranRow } from '@/components/anak/KehadiranTable';
 import { HafalanChecklist } from '@/components/anak/HafalanChecklist';
 import { LaporanCard } from '@/components/penilaian/LaporanCard';
+import { useCurrentSemester } from '@/hooks/useCurrentSemester';
 import { fmtTgl, calcAge, STATUS_COLOR } from '@/lib/utils';
 import { ArrowLeft, User, BookOpen, Calendar, Award } from 'lucide-react';
 
@@ -30,14 +31,23 @@ export default function AnakDetailPage() {
   const router = useRouter();
   const { id } = useParams() as { id: string };
   const [activeTab, setActiveTab] = useState('data');
-  const [semester, setSemester] = useState('25');
+  const { current: activeSemester, options: semesterOptions } = useCurrentSemester();
+  const [semester, setSemester] = useState('');
+
+  useEffect(() => {
+    if (!semester && activeSemester) setSemester(activeSemester.semesterid);
+  }, [semester, activeSemester]);
 
   // Load Child Detail
   const { anak, loading: loadingAnak, error: errorAnak } = useAnakDetail(id);
 
+  const anakId = anak?.id_anak || id;
+
   // Load Child Attendance History
-  const { data: attendanceRes } = useSWR<{ data: any[] }>(
-    activeTab === 'kehadiran' && id ? `/api/anakjuara/anak/${id}/kehadiran?semester=${semester}` : null,
+  const { data: attendanceRes, error: attendanceError, isLoading: attendanceLoading, mutate: mutateAttendance } = useSWR<{ data: KehadiranRow[]; error?: string }>(
+    activeTab === 'kehadiran' && anakId && semester
+      ? `/api/anakjuara/anak/${encodeURIComponent(anakId)}/kehadiran?semester=${encodeURIComponent(semester)}`
+      : null,
     fetcher,
     { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
@@ -107,9 +117,15 @@ export default function AnakDetailPage() {
         {activeTab !== 'data' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#7A6055' }}>Semester:</span>
-            <Sel value={semester} onChange={e => setSemester(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, width: 180 }}>
-              <option value="25">Semester Ganjil 2025/2026</option>
-              <option value="26">Semester Genap 2025/2026</option>
+            <Sel value={semester} onChange={e => setSemester(e.target.value)} style={{ padding: '4px 8px', fontSize: 12, width: 220 }}>
+              {semesterOptions.length === 0 && semester && (
+                <option value={semester}>{semester}</option>
+              )}
+              {semesterOptions.map(s => (
+                <option key={s.semesterid} value={s.semesterid}>
+                  {s.semester}{s.is_current ? ' (Aktif)' : ''}
+                </option>
+              ))}
             </Sel>
           </div>
         )}
@@ -230,7 +246,15 @@ export default function AnakDetailPage() {
           <Card>
             <CardHead title="Log Sesi & Pembiasaan Mandiri" />
             <div style={{ padding: 14 }}>
-              <KehadiranTable data={attendanceList} />
+              {attendanceLoading ? (
+                <div className="skeleton" style={{ height: 160, borderRadius: 12 }} />
+              ) : attendanceError || attendanceRes?.error ? (
+                <div style={{ textAlign: 'center', padding: 32, color: '#B02020', fontSize: 13 }}>
+                  {attendanceRes?.error || 'Gagal memuat kehadiran.'}
+                </div>
+              ) : (
+                <KehadiranTable data={attendanceList} idAnak={anakId} onSaved={() => mutateAttendance()} />
+              )}
             </div>
           </Card>
         )}

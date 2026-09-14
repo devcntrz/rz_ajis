@@ -7,28 +7,27 @@ import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
-import { SimplePager } from '@/components/ui/SimplePager';
+import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { ErrorRetry } from '@/components/ui/ErrorRetry';
-import type { PageSizeOption } from '@/components/ui/DesktopPagination';
 import { NewBulkWizard } from '@/components/penyaluran/NewBulkWizard';
 import { BatchDetailModal } from '@/components/penyaluran/BatchDetailModal';
 import { useBatchList, usePenyaluranLookup } from '@/hooks/usePenyaluran';
 import { DEFAULT_PAGE_SIZE } from '@/lib/pagination';
+import { BULAN_LABEL, labelBulan } from '@/lib/keuangan';
 import { fmtRp } from '@/lib/utils';
 import type { PenyaluranBatch } from '@/types/penyaluran';
 
 const T = { green: '#1A7A45', greenPale: '#E5F5ED', gray: '#7A6055', gold: '#B87800', goldPale: '#FDF4DC' };
 
 export function WilayahTab() {
+  const now = new Date();
   const { kantor, wilayah } = usePenyaluranLookup();
   const [kantorId, setKantorId] = useState('');
   const [wilayahId, setWilayahId] = useState('');
-  const [bulan, setBulan] = useState('');
-  // Defaults to the current year so the first paint stays scoped — an unfiltered grid
-  // aggregates the whole ajis_penyaluran table (see lib/penyaluran/queries.ts).
-  const [tahun, setTahun] = useState(String(new Date().getFullYear()));
+  const [bulan, setBulan] = useState(String(now.getMonth() + 1));
+  const [tahun, setTahun] = useState(String(now.getFullYear()));
   const [page, setPage] = useState(1);
-  const limit: PageSizeOption = DEFAULT_PAGE_SIZE;
+  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [showNewBulk, setShowNewBulk] = useState(false);
   const [selected, setSelected] = useState<PenyaluranBatch | null>(null);
 
@@ -49,8 +48,8 @@ export function WilayahTab() {
     if (kantorId) qs.set('kantor_id', kantorId);
     if (wilayahId) qs.set('id_wilayah_pembinaan', wilayahId);
     if (bulan) qs.set('bulan', bulan);
-    if (tahun) qs.set('tahun', tahun);
-    return `/api/anakjuara/penyaluran/export${qs.toString() ? `?${qs}` : ''}`;
+    qs.set('tahun', tahun);
+    return `/api/anakjuara/penyaluran/export?${qs}`;
   })();
 
   const columns = [
@@ -60,7 +59,7 @@ export function WilayahTab() {
     },
     { key: 'nama_wilayah', label: 'Wilayah', width: 190, sticky: true, sep: true, render: (r: PenyaluranBatch) => r.nama_wilayah },
     { key: 'nama_kantor', label: 'Kantor', width: 170, render: (r: PenyaluranBatch) => r.nama_kantor },
-    { key: 'bulan', label: 'Bulan', width: 80, align: 'right' as const, render: (r: PenyaluranBatch) => r.bulan },
+    { key: 'bulan', label: 'Bulan', width: 80, render: (r: PenyaluranBatch) => labelBulan(r.bulan) },
     { key: 'tahun', label: 'Tahun', width: 80, align: 'right' as const, render: (r: PenyaluranBatch) => r.tahun },
     { key: 'periode', label: 'Periode', width: 90, render: (r: PenyaluranBatch) => r.periode },
     { key: 'jumlah_anak', label: 'Jml Anak', width: 90, align: 'right' as const, render: (r: PenyaluranBatch) => r.jumlah_anak },
@@ -110,12 +109,12 @@ export function WilayahTab() {
           <FLabel>Bulan</FLabel>
           <Sel value={bulan} onChange={e => { setBulan(e.target.value); setPage(1); }}>
             <option value="">Semua</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(b => <option key={b} value={String(b)}>{b}</option>)}
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(b => (
+              <option key={b} value={String(b)}>{BULAN_LABEL[String(b)]}</option>
+            ))}
           </Sel>
         </div>
         <div style={{ minWidth: 100 }}>
-          {/* No "Semua" option: an unfiltered year scans the entire table server-side
-              (lib/penyaluran/queries.ts::defaultTahun), so the picker always names one. */}
           <FLabel>Tahun</FLabel>
           <Sel value={tahun} onChange={e => { setTahun(e.target.value); setPage(1); }}>
             {[0, 1, 2].map(d => {
@@ -143,17 +142,21 @@ export function WilayahTab() {
             loading={!list.isReady}
             rowKey={r => r.id_penyaluran}
             onRowClick={r => setSelected(r)}
+            rowNumberStart={(page - 1) * limit + 1}
             gridLines
-            minWidth={1600}
+            minWidth={1680}
             emptyText="Tidak ada batch penyaluran untuk filter ini."
           />
         </div>
       )}
 
-      {list.data.length > 0 && (
-        <SimplePager
-          page={page} hasMore={list.hasMore} onPageChange={setPage}
-          shownCount={list.data.length}
+      {list.isReady && list.total > 0 && (
+        <DesktopPagination
+          page={page}
+          limit={limit}
+          total={list.total}
+          onPageChange={setPage}
+          onLimitChange={next => { setLimit(next); setPage(1); }}
         />
       )}
 

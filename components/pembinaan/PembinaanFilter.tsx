@@ -144,6 +144,7 @@ export function PembinaanFilter({ onFilterChange }: PembinaanFilterProps) {
                 placeholder="Ketik semester..."
                 allowEmpty
                 clearable
+                limit={40}
               />
             </div>
 

@@ -1,6 +1,7 @@
 /**
- * GET /api/anakjuara/semester — Semester list (searchable, max 10)
- * Current semester first, then by tgl_awal.
+ * GET /api/anakjuara/semester — Semester list (searchable).
+ * Sort parses tahun / name year / jenis first (not id or raw tgl_awal),
+ * drops placeholder years (e.g. 2125), then current → newest half-year.
  *
  * `?mode=admin` switches to the full admin listing (all columns incl. the 13
  * template image URLs, paginated) used by the new Semester admin page — kept
@@ -16,6 +17,7 @@ import { query } from '@/lib/db';
 import { getSession, requireGroup12 } from '@/lib/auth';
 import { SEARCH_SELECT_LIMIT } from '@/lib/searchSelect';
 import { fetchSemesterList, createSemester } from '@/lib/semester/queries';
+import { sortSemesters } from '@/lib/semester/sort';
 import type { SemesterInput } from '@/types/semester';
 
 export async function GET(req: NextRequest) {
@@ -34,10 +36,8 @@ export async function GET(req: NextRequest) {
     }
 
     const q = req.nextUrl.searchParams.get('q')?.trim() || '';
-    const limit = Math.min(
-      SEARCH_SELECT_LIMIT,
-      Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || String(SEARCH_SELECT_LIMIT), 10)),
-    );
+    const requested = parseInt(req.nextUrl.searchParams.get('limit') || String(SEARCH_SELECT_LIMIT), 10);
+    const limit = Math.min(50, Math.max(1, Number.isFinite(requested) ? requested : SEARCH_SELECT_LIMIT));
 
     const conditions: string[] = [];
     const params: unknown[] = [];
@@ -55,26 +55,34 @@ export async function GET(req: NextRequest) {
       semester: string;
       tgl_awal: string;
       tgl_akhir: string;
+      tahun: string | null;
+      jenis: string | null;
+      onprogress: string | null;
       is_current: number;
     }>(
-      `SELECT semesterid, semester, tgl_awal, tgl_akhir,
-              CASE WHEN CURDATE() BETWEEN tgl_awal AND tgl_akhir THEN 1 ELSE 0 END AS is_current
+      `SELECT semesterid, semester, tgl_awal, tgl_akhir, tahun, jenis, onprogress,
+              CASE
+                WHEN onprogress = 'y' THEN 1
+                WHEN CURDATE() BETWEEN DATE(tgl_awal) AND DATE(tgl_akhir) THEN 1
+                ELSE 0
+              END AS is_current
        FROM ajis_semester
-       ${WHERE}
-       ORDER BY is_current DESC, tgl_awal ASC
-       LIMIT ?`,
-      [...params, limit],
+       ${WHERE}`,
+      params,
     );
 
-    return NextResponse.json({
-      data: rows.map(r => ({
-        semesterid: r.semesterid,
-        semester:   r.semester,
-        tgl_awal:   r.tgl_awal,
-        tgl_akhir:  r.tgl_akhir,
-        is_current: r.is_current === 1,
-      })),
-    });
+    const ordered = sortSemesters(rows.map(r => ({
+      semesterid: r.semesterid,
+      semester:   r.semester,
+      tgl_awal:   r.tgl_awal,
+      tgl_akhir:  r.tgl_akhir,
+      tahun:      r.tahun,
+      jenis:      r.jenis,
+      onprogress: r.onprogress,
+      is_current: r.is_current === 1,
+    }))).slice(0, limit);
+
+    return NextResponse.json({ data: ordered });
   } catch (err) {
     console.error('[semester list]', err);
     return NextResponse.json({ error: 'Gagal memuat semester.' }, { status: 500 });

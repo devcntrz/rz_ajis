@@ -51,7 +51,7 @@ export async function fetchSemesterList(params: {
     `SELECT ${ALL_COLUMNS}
      FROM ajis_semester
      ${WHERE}
-     ORDER BY onprogress DESC, YEAR(tgl_awal) ASC
+     ORDER BY tgl_awal DESC, tgl_akhir DESC, semesterid DESC
      LIMIT ? OFFSET ?`,
     [...args, limit, offset],
   );

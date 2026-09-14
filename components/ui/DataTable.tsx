@@ -27,11 +27,14 @@ interface DataTableProps<T> {
   data:        T[];
   rowKey:      (row: T) => string;
   onRowClick?: (row: T) => void;
+  onRowDoubleClick?: (row: T) => void;
   selectedKey?: string | null;
   /** Selected row uses text color (not cell background). */
   selectedTextColor?: string;
   /** Per-row text color, e.g. to flag inactive records. Selection still wins. */
   rowTextColor?: (row: T) => string | undefined;
+  /** Per-row background. Selection text still wins; striped default is used when omitted. */
+  rowBg?: (row: T) => string | undefined;
   sortBy?:     string;
   sortDir?:    'asc' | 'desc';
   onSort?:     (sortKey: string) => void;
@@ -51,7 +54,15 @@ interface DataTableProps<T> {
    * callers don't need to build their own numbering column.
    */
   rowNumberStart?: number;
+  /**
+   * Pin thead while the table body scrolls. The scroll box uses a viewport-based
+   * max height so `position: sticky; top: 0` has a containing overflow.
+   */
+  stickyHeader?: boolean;
 }
+
+const GRID_SCROLL_MAX = 'calc(100vh - 280px)';
+const GROUP_HEADER_H = 26;
 
 const T = {
   primaryPale: '#FBF0E8', primarySoft: '#F0C4A0', primaryDk: '#8F3A01',
@@ -77,11 +88,11 @@ function computeLayout<T>(columns: Column<T>[]): Layout[] {
 }
 
 export function DataTable<Row>({
-  columns: columnsProp, data, rowKey, onRowClick, selectedKey,
-  selectedTextColor = T.selectedText, rowTextColor,
+  columns: columnsProp, data, rowKey, onRowClick, onRowDoubleClick, selectedKey,
+  selectedTextColor = T.selectedText, rowTextColor, rowBg,
   sortBy, sortDir = 'asc', onSort,
   minWidth = 900, loading, emptyText = 'Tidak ada data.', gridLines,
-  rowNumberStart,
+  rowNumberStart, stickyHeader = true,
 }: DataTableProps<Row>) {
   const columns = React.useMemo<Column<Row>[]>(() => {
     if (rowNumberStart == null) return columnsProp;
@@ -123,10 +134,12 @@ export function DataTable<Row>({
     );
   }
 
-  const stickyStyle = (c: Column<Row>, i: number, bg: string, headerLayer: boolean): React.CSSProperties =>
-    c.sticky
+  const stickyStyle = (
+    c: Column<Row>, i: number, bg: string, headerLayer: boolean, headerTop = 0,
+  ): React.CSSProperties => {
+    const frozen = c.sticky
       ? {
-          position: 'sticky',
+          position: 'sticky' as const,
           left: layout[i].left,
           // Frozen cells must outrank scrolling cells of the same band; header
           // outranks body so it never gets painted over while scrolling.
@@ -134,11 +147,27 @@ export function DataTable<Row>({
           background: bg,
           boxShadow: layout[i].isLastSticky ? FREEZE_SHADOW : undefined,
         }
-      : { position: 'static', zIndex: headerLayer ? 3 : 0, background: bg };
+      : { position: 'static' as const, zIndex: headerLayer ? 3 : 0, background: bg };
+
+    if (headerLayer && stickyHeader) {
+      return {
+        ...frozen,
+        position: 'sticky',
+        top: headerTop,
+        zIndex: c.sticky ? 6 : 5,
+        background: bg,
+      };
+    }
+    return frozen;
+  };
 
   return (
     <div style={{ background: T.white, borderRadius: 16, border: `1.5px solid ${T.primarySoft}`, overflow: 'hidden' }}>
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{
+        overflowX: 'auto',
+        overflowY: stickyHeader ? 'auto' : undefined,
+        maxHeight: stickyHeader ? GRID_SCROLL_MAX : undefined,
+      }}>
         <table style={{
           borderCollapse: 'separate', borderSpacing: 0,
           width: '100%', minWidth, tableLayout: 'fixed',
@@ -163,8 +192,12 @@ export function DataTable<Row>({
                         textAlign: g.span > 1 ? 'center' : 'left',
                         borderBottom: `1px solid ${T.primarySoft}`,
                         ...(c && g.span === 1
-                          ? stickyStyle(c, firstIdx, T.primaryPale, true)
-                          : { background: T.primaryPale, zIndex: 3 }),
+                          ? stickyStyle(c, firstIdx, T.primaryPale, true, 0)
+                          : {
+                              background: T.primaryPale,
+                              zIndex: stickyHeader ? 5 : 3,
+                              ...(stickyHeader ? { position: 'sticky' as const, top: 0 } : {}),
+                            }),
                       }}
                     >
                       {g.label}
@@ -192,7 +225,7 @@ export function DataTable<Row>({
                       cursor: canSort ? 'pointer' : undefined,
                       userSelect: 'none',
                       overflow: 'hidden', textOverflow: 'ellipsis',
-                      ...stickyStyle(c, i, T.primaryPale, true),
+                      ...stickyStyle(c, i, T.primaryPale, true, hasGroups ? GROUP_HEADER_H : 0),
                     }}
                   >
                     <span style={{
@@ -224,10 +257,11 @@ export function DataTable<Row>({
             {data.map((row, i) => {
               const key = rowKey(row);
               const selected = selectedKey != null && selectedKey !== '' && key === selectedKey;
-              const bg = i % 2 === 0 ? T.white : '#FDFAF8';
+              const bg = rowBg?.(row) ?? (i % 2 === 0 ? T.white : '#FDFAF8');
               const textColor = selected
                 ? selectedTextColor
                 : (rowTextColor?.(row) ?? T.charcoal);
+              const rowInteractive = !!(onRowClick || onRowDoubleClick);
               const paint = (el: HTMLElement, color: string) => {
                 el.style.background = color;
                 el.querySelectorAll('td').forEach(td => {
@@ -240,16 +274,18 @@ export function DataTable<Row>({
                   data-selected={selected ? '1' : undefined}
                   style={{
                     background: bg,
-                    cursor: onRowClick ? 'pointer' : undefined,
+                    cursor: rowInteractive ? 'pointer' : undefined,
                     color: textColor,
+                    userSelect: onRowDoubleClick ? 'none' : undefined,
                   }}
                   onClick={() => onRowClick?.(row)}
+                  onDoubleClick={() => onRowDoubleClick?.(row)}
                   onMouseEnter={e => {
-                    if (!onRowClick) return;
+                    if (!rowInteractive) return;
                     paint(e.currentTarget as HTMLElement, selected ? bg : T.primaryPale);
                   }}
                   onMouseLeave={e => {
-                    if (!onRowClick) return;
+                    if (!rowInteractive) return;
                     paint(e.currentTarget as HTMLElement, bg);
                   }}
                 >

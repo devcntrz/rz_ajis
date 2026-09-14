@@ -7,10 +7,14 @@ import { SemesterTable } from '@/components/semester/SemesterTable';
 import { SemesterForm } from '@/components/semester/SemesterForm';
 import { SemesterTemplateUpload } from '@/components/semester/SemesterTemplateUpload';
 import { Btn } from '@/components/ui/Btn';
+import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
+import { DEFAULT_PAGE_SIZE } from '@/lib/pagination';
 import type { Semester } from '@/types/semester';
 
 export function SemesterClient() {
-  const { data, loading, mutate } = useSemesterAdmin({ limit: 100 });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
+  const { data, total, loading, mutate } = useSemesterAdmin({ page, limit });
   const [formRow, setFormRow] = useState<Semester | null | undefined>(undefined);
   const [templateRow, setTemplateRow] = useState<Semester | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -75,6 +79,7 @@ export function SemesterClient() {
         <SemesterTable
           data={data}
           loading={loading}
+          rowOffset={(page - 1) * limit}
           onEdit={setFormRow}
           onDelete={handleDelete}
           onActivate={handleActivate}
@@ -82,6 +87,16 @@ export function SemesterClient() {
           busyId={busyId}
         />
       </div>
+
+      {total > 0 && (
+        <DesktopPagination
+          page={page}
+          limit={limit}
+          total={total}
+          onPageChange={setPage}
+          onLimitChange={next => { setLimit(next); setPage(1); }}
+        />
+      )}
 
       {formRow !== undefined && (
         <SemesterForm

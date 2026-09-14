@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import useSWR from 'swr';
 import { Card, CardHead } from '@/components/ui/Card';
 import { StatCard } from '@/components/ui/StatCard';
@@ -8,7 +7,12 @@ import TrendChart from '@/components/dashboard/TrendChart';
 import PieChart from '@/components/dashboard/PieChart';
 import HafalanBarChart from '@/components/dashboard/HafalanBarChart';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || 'Gagal memuat dashboard.');
+  return body;
+};
 
 interface DashboardData {
   total_anak:    number;
@@ -102,22 +106,40 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
         <Card>
           <CardHead title="Tren Kehadiran Sesi Pembinaan" />
-          <div style={{ padding: '16px 14px 10px' }}>
-            <TrendChart data={data?.trend ?? []} />
+          <div style={{ padding: '16px 14px 10px', minWidth: 0 }}>
+            {(data?.trend?.length ?? 0) > 0 ? (
+              <TrendChart data={data!.trend} />
+            ) : (
+              <p style={{ fontSize: 13, color: '#7A6055', padding: '40px 0', textAlign: 'center' }}>
+                Belum ada data kehadiran.
+              </p>
+            )}
           </div>
         </Card>
 
         <Card>
           <CardHead title="Status Yatim / Dhuafa Anak" />
-          <div style={{ padding: '16px 14px 10px' }}>
-            <PieChart data={data?.status_pie ?? []} />
+          <div style={{ padding: '16px 14px 10px', minWidth: 0 }}>
+            {(data?.status_pie?.length ?? 0) > 0 ? (
+              <PieChart data={data!.status_pie} />
+            ) : (
+              <p style={{ fontSize: 13, color: '#7A6055', padding: '40px 0', textAlign: 'center' }}>
+                Belum ada data status anak.
+              </p>
+            )}
           </div>
         </Card>
 
         <Card style={{ gridColumn: '1 / -1' }}>
           <CardHead title="Distribusi Penyelesaian Hafalan" />
-          <div style={{ padding: '16px 14px 10px' }}>
-            <HafalanBarChart data={hafalanDemoData} />
+          <div style={{ padding: '16px 14px 10px', minWidth: 0 }}>
+            {data?.total_anak ? (
+              <HafalanBarChart data={hafalanDemoData} />
+            ) : (
+              <p style={{ fontSize: 13, color: '#7A6055', padding: '40px 0', textAlign: 'center' }}>
+                Belum ada data hafalan.
+              </p>
+            )}
           </div>
         </Card>
       </div>

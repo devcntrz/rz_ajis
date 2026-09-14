@@ -1,7 +1,7 @@
 'use client';
 import { Badge } from '@/components/ui/Badge';
 import { RowActions } from '@/components/ui/RowActions';
-import { buildRowActions, rowKeyOf, type RowHandlers } from '@/components/transaksi/TransaksiTable';
+import { buildRowActions, rowKeyOf, transaksiRowColor, type RowHandlers } from '@/components/transaksi/TransaksiTable';
 import { fmtRp, fmtTgl } from '@/lib/utils';
 import type { Transaksi, TransaksiScope } from '@/types/transaksi';
 
@@ -73,7 +73,7 @@ export function TransaksiCard({
                   />
                 )}
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: T.charcoal }}>
+                  <div style={{ fontWeight: 800, fontSize: 14, color: transaksiRowColor(r) }}>
                     {r.nama_donatur || '-'}
                   </div>
                 </div>

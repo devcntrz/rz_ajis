@@ -8,6 +8,7 @@ import type { Semester } from '@/types/semester';
 interface SemesterTableProps {
   data:     Semester[];
   loading:  boolean;
+  rowOffset?: number;
   onEdit:   (row: Semester) => void;
   onDelete: (row: Semester) => void;
   onActivate: (row: Semester) => void;
@@ -15,7 +16,7 @@ interface SemesterTableProps {
   busyId?: number | null;
 }
 
-export function SemesterTable({ data, loading, onEdit, onDelete, onActivate, onTemplate, busyId }: SemesterTableProps) {
+export function SemesterTable({ data, loading, rowOffset = 0, onEdit, onDelete, onActivate, onTemplate, busyId }: SemesterTableProps) {
   const columns = [
     {
       key: 'aksi',
@@ -80,7 +81,8 @@ export function SemesterTable({ data, loading, onEdit, onDelete, onActivate, onT
       data={data}
       rowKey={r => String(r.id)}
       loading={loading}
-      minWidth={totalWidth}
+      rowNumberStart={rowOffset + 1}
+      minWidth={totalWidth + 48}
       emptyText="Belum ada data semester."
     />
   );

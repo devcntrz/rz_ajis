@@ -23,8 +23,8 @@ export default function PieChart({ data }: PieChartProps) {
   const cleanData = data.filter(d => d.value > 0);
 
   return (
-    <div style={{ width: '100%', height: 220 }}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: '100%', minWidth: 0, height: 220 }}>
+      <ResponsiveContainer width="100%" height={220}>
         <RePieChart>
           <Pie
             data={cleanData}

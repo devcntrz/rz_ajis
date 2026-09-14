@@ -39,11 +39,14 @@ export async function launchBrowser(): Promise<Browser> {
 }
 
 /** Renders an HTML string to a PDF buffer (A4, no extra margins — CSS controls layout). */
-export async function renderHtmlToPdf(html: string): Promise<Buffer> {
+export async function renderHtmlToPdf(
+  html: string,
+  options?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2' },
+): Promise<Buffer> {
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'load' });
+    await page.setContent(html, { waitUntil: options?.waitUntil ?? 'load' });
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,

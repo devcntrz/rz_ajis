@@ -4,14 +4,23 @@ import type { PenilaianSummary } from '@/types/penilaian';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export function usePenilaianList(params: { semester?: string; wilayah?: string; q?: string; status?: string } = {}) {
+export function usePenilaianList(params: {
+  semester?: string; wilayah?: string; q?: string; status?: string;
+  page?: number; limit?: number;
+} = {}) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
-    if (v) query.append(k, v);
+    if (v !== undefined && v !== null && v !== '') query.append(k, String(v));
   });
 
   const queryString = query.toString();
-  const { data, error, mutate } = useSWR<{ data: Array<{ id_anak: string; nama_lengkap: string; jenjang_pendidikan: string; nama_wilayah: string; nama_kantor: string; record_count: number; nilai_capaian_avg: number }> }>(
+  const { data, error, mutate } = useSWR<{
+    data: Array<{
+      id_anak: string; nama_lengkap: string; jenjang_pendidikan: string;
+      nama_wilayah: string; nama_kantor: string; record_count: number; nilai_capaian_avg: number;
+    }>;
+    total: number;
+  }>(
     `/api/anakjuara/penilaian${queryString ? `?${queryString}` : ''}`,
     fetcher,
     { keepPreviousData: true, revalidateOnFocus: false, revalidateOnReconnect: false },
@@ -19,6 +28,7 @@ export function usePenilaianList(params: { semester?: string; wilayah?: string; 
 
   return {
     data:    data?.data ?? [],
+    total:   data?.total ?? 0,
     loading: !data && !error,
     error,
     mutate,

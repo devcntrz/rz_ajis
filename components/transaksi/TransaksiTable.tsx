@@ -1,7 +1,9 @@
 'use client';
+import { toast } from 'sonner';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
 import { RowActions } from '@/components/ui/RowActions';
+import { canEntry } from '@/lib/transaksi/rules';
 import { fmtRp, fmtTgl } from '@/lib/utils';
 import type { Transaksi, TransaksiScope } from '@/types/transaksi';
 
@@ -10,7 +12,15 @@ const T = {
   red: '#B02020', redPale: '#FDEAEA',
   gold: '#B87800', goldPale: '#FDF4DC',
   gray: '#7A6055', grayLt: '#F2EAE3',
+  charcoal: '#1A0A00',
 };
+
+/** Legacy AJIS row ink: unapprove green, not-entered red, entered black. */
+export function transaksiRowColor(r: Transaksi): string {
+  if (r.approve_salur === 'n') return T.green;
+  if (r.status_pasang !== 'y') return T.red;
+  return T.charcoal;
+}
 
 export interface RowHandlers {
   onEntry:         (row: Transaksi) => void;
@@ -197,11 +207,22 @@ export function TransaksiTable({
       sortDir={sortDir}
       onSort={onSort}
       gridLines
+      stickyHeader
       // Exactly the sum of the column widths above, so the browser honours them as
       // declared instead of stretching them and shifting the sticky offsets.
       minWidth={2640}
-      // A non-zero selisih is the operator's whole reason for scanning this grid.
-      rowTextColor={r => (Number(r.selisih_donasi || 0) !== 0 ? T.red : undefined)}
+      rowTextColor={transaksiRowColor}
+      onRowDoubleClick={row => {
+        if (canEntry(row)) {
+          handlers.onEntry(row);
+          return;
+        }
+        if (row.status_pasang === 'y') {
+          handlers.onUpdate(row);
+          return;
+        }
+        toast.error('Transaksi belum disetujui untuk disalurkan (approve salur = n).');
+      }}
       emptyText="Tidak ada transaksi untuk filter ini."
     />
   );

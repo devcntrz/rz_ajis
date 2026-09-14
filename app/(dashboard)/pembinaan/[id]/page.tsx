@@ -320,25 +320,21 @@ export default function PembinaanDetailPage() {
                         </td>
                       )}
                       <td style={{ padding: 10 }}>
-                        {anak.kehadiran === 'y' ? (
-                          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                            {[
-                              { key: 'pembiasaan_shalat_wajib', label: 'Shalat' },
-                              { key: 'pembiasaan_tilawah',      label: 'Tilawah' },
-                              { key: 'pembiasaan_sedekah',      label: 'Sedekah' },
-                              { key: 'membantu_ortu',           label: 'Bantu Ortu' },
-                            ].map(({ key, label }) => {
-                              const on = !!(anak as unknown as Record<string, unknown>)[key];
-                              return (
-                                <span key={key} style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: on ? '#E5F5ED' : '#FDEAEA', color: on ? '#1A7A45' : '#B02020' }}>
-                                  {label}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div style={{ textAlign: 'center', color: '#7A6055', fontSize: 11 }}>—</div>
-                        )}
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                          {[
+                            { key: 'pembiasaan_shalat_wajib', label: 'Shalat' },
+                            { key: 'pembiasaan_tilawah',      label: 'Tilawah' },
+                            { key: 'pembiasaan_sedekah',      label: 'Sedekah' },
+                            { key: 'membantu_ortu',           label: 'Bantu Ortu' },
+                          ].map(({ key, label }) => {
+                            const on = !!(anak as unknown as Record<string, unknown>)[key];
+                            return (
+                              <span key={key} style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: on ? '#E5F5ED' : '#FDEAEA', color: on ? '#1A7A45' : '#B02020' }}>
+                                {label}
+                              </span>
+                            );
+                          })}
+                        </div>
                       </td>
                     </tr>
                   );
