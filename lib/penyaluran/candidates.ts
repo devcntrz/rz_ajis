@@ -20,8 +20,13 @@ export async function kandidatSalur(q: KandidatQuery): Promise<KandidatSalur[]> 
   const [bulanAwal, bulanAkhir] = per === 'ganjil' ? [1, 6] : [7, 12];
 
   // Params order must match the SQL below exactly (donasi subq, salur subq, then main WHERE).
-  const donasiParams = [q.tahun, bulanAwal, bulanAkhir, q.wilayahId];
-  const salurParams = [q.tahun, bulanAwal, bulanAkhir, q.wilayahId];
+  // donasi/salur subqueries key on id_pemasangan_baru alone (no tahun/wilayah predicate) —
+  // this mirrors lib/keuangan.ts's replication of the legacy ajis_view_anak_juara formula.
+  // ajis_input_donasi/ajis_penyaluran rows aren't guaranteed to carry the same
+  // id_wilayah_pembinaan/tahun as the current ajis_pemasangan row (e.g. after a
+  // wilayah/tahun change), so filtering on those here silently undercounts donasi.
+  const donasiParams = [bulanAwal, bulanAkhir];
+  const salurParams = [bulanAwal, bulanAkhir];
   const mainParams: unknown[] = [q.wilayahId, q.tahun];
 
   if (q.kantorId) { mainParams.push(q.kantorId); }
@@ -50,13 +55,13 @@ export async function kandidatSalur(q: KandidatQuery): Promise<KandidatSalur[]> 
      LEFT JOIN (
        SELECT id_pemasangan_baru, SUM(nominal_donasi) AS donasi
        FROM ajis_input_donasi
-       WHERE tahun = ? AND jenis = 'trans' AND bulan BETWEEN ? AND ? AND id_wilayah_pembinaan = ?
+       WHERE jenis = 'trans' AND bulan BETWEEN ? AND ?
        GROUP BY id_pemasangan_baru
      ) d ON d.id_pemasangan_baru = p.id_pemasangan_baru
      LEFT JOIN (
        SELECT id_pemasangan_baru, SUM(nominal_penyaluran) AS salur
        FROM ajis_penyaluran
-       WHERE tahun = ? AND bulan BETWEEN ? AND ? AND id_wilayah_pembinaan = ?
+       WHERE bulan BETWEEN ? AND ?
        GROUP BY id_pemasangan_baru
      ) s ON s.id_pemasangan_baru = p.id_pemasangan_baru
      WHERE p.status_pasangan = 'y'
