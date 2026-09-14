@@ -1,22 +1,24 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAnakDetail } from '@/hooks/useAnakList';
 import { usePenilaianDetail } from '@/hooks/usePenilaian';
 import { TabBar } from '@/components/ui/TabBar';
 import { Card, CardHead } from '@/components/ui/Card';
-import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Btn } from '@/components/ui/Btn';
 import { FLabel } from '@/components/ui/FLabel';
 import { Sel } from '@/components/ui/Input';
 import { KehadiranTable, type KehadiranRow } from '@/components/anak/KehadiranTable';
 import { HafalanChecklist } from '@/components/anak/HafalanChecklist';
+import { AnakProfileForm } from '@/components/anak/AnakProfileForm';
+import { AnakFotoUpload } from '@/components/anak/AnakFotoUpload';
 import { LaporanCard } from '@/components/penilaian/LaporanCard';
 import { useCurrentSemester } from '@/hooks/useCurrentSemester';
 import { fmtTgl, calcAge, STATUS_COLOR } from '@/lib/utils';
-import { ArrowLeft, User, BookOpen, Calendar, Award } from 'lucide-react';
+import { ArrowLeft, User, BookOpen, Calendar, Award, Pencil } from 'lucide-react';
+import type { AnakDetail } from '@/types/anak';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -30,7 +32,9 @@ const tabs = [
 export default function AnakDetailPage() {
   const router = useRouter();
   const { id } = useParams() as { id: string };
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('data');
+  const [editMode, setEditMode] = useState(() => searchParams.get('edit') === '1');
   const { current: activeSemester, options: semesterOptions } = useCurrentSemester();
   const [semester, setSemester] = useState('');
 
@@ -39,7 +43,7 @@ export default function AnakDetailPage() {
   }, [semester, activeSemester]);
 
   // Load Child Detail
-  const { anak, loading: loadingAnak, error: errorAnak } = useAnakDetail(id);
+  const { anak, loading: loadingAnak, error: errorAnak, mutate: mutateAnak } = useAnakDetail(id);
 
   const anakId = anak?.id_anak || id;
 
@@ -77,14 +81,21 @@ export default function AnakDetailPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Back Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Btn onClick={() => router.back()} variant="ghost" style={{ padding: 6 }}>
-          <ArrowLeft size={18} />
-        </Btn>
-        <div>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A0A00' }}>Detail Profil Anak Asuh</h2>
-          <span style={{ fontSize: 12, color: '#7A6055' }}>ID Anak: {anak.id_anak}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Btn onClick={() => router.back()} variant="ghost" style={{ padding: 6 }}>
+            <ArrowLeft size={18} />
+          </Btn>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1A0A00' }}>Detail Profil Anak Asuh</h2>
+            <span style={{ fontSize: 12, color: '#7A6055' }}>ID Anak: {anak.id_anak}</span>
+          </div>
         </div>
+        {activeTab === 'data' && !editMode && (
+          <Btn onClick={() => setEditMode(true)} variant="outline">
+            <Pencil size={14} /> Edit Data
+          </Btn>
+        )}
       </div>
 
       {/* Profile Overview Banner */}
@@ -92,7 +103,14 @@ export default function AnakDetailPage() {
         background: '#FFFFFF', border: '1.5px solid #F0C4A0', borderRadius: 18,
         padding: 18, display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
       }}>
-        <Avatar nama={String(anak.nama_lengkap)} gender={String(anak.jns_kel)} size={60} />
+        <AnakFotoUpload
+          idAnak={anak.id_anak}
+          nama={String(anak.nama_lengkap)}
+          gender={String(anak.jns_kel)}
+          foto={anak.foto}
+          size={60}
+          onUploaded={url => mutateAnak({ data: { ...anak, foto: url } }, false)}
+        />
         <div style={{ flex: 1, minWidth: 200 }}>
           <h3 style={{ fontSize: 16, fontWeight: 800, color: '#1A0A00' }}>{anak.nama_lengkap}</h3>
           <div style={{ fontSize: 13, color: '#7A6055', marginTop: 3 }}>
@@ -133,7 +151,19 @@ export default function AnakDetailPage() {
 
       {/* Tab Content Panels */}
       <div>
-        {activeTab === 'data' && (
+        {activeTab === 'data' && editMode && (
+          <AnakProfileForm
+            key={anak.id_anak}
+            anak={anak as AnakDetail}
+            onCancel={() => setEditMode(false)}
+            onSaved={updated => {
+              mutateAnak({ data: updated }, false);
+              setEditMode(false);
+            }}
+          />
+        )}
+
+        {activeTab === 'data' && !editMode && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <Card>
               <CardHead title="Data Diri & Pendidikan" />

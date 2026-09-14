@@ -2,7 +2,7 @@
 import useSWR from 'swr';
 import { isListPageReady, parseRequestedPage } from '@/lib/pagination';
 import { LIST_SWR_OPTIONS } from '@/lib/swrConfig';
-import type { AnakListRow } from '@/types/anak';
+import type { AnakListRow, AnakDetail } from '@/types/anak';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -49,7 +49,7 @@ export function useAnakList(
 }
 
 export function useAnakDetail(id: string) {
-  const { data, error, mutate } = useSWR<{ data: any }>(
+  const { data, error, mutate } = useSWR<{ data: AnakDetail }>(
     id ? `/api/anakjuara/anak/${id}` : null,
     fetcher,
     { revalidateOnFocus: false, revalidateOnReconnect: false },
