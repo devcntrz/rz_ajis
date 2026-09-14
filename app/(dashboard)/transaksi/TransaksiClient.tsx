@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCheck, Info } from 'lucide-react';
+import { CheckCheck, Info, Download } from 'lucide-react';
 import { TabBar } from '@/components/ui/TabBar';
 import { Btn } from '@/components/ui/Btn';
 import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
@@ -12,6 +12,8 @@ import { TransaksiCard } from '@/components/transaksi/TransaksiCard';
 import { EntryCashflowForm } from '@/components/transaksi/EntryCashflowForm';
 import { ApproveSalurModal } from '@/components/transaksi/ApproveSalurModal';
 import { GantiProgramModal } from '@/components/transaksi/GantiProgramModal';
+import { SyncTransidModal } from '@/components/transaksi/SyncTransidModal';
+import { SyncDonaturModal } from '@/components/transaksi/SyncDonaturModal';
 import { useTransaksiList } from '@/hooks/useTransaksi';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useMobileInfiniteList } from '@/hooks/useMobileInfiniteList';
@@ -61,6 +63,8 @@ export function TransaksiClient({ idGroupUser }: Props) {
   const [salurRow, setSalurRow] = useState<Transaksi | null>(null);
   const [bulkSalur, setBulkSalur] = useState(false);
   const [programRow, setProgramRow] = useState<Transaksi | null>(null);
+  const [syncTransidOpen, setSyncTransidOpen] = useState(false);
+  const [syncDonaturOpen, setSyncDonaturOpen] = useState(false);
 
   const queryParams = useMemo(
     () => ({ ...filters, scope, ...(sortBy ? { sort_by: sortBy, sort_dir: sortDir } : {}) }),
@@ -194,6 +198,17 @@ export function TransaksiClient({ idGroupUser }: Props) {
 
       <TabBar tabs={TABS} active={scope} onChange={changeScope} />
 
+      {isAdmin && (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <Btn variant="outline" size="sm" onClick={() => setSyncTransidOpen(true)}>
+            <Download size={14} /> Get Transid
+          </Btn>
+          <Btn variant="outline" size="sm" onClick={() => setSyncDonaturOpen(true)}>
+            <Download size={14} /> Get Donatur
+          </Btn>
+        </div>
+      )}
+
       <TransaksiFilter value={filters} onApply={applyFilters} isBranch={isBranch} />
 
       {/* Footer sum. Reproduced from legacy including its narrower condition, which is
@@ -305,6 +320,20 @@ export function TransaksiClient({ idGroupUser }: Props) {
           row={programRow}
           onClose={() => setProgramRow(null)}
           onSuccess={() => { setProgramRow(null); refresh(); }}
+        />
+      )}
+
+      {syncTransidOpen && (
+        <SyncTransidModal
+          onClose={() => setSyncTransidOpen(false)}
+          onSuccess={() => { setSyncTransidOpen(false); refresh(); }}
+        />
+      )}
+
+      {syncDonaturOpen && (
+        <SyncDonaturModal
+          onClose={() => setSyncDonaturOpen(false)}
+          onSuccess={() => { setSyncDonaturOpen(false); refresh(); }}
         />
       )}
     </div>

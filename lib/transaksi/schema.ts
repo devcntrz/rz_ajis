@@ -131,6 +131,84 @@ export const gantiProgramPayload = z.object({
   id_program: z.coerce.number().int().positive(),
 });
 
+/**
+ * Get Transid / Get Transid by tgl (legacy: two buttons, one API — `transaksiZ`
+ * already accepts a date range, so both collapse onto this single search mode).
+ */
+export const syncTransidSearchQuery = z.object({
+  page:       z.coerce.number().int().min(1).default(1),
+  id_transaksi: z.string().max(50).optional(),
+  start_date: dateStr.optional(),
+  end_date:   dateStr.optional(),
+});
+export type SyncTransidSearchQuery = z.infer<typeof syncTransidSearchQuery>;
+
+export const syncDonaturSearchQuery = z.object({
+  page:       z.coerce.number().int().min(1).default(1),
+  id_donatur: z.string().max(30).optional(),
+});
+export type SyncDonaturSearchQuery = z.infer<typeof syncDonaturSearchQuery>;
+
+const transidCandidate = z.object({
+  transid:          z.string().min(1).max(50),
+  detailid:         z.coerce.number().int().min(0).default(1),
+  jenis_transaksi:  z.string().max(20).default('bank'),
+  did:              z.string().max(30).default(''),
+  nama_donatur:     z.string().max(200).default(''),
+  id_program:       z.coerce.number().int().default(0),
+  nama_program:     z.string().max(200).default(''),
+  perkiraan_rp:     z.coerce.number().default(0),
+  tgl_transaksi:    z.string().max(30).default(''),
+  tgl_donasi:       z.string().max(30).default(''),
+  oid_transaksi:       z.string().max(20).default(''),
+  oid_donatur:         z.string().max(20).default(''),
+  id_kantor_transaksi: z.string().max(20).default(''),
+  id_kantor_donatur:   z.string().max(20).default(''),
+  kantor_transaksi:    z.string().max(200).default(''),
+  kantor_donatur:      z.string().max(200).default(''),
+  vbayarid:         z.string().max(100).default(''),
+  mbayarid:         z.string().max(100).default(''),
+  nik_rfo:          z.string().max(100).default(''),
+  nik_claim:        z.string().max(100).default(''),
+  approved_claim:   z.string().max(20).default(''),
+  approved_trans:   z.string().max(20).default(''),
+  atas_nama:        z.string().max(300).default(''),
+  keterangan:       z.string().max(500).default(''),
+  jml_mustahik:     z.string().max(100).default(''),
+});
+
+export const syncTransidCommitPayload = z.object({
+  rows: z.array(transidCandidate).min(1, 'Pilih minimal satu baris transaksi'),
+});
+export type SyncTransidCommitPayload = z.infer<typeof syncTransidCommitPayload>;
+
+const donaturCandidate = z.object({
+  did:                z.string().min(1).max(30),
+  nama_lengkap:       z.string().max(200).default(''),
+  nama_publikasi:     z.string().max(200).default(''),
+  tgl_lahir:          z.string().max(30).default(''),
+  alamat_lengkap:     z.string().max(500).default(''),
+  alamat_silaturahmi: z.string().max(500).default(''),
+  jcustid:            z.string().max(20).default(''),
+  status:             z.string().max(50).default(''),
+  tgl_registrasi:     z.string().max(30).default(''),
+  aktif:               z.string().max(5).default(''),
+  telp:               z.string().max(50).default(''),
+  hp:                 z.string().max(50).default(''),
+  email:              z.string().max(100).default(''),
+  verifikasi1:        z.string().max(10).default(''),
+  jenis_kelamin:      z.string().max(10).default(''),
+  nia_rfo:            z.string().max(50).default(''),
+  nama_rfo:           z.string().max(200).default(''),
+  tgl_update:         z.string().max(30).default(''),
+  npwp:               z.string().max(50).default(''),
+});
+
+export const syncDonaturCommitPayload = z.object({
+  rows: z.array(donaturCandidate).min(1, 'Pilih minimal satu donatur'),
+});
+export type SyncDonaturCommitPayload = z.infer<typeof syncDonaturCommitPayload>;
+
 /** Drop empty query-string values so zod defaults apply instead of failing on ''. */
 export function searchParamsToObject(sp: URLSearchParams): Record<string, string> {
   const out: Record<string, string> = {};
