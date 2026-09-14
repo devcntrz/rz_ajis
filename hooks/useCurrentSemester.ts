@@ -1,26 +1,18 @@
 'use client';
-import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import type { SemesterOption } from '@/types/semester';
 
+const fetcher = (url: string) => fetch(url).then(r => r.json());
+
 export function useCurrentSemester(enabled = true) {
-  const [current, setCurrent] = useState<SemesterOption | null>(null);
-  const [loading, setLoading] = useState(enabled);
+  const { data, isLoading } = useSWR<{ data: SemesterOption[] }>(
+    enabled ? '/api/anakjuara/semester?limit=40' : null,
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60_000 },
+  );
 
-  useEffect(() => {
-    if (!enabled) return;
-    let cancelled = false;
-    fetch('/api/anakjuara/semester?limit=10')
-      .then(r => r.json())
-      .then(json => {
-        if (cancelled) return;
-        const list = (json.data ?? []) as SemesterOption[];
-        const active = list.find(s => s.is_current) ?? list[0] ?? null;
-        setCurrent(active);
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [enabled]);
+  const options = data?.data ?? [];
+  const current = options.find(s => s.is_current) ?? options[0] ?? null;
 
-  return { current, loading };
+  return { current, options, loading: enabled && isLoading };
 }

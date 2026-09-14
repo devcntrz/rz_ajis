@@ -140,6 +140,7 @@ export function LapsemFilter({ onFilterChange, idGroupUser }: LapsemFilterProps)
               emptyLabel="Semua semester"
               clearable
               placeholder="Ketik nama semester…"
+              limit={40}
             />
           </div>
           {idGroupUser === 1 && (

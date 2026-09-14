@@ -65,12 +65,20 @@ function SimpleTable({ headers, rows, empty, loading, rowNumberStart }: {
 }) {
   const allHeaders = ['No', ...headers];
   return (
-    <div style={{ overflowX: 'auto', border: `1px solid ${T.grayLt}`, borderRadius: 12 }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+    <div style={{
+      overflow: 'auto',
+      maxHeight: 'calc(100vh - 280px)',
+      border: `1px solid ${T.grayLt}`,
+      borderRadius: 12,
+    }}>
+      <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: 13 }}>
         <thead>
           <tr style={{ background: '#FBF0E8' }}>
             {allHeaders.map((h, i) => (
-              <th key={i} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 700, color: T.charcoal, whiteSpace: 'nowrap' }}>{h}</th>
+              <th key={i} style={{
+                textAlign: 'left', padding: '10px 12px', fontWeight: 700, color: T.charcoal,
+                whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 4, background: '#FBF0E8',
+              }}>{h}</th>
             ))}
           </tr>
         </thead>

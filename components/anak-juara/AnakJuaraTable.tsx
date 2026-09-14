@@ -195,6 +195,7 @@ export function AnakJuaraTable({
       label: 'Nama Anak',
       width: 200,
       sticky: true,
+      sep: true,
       left: 136,
       sortable: true,
       sortKey: 'nama_anak',
@@ -213,8 +214,6 @@ export function AnakJuaraTable({
       key: 'status',
       label: 'Status',
       width: 90,
-      sticky: true,
-      left: 336,
       sortable: true,
       sortKey: 'status_pasangan',
       render: (r: AnakJuaraRow) => (
@@ -229,9 +228,6 @@ export function AnakJuaraTable({
       key: 'donatur',
       label: 'Donatur',
       width: 180,
-      sticky: true,
-      left: 426,
-      sep: true,
       sortable: true,
       sortKey: 'nama_donatur',
       render: (r: AnakJuaraRow) => (
@@ -329,6 +325,7 @@ export function AnakJuaraTable({
       selectedKey={selectedId}
       selectedTextColor={SELECTED}
       rowTextColor={r => (isOff(r) ? INACTIVE : undefined)}
+      rowBg={r => (isOff(r) ? '#FDEAEA' : undefined)}
       sortBy={sortBy}
       sortDir={sortDir}
       onSort={onSort}

@@ -49,10 +49,13 @@ export function PenilaianFilter({ onFilterChange, semester, setSemester }: Penil
     }}>
       <div>
         <FLabel>Semester Evaluasi</FLabel>
-        <Sel value={semester} onChange={e => setSemester(e.target.value)}>
-          <option value="25">Semester Ganjil 2025/2026</option>
-          <option value="26">Semester Genap 2025/2026</option>
-        </Sel>
+        <SearchSelect
+          fetchUrl="/api/anakjuara/semester"
+          value={semester}
+          onChange={setSemester}
+          placeholder="Pilih semester…"
+          limit={40}
+        />
       </div>
 
       <div>

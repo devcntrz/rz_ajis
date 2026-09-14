@@ -286,6 +286,7 @@ export function PembinaanForm({ initialData, isEdit = false }: PembinaanFormProp
               resolvedLabel={semesterLabel}
               placeholder="Ketik nama semester..."
               disabled={isEdit}
+              limit={40}
             />
           </div>
 

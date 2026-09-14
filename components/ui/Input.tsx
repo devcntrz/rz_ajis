@@ -11,6 +11,7 @@ interface InputProps {
   value?:       string | number;
   onChange?:    (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?:   (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onBlur?:      (e: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
   type?:        string;
   name?:        string;
@@ -20,10 +21,10 @@ interface InputProps {
   style?:       React.CSSProperties;
 }
 
-export function Input({ value, onChange, onKeyDown, placeholder, type = 'text', name, id, required, disabled, style }: InputProps) {
+export function Input({ value, onChange, onKeyDown, onBlur, placeholder, type = 'text', name, id, required, disabled, style }: InputProps) {
   return (
     <input
-      type={type} value={value ?? ''} onChange={onChange} onKeyDown={onKeyDown}
+      type={type} value={value ?? ''} onChange={onChange} onKeyDown={onKeyDown} onBlur={onBlur}
       placeholder={placeholder} name={name} id={id}
       required={required} disabled={disabled}
       style={{ ...inputStyle, opacity: disabled ? 0.6 : 1, ...style }}

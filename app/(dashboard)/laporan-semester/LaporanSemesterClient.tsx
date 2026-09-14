@@ -159,6 +159,7 @@ export function LaporanSemesterClient({ idGroupUser, canApprove }: Props) {
                 onChange={setRekapSemester}
                 fetchUrl="/api/anakjuara/semester"
                 placeholder="Pilih semester…"
+                limit={40}
               />
             </div>
             <Btn variant="outline" onClick={handleExportRekap} disabled={exporting || !rekapSemester}>

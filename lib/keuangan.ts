@@ -16,6 +16,16 @@ export const BULAN_LABEL: Record<string, string> = {
   '7': 'Jul', '8': 'Agu', '9': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Des',
 };
 
+/** Display month as a short name (Jan…Des). Accepts 1–12 or already-named values. */
+export function labelBulan(raw: string | number | null | undefined): string {
+  const s = String(raw ?? '').trim();
+  if (!s) return '—';
+  const n = String(Number(s));
+  if (BULAN_LABEL[s]) return BULAN_LABEL[s];
+  if (BULAN_LABEL[n]) return BULAN_LABEL[n];
+  return s;
+}
+
 export const GANJIL_KEYS = ['1', '2', '3', '4', '5', '6'] as const;
 export const GENAP_KEYS = ['7', '8', '9', '10', '11', '12'] as const;
 

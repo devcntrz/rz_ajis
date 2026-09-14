@@ -8,18 +8,19 @@ import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { DataTable } from '@/components/ui/DataTable';
 import { RowActions } from '@/components/ui/RowActions';
-import { SimplePager } from '@/components/ui/SimplePager';
+import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { ErrorRetry } from '@/components/ui/ErrorRetry';
-import type { PageSizeOption } from '@/components/ui/DesktopPagination';
 import { EditRowModal } from '@/components/penyaluran/EditRowModal';
 import { useAnakGridList, usePenyaluranLookup } from '@/hooks/usePenyaluran';
 import { DEFAULT_PAGE_SIZE } from '@/lib/pagination';
+import { BULAN_LABEL, labelBulan } from '@/lib/keuangan';
 import { fmtRp } from '@/lib/utils';
 import type { PenyaluranRow } from '@/types/penyaluran';
 
 const T = { green: '#1A7A45', gray: '#7A6055' };
 
 export function AnakTab() {
+  const now = new Date();
   const { kantor, wilayah } = usePenyaluranLookup();
   // Staged like TransaksiFilter: the grid refetches on "Cari", not on every keystroke —
   // an unstaged `q` used to trigger a LIKE scan per keypress.
@@ -27,12 +28,10 @@ export function AnakTab() {
   const [q, setQ] = useState('');
   const [kantorId, setKantorId] = useState('');
   const [wilayahId, setWilayahId] = useState('');
-  const [bulan, setBulan] = useState('');
-  // No "Semua" option: an unfiltered year scans the whole table server-side
-  // (lib/penyaluran/queries.ts::defaultTahun), which is what made this grid feel stuck.
-  const [tahun, setTahun] = useState(String(new Date().getFullYear()));
+  const [bulan, setBulan] = useState(String(now.getMonth() + 1));
+  const [tahun, setTahun] = useState(String(now.getFullYear()));
   const [page, setPage] = useState(1);
-  const limit: PageSizeOption = DEFAULT_PAGE_SIZE;
+  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [editRow, setEditRow] = useState<PenyaluranRow | null>(null);
 
   const list = useAnakGridList({
@@ -54,8 +53,8 @@ export function AnakTab() {
     if (kantorId) qs.set('kantor_id', kantorId);
     if (wilayahId) qs.set('id_wilayah_pembinaan', wilayahId);
     if (bulan) qs.set('bulan', bulan);
-    if (tahun) qs.set('tahun', tahun);
-    return `/api/anakjuara/penyaluran/anak/export${qs.toString() ? `?${qs}` : ''}`;
+    qs.set('tahun', tahun);
+    return `/api/anakjuara/penyaluran/anak/export?${qs}`;
   })();
 
   const handleDelete = async (row: PenyaluranRow) => {
@@ -83,7 +82,9 @@ export function AnakTab() {
       render: (r: PenyaluranRow) => <strong style={{ color: T.green }}>{fmtRp(r.nominal_penyaluran)}</strong>,
     },
     { key: 'nominal_hpp', label: 'HPP', width: 120, align: 'right' as const, render: (r: PenyaluranRow) => fmtRp(r.nominal_hpp) },
-    { key: 'bulan', label: 'Bulan', width: 70, align: 'right' as const, render: (r: PenyaluranRow) => r.bulan },
+    { key: 'no_rekening', label: 'No Rekening', width: 140, render: (r: PenyaluranRow) => r.no_rekening || '-' },
+    { key: 'nama_bank', label: 'Bank', width: 120, render: (r: PenyaluranRow) => r.nama_bank || '-' },
+    { key: 'bulan', label: 'Bulan', width: 80, render: (r: PenyaluranRow) => labelBulan(r.bulan) },
     { key: 'tahun', label: 'Tahun', width: 80, align: 'right' as const, sep: true, render: (r: PenyaluranRow) => r.tahun },
     { key: 'via_input', label: 'Via', width: 90, render: (r: PenyaluranRow) => r.via_input },
     { key: 'nama_kantor', label: 'Kantor', width: 170, render: (r: PenyaluranRow) => r.nama_kantor || '-' },
@@ -138,7 +139,9 @@ export function AnakTab() {
           <FLabel>Bulan</FLabel>
           <Sel value={bulan} onChange={e => { setBulan(e.target.value); setPage(1); }}>
             <option value="">Semua</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map(b => <option key={b} value={String(b)}>{b}</option>)}
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(b => (
+              <option key={b} value={String(b)}>{BULAN_LABEL[String(b)]}</option>
+            ))}
           </Sel>
         </div>
         <div style={{ minWidth: 100 }}>
@@ -166,17 +169,21 @@ export function AnakTab() {
             data={list.isReady ? list.data : []}
             loading={!list.isReady}
             rowKey={r => `${r.id_penyaluran}::${r.id_row}`}
+            rowNumberStart={(page - 1) * limit + 1}
             gridLines
-            minWidth={1700}
+            minWidth={2010}
             emptyText="Tidak ada baris penyaluran untuk filter ini."
           />
         </div>
       )}
 
-      {list.data.length > 0 && (
-        <SimplePager
-          page={page} hasMore={list.hasMore} onPageChange={setPage}
-          shownCount={list.data.length}
+      {list.isReady && list.total > 0 && (
+        <DesktopPagination
+          page={page}
+          limit={limit}
+          total={list.total}
+          onPageChange={setPage}
+          onLimitChange={next => { setLimit(next); setPage(1); }}
         />
       )}
 

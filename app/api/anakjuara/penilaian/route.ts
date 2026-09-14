@@ -4,7 +4,7 @@
  * Query parameters: semester, wilayah, q, status (has_data | no_data)
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, queryOne } from '@/lib/db';
 import { getSession, getScopeCondition } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -13,7 +13,9 @@ export async function GET(req: NextRequest) {
     if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const sp       = req.nextUrl.searchParams;
-    const semester = sp.get('semester') || '25';
+    const semester = sp.get('semester') || '';
+    const page  = Math.max(1, parseInt(sp.get('page') || '1', 10) || 1);
+    const limit = Math.min(200, Math.max(1, parseInt(sp.get('limit') || '20', 10) || 20));
     const wilayah  = sp.get('wilayah')  || '';
     const q        = sp.get('q')        || '';
     const status   = sp.get('status')   || ''; // 'has_data' | 'no_data'
@@ -75,7 +77,26 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ data: pivotedData });
     }
 
-    // Fetch children and aggregate aspect count for this semester
+    if (!semester) {
+      return NextResponse.json({ data: [], total: 0, page, limit });
+    }
+
+    let having = '';
+    if (status === 'has_data') having = 'HAVING COUNT(p.aspek) > 0';
+    if (status === 'no_data') having = 'HAVING COUNT(p.aspek) = 0';
+
+    const countRow = await queryOne<{ n: number }>(
+      `SELECT COUNT(*) AS n FROM (
+         SELECT a.id_anak
+         FROM ajis_anak a
+         LEFT JOIN ajis_penilaian p ON p.id_anak = a.id_anak AND p.semesterid = ?
+         WHERE ${WHERE}
+         GROUP BY a.id_anak
+         ${having}
+       ) t`,
+      [semester, ...qparams],
+    );
+
     const rows = await query<{
       id_anak: string;
       nama_lengkap: string;
@@ -92,19 +113,13 @@ export async function GET(req: NextRequest) {
        LEFT JOIN ajis_penilaian p ON p.id_anak = a.id_anak AND p.semesterid = ?
        WHERE  ${WHERE}
        GROUP BY a.id_anak
-       ORDER BY a.nama_lengkap`,
-      [semester, ...qparams],
+       ${having}
+       ORDER BY a.nama_lengkap
+       LIMIT ? OFFSET ?`,
+      [semester, ...qparams, limit, (page - 1) * limit],
     );
 
-    // Filter by status if specified
-    let filtered = rows;
-    if (status === 'has_data') {
-      filtered = rows.filter(r => r.record_count > 0);
-    } else if (status === 'no_data') {
-      filtered = rows.filter(r => r.record_count === 0);
-    }
-
-    return NextResponse.json({ data: filtered });
+    return NextResponse.json({ data: rows, total: Number(countRow?.n ?? 0), page, limit });
   } catch (err) {
     console.error('[penilaian list]', err);
     return NextResponse.json({ error: 'Gagal memuat daftar penilaian.' }, { status: 500 });

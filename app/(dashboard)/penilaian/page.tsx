@@ -1,13 +1,15 @@
 'use client';
-import { useCallback, useState } from 'react';
-import { filtersAreEqual } from '@/lib/pagination';
+import { useCallback, useEffect, useState } from 'react';
+import { DEFAULT_PAGE_SIZE, filtersAreEqual } from '@/lib/pagination';
 import { usePenilaianList } from '@/hooks/usePenilaian';
+import { useCurrentSemester } from '@/hooks/useCurrentSemester';
 import { PenilaianFilter } from '@/components/penilaian/PenilaianFilter';
 import { PenilaianTable } from '@/components/penilaian/PenilaianTable';
 import { PenilaianCard } from '@/components/penilaian/PenilaianCard';
 import { PivotTable } from '@/components/penilaian/PivotTable';
 import { TabBar } from '@/components/ui/TabBar';
 import { Btn } from '@/components/ui/Btn';
+import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { RefreshCw, List, Grid } from 'lucide-react';
 
 const tabs = [
@@ -17,14 +19,27 @@ const tabs = [
 
 export default function PenilaianListPage() {
   const [activeTab, setActiveTab] = useState('list');
-  const [semester, setSemester] = useState('25');
+  const { current: activeSemester } = useCurrentSemester();
+  const [semester, setSemester] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [syncingAll, setSyncingAll] = useState(false);
 
-  const { data, loading, mutate } = usePenilaianList({ ...filters, semester });
+  useEffect(() => {
+    if (!semester && activeSemester) setSemester(activeSemester.semesterid);
+  }, [semester, activeSemester]);
+
+  const { data, total, loading, mutate } = usePenilaianList({
+    ...filters, semester, page, limit,
+  });
 
   const handleFilterChange = useCallback((newFilters: Record<string, string>) => {
-    setFilters(prev => (filtersAreEqual(prev, newFilters) ? prev : newFilters));
+    setFilters(prev => {
+      if (filtersAreEqual(prev, newFilters)) return prev;
+      setPage(1);
+      return newFilters;
+    });
   }, []);
 
   async function handleSync(idAnak: string) {
@@ -104,6 +119,7 @@ export default function PenilaianListPage() {
               data={data}
               loading={loading}
               semester={semester}
+              rowOffset={(page - 1) * limit}
               onSync={handleSync}
             />
           </div>
@@ -112,6 +128,15 @@ export default function PenilaianListPage() {
             semester={semester}
             onSync={handleSync}
           />
+          {total > 0 && (
+            <DesktopPagination
+              page={page}
+              limit={limit}
+              total={total}
+              onPageChange={setPage}
+              onLimitChange={next => { setLimit(next); setPage(1); }}
+            />
+          )}
         </>
       ) : (
         <PivotTable

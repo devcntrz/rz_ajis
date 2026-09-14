@@ -39,9 +39,7 @@ export function AttendanceMatrix({
     const nextKehadiran = { ...kehadiran, [anakId]: isHadir ? ('y' as const) : ('n' as const) };
     const nextKeterangan = { ...keterangan };
     const nextOrtu = { ...ortuHadir };
-    const allOn: Mandiri = { shalat_wajib: true, tilawah: true, sedekah: true, bantu_ortu: true };
-    const allOff: Mandiri = { shalat_wajib: false, tilawah: false, sedekah: false, bantu_ortu: false };
-    const nextMandiri = { ...mandiri, [anakId]: isHadir ? allOn : allOff };
+    const nextMandiri = mandiri;
     if (isHadir) {
       delete nextKeterangan[anakId];
       delete nextOrtu[anakId];
@@ -90,7 +88,7 @@ export function AttendanceMatrix({
               {showParenting && (
                 <th style={{ padding: '12px 14px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', width: 120, textAlign: 'left' }}>Ortu Hadir</th>
               )}
-              <th style={{ padding: '12px 14px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', textAlign: 'center' }}>Pembiasaan Mandiri (Jika Hadir)</th>
+              <th style={{ padding: '12px 14px', fontSize: 11, fontWeight: 800, color: '#8F3A01', textTransform: 'uppercase', textAlign: 'center' }}>Pembiasaan Mandiri</th>
             </tr>
           </thead>
           <tbody>
@@ -180,16 +178,12 @@ export function AttendanceMatrix({
                   )}
 
                   <td style={{ padding: '10px 14px', verticalAlign: 'middle' }}>
-                    {isHadir ? (
-                      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Toggle value={!!m.shalat_wajib} onChange={v => handleMandiriToggle(anak.id_anak, 'shalat_wajib', v)} label="Shalat" />
-                        <Toggle value={!!m.tilawah} onChange={v => handleMandiriToggle(anak.id_anak, 'tilawah', v)} label="Tilawah" />
-                        <Toggle value={!!m.sedekah} onChange={v => handleMandiriToggle(anak.id_anak, 'sedekah', v)} label="Sedekah" />
-                        <Toggle value={!!m.bantu_ortu} onChange={v => handleMandiriToggle(anak.id_anak, 'bantu_ortu', v)} label="Bantu Ortu" />
-                      </div>
-                    ) : (
-                      <div style={{ textAlign: 'center', fontSize: 11, color: '#7A6055' }}>—</div>
-                    )}
+                    <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <Toggle value={!!m.shalat_wajib} onChange={v => handleMandiriToggle(anak.id_anak, 'shalat_wajib', v)} label="Shalat" />
+                      <Toggle value={!!m.tilawah} onChange={v => handleMandiriToggle(anak.id_anak, 'tilawah', v)} label="Tilawah" />
+                      <Toggle value={!!m.sedekah} onChange={v => handleMandiriToggle(anak.id_anak, 'sedekah', v)} label="Sedekah" />
+                      <Toggle value={!!m.bantu_ortu} onChange={v => handleMandiriToggle(anak.id_anak, 'bantu_ortu', v)} label="Bantu Ortu" />
+                    </div>
                   </td>
                 </tr>
               );
