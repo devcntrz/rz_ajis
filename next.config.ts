@@ -11,19 +11,23 @@ const nextConfig: NextConfig = {
   // the `bin/` directory is absent from the Vercel lambda bundle at runtime
   // ("does not exist" error). Force-include it for every route that renders PDFs.
   // NOTE: in Next.js 16+, outputFileTracingIncludes is top-level (not experimental).
+  //
+  // IMPORTANT: keys here are matched against the *normalized app route*
+  // (e.g. "/api/anakjuara/laporan-semester/[laporanid]/preview"), not the
+  // source file path — Next strips the "app/" prefix and the trailing
+  // "/route" segment before matching (see normalizeAppPath in
+  // next/dist/build/collect-build-traces.js). A key like
+  // "app/api/.../route.ts" never matches anything and silently does nothing.
+  // Wildcards are used instead of literal "[param]" segments because the
+  // matcher is picomatch with `contains: true`, which would otherwise parse
+  // "[laporanid]" as a bracket character class rather than literal text.
   outputFileTracingIncludes: {
-    // Laporan Semester PDF routes
-    "app/api/anakjuara/laporan-semester/[laporanid]/preview/route.ts": [
+    // Laporan Semester PDF routes (preview + approve)
+    "/api/anakjuara/laporan-semester/**": [
       "./node_modules/@sparticuz/chromium/**/*",
     ],
-    "app/api/anakjuara/laporan-semester/[laporanid]/approve/route.ts": [
-      "./node_modules/@sparticuz/chromium/**/*",
-    ],
-    // Calon Anak Juara PDF routes
-    "app/api/anakjuara/calon-anak-juara/[id]/pdf-surat/route.ts": [
-      "./node_modules/@sparticuz/chromium/**/*",
-    ],
-    "app/api/anakjuara/calon-anak-juara/[id]/pdf-cv/route.ts": [
+    // Calon Anak Juara PDF routes (pdf-surat + pdf-cv)
+    "/api/anakjuara/calon-anak-juara/**": [
       "./node_modules/@sparticuz/chromium/**/*",
     ],
   },
