@@ -26,10 +26,9 @@ export async function launchBrowser(): Promise<Browser> {
       import('puppeteer-core'),
       import('@sparticuz/chromium'),
     ]);
-    chromium.setGraphicsMode(false);
+    chromium.setGraphicsMode = false;
     return puppeteer.launch({
       args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: 'shell',
     });
