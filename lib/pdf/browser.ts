@@ -41,12 +41,16 @@ export async function launchBrowser(): Promise<Browser> {
 /** Renders an HTML string to a PDF buffer (A4, no extra margins — CSS controls layout). */
 export async function renderHtmlToPdf(
   html: string,
-  options?: { waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2' },
+  options?: { waitForNetworkIdle?: boolean },
 ): Promise<Buffer> {
   const browser = await launchBrowser();
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: options?.waitUntil ?? 'load' });
+    // puppeteer-core's setContent only types `load` | `domcontentloaded`.
+    await page.setContent(html, { waitUntil: 'load' });
+    if (options?.waitForNetworkIdle) {
+      await page.waitForNetworkIdle({ idleTime: 500, timeout: 15_000 }).catch(() => undefined);
+    }
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
