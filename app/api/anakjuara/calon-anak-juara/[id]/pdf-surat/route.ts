@@ -22,7 +22,7 @@ export async function GET(
     const { id } = await params;
     const data = await loadCajPdfRow(session, id);
     const html = renderCajSuratHtml(data);
-    const pdf = await renderHtmlToPdf(html, { waitForNetworkIdle: true });
+    const pdf = await renderHtmlToPdf(html);
 
     return new Response(new Uint8Array(pdf), {
       status: 200,
