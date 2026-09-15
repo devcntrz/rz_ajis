@@ -3,10 +3,10 @@ import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/ui/DataTable';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { Btn } from '@/components/ui/Btn';
+import { RowActions } from '@/components/ui/RowActions';
 import { STATUS_COLOR, calcAge } from '@/lib/utils';
 import { anakFotoUrl } from '@/lib/anakFotoUrl';
-import { CheckCircle2, XCircle, Pencil } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import type { AnakListRow } from '@/types/anak';
 
 interface AnakTableProps {
@@ -133,16 +133,16 @@ export function AnakTable({ data, loading, rowOffset = 0 }: AnakTableProps) {
     {
       key: 'aksi',
       label: 'Aksi',
-      width: 70,
+      width: 64,
       align: 'center' as const,
       render: (r: AnakListRow) => (
-        // Row itself navigates on click — stop propagation here so Edit doesn't
-        // also trigger the row's own (non-edit) navigation.
-        <span onClick={e => e.stopPropagation()}>
-          <Btn size="sm" variant="outline" onClick={() => router.push(`/anak/${r.id_anak}?edit=1`)}>
-            <Pencil size={13} /> Edit
-          </Btn>
-        </span>
+        <RowActions
+          label={`Aksi untuk ${r.nama_lengkap}`}
+          items={[
+            { label: 'Edit', onClick: () => router.push(`/anak/${r.id_anak}?edit=1`) },
+            { label: 'Survey', onClick: () => router.push(`/survey?id_anak=${encodeURIComponent(r.id_anak)}`) },
+          ]}
+        />
       ),
     },
   ];

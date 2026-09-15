@@ -188,8 +188,10 @@ export async function loadCajPdfRow(session: SessionData, idAnak: string): Promi
   if (!row) {
     throw new CajPdfLookupError(404, 'Data anak tidak ditemukan.');
   }
-  if (row.status_anak_juara !== 'caj') {
-    throw new CajPdfLookupError(404, 'Anak ini bukan Calon Anak Juara.');
+  // Also used by the Anak Juara menu's Profil CV/Surat actions — 'aj' children
+  // share the same template, just past the promotion from 'caj'.
+  if (row.status_anak_juara !== 'caj' && row.status_anak_juara !== 'aj') {
+    throw new CajPdfLookupError(404, 'Anak ini bukan Calon Anak Juara / Anak Juara.');
   }
 
   const isIj = (row.nama_kantor || '').includes('IJ');

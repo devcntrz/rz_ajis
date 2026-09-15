@@ -78,6 +78,7 @@ export const PROD_PREFIX = '/p';
 const transisi: NavItem[] = [
   { href: '/', icon: Home, label: 'Beranda', labelShort: 'Beranda', ready: true },
   { href: '/anak', icon: Users, label: 'Pengajuan Beasiswa', labelShort: 'Anak', ready: true },
+  { href: '/survey', icon: UserSearch, label: 'Data Survey', labelShort: 'Survey', ready: true },
   { href: '/calon-anak-juara', icon: UserSearch, label: 'Calon Anak Juara', labelShort: 'CAJ', ready: true },
   { href: '/anak-juara', icon: GraduationCap, label: 'Anak Juara', labelShort: 'AJ', groups: [1, 2], ready: true },
   { href: '/ajuan-pergantian', icon: RefreshCw, label: 'Ajuan Pergantian', labelShort: 'Ajuan', groups: [1, 2], ready: true },

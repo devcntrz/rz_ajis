@@ -1,10 +1,17 @@
 /**
  * GET /api/anakjuara/kantor/lookup — legacy MySQL kantor list for the anak
- * edit form's kantor_id picker. Unlike /api/anakjuara/kantor (group1/2 only,
- * used by admin filters), this is open to any logged-in session since a
+ * edit/create form's kantor_id picker. Unlike /api/anakjuara/kantor (group1/2
+ * only, used by admin filters), this is open to any logged-in session since a
  * scoped user still needs to see (their own, forced) kantor when editing an
- * anak record — the PATCH route itself re-validates scope server-side.
+ * anak record — the PATCH/POST route itself re-validates scope server-side.
  * Response matches the *-pg lookup convention: plain array, no envelope.
+ *
+ * Sources from ajis_kantor (oid, kantor) — the real office master table —
+ * rather than DISTINCT kantor_id/nama_kantor off ajis_pemasangan, which is a
+ * sponsorship-pairing table: it only carries a kantor row for children who
+ * already have an active pairing, so brand-new/unpaired kantor never showed
+ * up here and the id_wilayah_pembinaan lookup below (keyed off ajis_kantor's
+ * own oid) could silently mismatch.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
@@ -22,18 +29,18 @@ export async function GET(req: NextRequest) {
     }
 
     const q = req.nextUrl.searchParams.get('q')?.trim() || '';
-    const conditions = [`kantor_id != ''`, `nama_kantor != ''`];
+    const conditions = [`oid != ''`, `kantor != ''`];
     const params: unknown[] = [];
     if (q) {
-      conditions.push('nama_kantor LIKE ?');
+      conditions.push('kantor LIKE ?');
       params.push(`%${q}%`);
     }
 
     const rows = await query<{ id_kantor: string; nama_kantor: string }>(
-      `SELECT DISTINCT kantor_id AS id_kantor, nama_kantor
-       FROM ajis_pemasangan
+      `SELECT oid AS id_kantor, kantor AS nama_kantor
+       FROM ajis_kantor
        WHERE ${conditions.join(' AND ')}
-       ORDER BY nama_kantor
+       ORDER BY kantor
        LIMIT 50`,
       params,
     );

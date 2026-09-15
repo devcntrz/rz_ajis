@@ -36,7 +36,7 @@ const DETAIL_SQL = `SELECT a.id_anak, a.nik, a.nama_lengkap, a.nama_panggilan,
 /** Editable ajis_anak columns — excludes id_anak (PK), joined nama_wilayah/nama_kantor, and
  *  internal RFO-book/PostgreSQL-sync bookkeeping columns (oid_rz, nia_rfo_book, tgl_peminjaman,
  *  id_kantor_postgree, upload_gdrive, ...) which aren't part of the anak profile. */
-const EDITABLE_FIELDS = [
+export const EDITABLE_FIELDS = [
   'nik', 'nama_lengkap', 'nama_panggilan', 'agama', 'jns_kel', 'tempat_lahir', 'tgl_lahir',
   'anak_ke', 'dari_saudara', 'alamat',
   'jenjang_pendidikan', 'kelas', 'nama_sekolah', 'alamat_sekolah',

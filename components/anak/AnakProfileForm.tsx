@@ -8,11 +8,44 @@ import { SearchSelect } from '@/components/ui/SearchSelect';
 import { Btn } from '@/components/ui/Btn';
 import type { AnakDetail } from '@/types/anak';
 
+/** The logged-in user's own kantor/wilayah, from SessionData — used to lock the
+ *  create form to their scope instead of making them pick what login already
+ *  determined (group 2: kantor forced; group 9: kantor + wilayah forced). */
+export interface LockedScope {
+  idGroupUser:        number;
+  kantorId:           string;
+  namaKantor:         string;
+  idWilayahPembinaan: string;
+  namaWilayah:        string;
+}
+
 interface AnakProfileFormProps {
   anak: AnakDetail;
+  mode?: 'create' | 'edit';
+  /** Only applied when mode === 'create'. */
+  lockedScope?: LockedScope;
   onSaved: (updated: AnakDetail) => void;
   onCancel: () => void;
 }
+
+export const BLANK_ANAK: AnakDetail = {
+  id_anak: '', nik: '', nama_lengkap: '', nama_panggilan: '', agama: '',
+  jns_kel: 'l', tempat_lahir: '', tgl_lahir: '', anak_ke: '', dari_saudara: '',
+  alamat: '', jenjang_pendidikan: '', kelas: '', nama_sekolah: '', alamat_sekolah: '',
+  jurusan: '', semester: null, nama_pt: '', alamat_pt: '', nilai: '', pelajaran_favorit: '',
+  jarak_rumah: '', alat_transportasi: '', no_kartu_keluarga: '', asnaf: '', status_ortu: '',
+  status_tersantuni: 'b', status_survey: 'n', status_kelayakan: 'n', status_anak_juara: '',
+  status_pinjam: 'n', status_mentor: 'n', id_wilayah_pembinaan: 0, kantor_id: '',
+  nama_wilayah: '', nama_kantor: '', tgl_terdaftar: '', tgl_pengajuan: null, foto: '',
+  hobi: '', prestasi: '', aktif: 'y', tinggal_bersama: '', nama_tinggal: '', ket_tinggal: '',
+  penghasilan_tinggal: '', pekerjaan_tinggal: '', tidak_serumah_ortu: '', nama_lengkap_ayah: '',
+  pekerjaan_ayah: '', penghasilan_rata_rata_ayah: '', tanggal_kematian_ayah: null,
+  penyebab_kematian_ayah: '', nama_lengkap_ibu: '', pekerjaan_ibu: '', penghasilan_rata_rata_ibu: '',
+  tanggal_kematian_ibu: null, penyebab_kematian_ibu: '', nama_lengkap_wali: '', pekerjaan_wali: '',
+  penghasilan_rata_rata_wali: '', telp_yang_bisa_dihubungi: '', atas_nama: '', hubungan_kerabat: '',
+  no_rekening: '', nama_bank: '', pemilik_rekening: '', id_sdm: '', nama_mentor: '',
+  alumni_juara: '', juara: '',
+};
 
 /** ISO datetime/date -> yyyy-mm-dd for <input type="date">. */
 function toDateInput(value: string | null | undefined): string {
@@ -61,7 +94,13 @@ function StaticSel({ value, options, onChange, placeholder }: {
   );
 }
 
-export function AnakProfileForm({ anak, onSaved, onCancel }: AnakProfileFormProps) {
+export function AnakProfileForm({ anak, mode = 'edit', lockedScope, onSaved, onCancel }: AnakProfileFormProps) {
+  // Group 2 (branch admin) already only ever works one kantor; group 9 (korwil)
+  // is further scoped to one wilayah within it — login already determined
+  // both, so the create form shouldn't ask the user to pick them again.
+  const kantorLocked = mode === 'create' && !!lockedScope && (lockedScope.idGroupUser === 2 || lockedScope.idGroupUser === 9);
+  const wilayahLocked = mode === 'create' && !!lockedScope && lockedScope.idGroupUser === 9;
+
   const [form, setForm] = useState<AnakDetail>(() => ({
     ...anak,
     tgl_lahir: toDateInput(anak.tgl_lahir),
@@ -69,6 +108,11 @@ export function AnakProfileForm({ anak, onSaved, onCancel }: AnakProfileFormProp
     tgl_pengajuan: toDateInput(anak.tgl_pengajuan),
     tanggal_kematian_ayah: toDateInput(anak.tanggal_kematian_ayah),
     tanggal_kematian_ibu: toDateInput(anak.tanggal_kematian_ibu),
+    ...(kantorLocked && lockedScope ? { kantor_id: lockedScope.kantorId, nama_kantor: lockedScope.namaKantor } : {}),
+    ...(wilayahLocked && lockedScope ? {
+      id_wilayah_pembinaan: Number(lockedScope.idWilayahPembinaan) as AnakDetail['id_wilayah_pembinaan'],
+      nama_wilayah: lockedScope.namaWilayah,
+    } : {}),
   }));
   const [saving, setSaving] = useState(false);
 
@@ -88,18 +132,23 @@ export function AnakProfileForm({ anak, onSaved, onCancel }: AnakProfileFormProp
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch(`/api/anakjuara/anak/${encodeURIComponent(anak.id_anak)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        // Server whitelists to editable ajis_anak columns; id_anak/nama_wilayah/nama_kantor are ignored.
-        body: JSON.stringify(form),
-      });
+      const isCreate = mode === 'create';
+      const res = await fetch(
+        isCreate ? '/api/anakjuara/anak' : `/api/anakjuara/anak/${encodeURIComponent(anak.id_anak)}`,
+        {
+          method: isCreate ? 'POST' : 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          // Server whitelists to editable ajis_anak columns; nama_wilayah/nama_kantor are ignored (and,
+          // on PATCH, id_anak too — POST needs it since it's the record being created).
+          body: JSON.stringify(form),
+        },
+      );
       const json = await res.json();
       if (!res.ok) {
         toast.error(json.error || 'Gagal menyimpan data anak.');
         return;
       }
-      toast.success('Data anak berhasil disimpan.');
+      toast.success(isCreate ? 'Anak baru berhasil ditambahkan.' : 'Data anak berhasil disimpan.');
       onSaved(json.data as AnakDetail);
     } catch {
       toast.error('Gagal menyimpan data anak.');
@@ -154,40 +203,46 @@ export function AnakProfileForm({ anak, onSaved, onCancel }: AnakProfileFormProp
             </Sel>
           </Field>
           <Field label="Kantor">
-            <SearchSelect
-              value={form.kantor_id ?? ''}
-              onChange={v => {
-                // Kantor -> wilayah is a cascading pair (mirrors the legacy app's
-                // combogrid onSelect reload) — changing kantor invalidates the
-                // previously selected wilayah, which belongs to the old kantor.
-                setForm(prev => ({ ...prev, kantor_id: v, id_wilayah_pembinaan: 0 as AnakDetail['id_wilayah_pembinaan'] }));
-              }}
-              fetchUrl="/api/anakjuara/kantor/lookup"
-              resolvedLabel={anak.nama_kantor}
-              mapRow={row => (
-                row.id_kantor ? { value: String(row.id_kantor), label: String(row.nama_kantor ?? '') } : null
-              )}
-              placeholder="Ketik nama kantor…"
-            />
+            {kantorLocked ? (
+              <Input value={form.nama_kantor || ''} disabled />
+            ) : (
+              <SearchSelect
+                value={form.kantor_id ?? ''}
+                onChange={v => {
+                  // Kantor -> wilayah is a cascading pair (mirrors the legacy app's
+                  // combogrid onSelect reload) — changing kantor invalidates the
+                  // previously selected wilayah, which belongs to the old kantor.
+                  setForm(prev => ({ ...prev, kantor_id: v, id_wilayah_pembinaan: 0 as AnakDetail['id_wilayah_pembinaan'] }));
+                }}
+                fetchUrl="/api/anakjuara/kantor/lookup"
+                resolvedLabel={anak.nama_kantor}
+                mapRow={row => (
+                  row.id_kantor ? { value: String(row.id_kantor), label: String(row.nama_kantor ?? '') } : null
+                )}
+                placeholder="Ketik nama kantor…"
+              />
+            )}
           </Field>
           <Field label="Wilayah Binaan">
-            <SearchSelect
-              key={form.kantor_id || 'no-kantor'}
-              value={String(form.id_wilayah_pembinaan ?? '')}
-              onChange={v => set('id_wilayah_pembinaan', (v ? Number(v) : 0) as AnakDetail['id_wilayah_pembinaan'])}
-              fetchUrl={`/api/anakjuara/wilayah${form.kantor_id ? `?kantor_id=${encodeURIComponent(form.kantor_id)}` : ''}`}
-              resolvedLabel={form.kantor_id === anak.kantor_id ? anak.nama_wilayah : undefined}
-              disabled={!form.kantor_id}
-              mapRow={row => (
-                row.id_wilayah_pembinaan != null
-                  ? { value: String(row.id_wilayah_pembinaan), label: String(row.nama_wilayah ?? '') }
-                  : null
-              )}
-              placeholder={form.kantor_id ? 'Ketik nama wilayah…' : 'Pilih kantor terlebih dahulu'}
-            />
+            {wilayahLocked ? (
+              <Input value={form.nama_wilayah || ''} disabled />
+            ) : (
+              <SearchSelect
+                key={form.kantor_id || 'no-kantor'}
+                value={String(form.id_wilayah_pembinaan ?? '')}
+                onChange={v => set('id_wilayah_pembinaan', (v ? Number(v) : 0) as AnakDetail['id_wilayah_pembinaan'])}
+                fetchUrl={`/api/anakjuara/wilayah${form.kantor_id ? `?kantor_id=${encodeURIComponent(form.kantor_id)}` : ''}`}
+                resolvedLabel={form.kantor_id === anak.kantor_id ? anak.nama_wilayah : undefined}
+                disabled={!form.kantor_id}
+                mapRow={row => (
+                  row.id_wilayah_pembinaan != null
+                    ? { value: String(row.id_wilayah_pembinaan), label: String(row.nama_wilayah ?? '') }
+                    : null
+                )}
+                placeholder={form.kantor_id ? 'Ketik nama wilayah…' : 'Pilih kantor terlebih dahulu'}
+              />
+            )}
           </Field>
-          <Field label="Tanggal Terdaftar"><Input type="date" value={form.tgl_terdaftar} onChange={onText('tgl_terdaftar')} /></Field>
-          <Field label="Tanggal Pengajuan"><Input type="date" value={form.tgl_pengajuan ?? ''} onChange={onText('tgl_pengajuan')} /></Field>
           <Field label="Status Aktif">
             <Sel value={form.aktif} onChange={e => set('aktif', e.target.value as AnakDetail['aktif'])}>
               <option value="y">Aktif</option>
@@ -215,10 +270,8 @@ export function AnakProfileForm({ anak, onSaved, onCancel }: AnakProfileFormProp
           <Field label="Penghasilan Rata-rata Wali"><Input value={form.penghasilan_rata_rata_wali} onChange={onText('penghasilan_rata_rata_wali')} /></Field>
           <Field label="Alamat Tinggal" full><Textarea value={form.alamat} onChange={onText('alamat')} /></Field>
           <Field label="Tinggal Bersama"><Input value={form.tinggal_bersama} onChange={onText('tinggal_bersama')} /></Field>
-          <Field label="Nama yang Ditinggali"><Input value={form.nama_tinggal} onChange={onText('nama_tinggal')} /></Field>
           <Field label="Keterangan Tinggal"><Input value={form.ket_tinggal} onChange={onText('ket_tinggal')} /></Field>
           <Field label="Penghasilan Tempat Tinggal"><Input value={form.penghasilan_tinggal} onChange={onText('penghasilan_tinggal')} /></Field>
-          <Field label="Pekerjaan Tempat Tinggal"><Input value={form.pekerjaan_tinggal} onChange={onText('pekerjaan_tinggal')} /></Field>
           <Field label="Sebab Tidak Serumah Ortu"><Input value={form.tidak_serumah_ortu} onChange={onText('tidak_serumah_ortu')} /></Field>
         </div>
       </Card>
@@ -285,7 +338,9 @@ export function AnakProfileForm({ anak, onSaved, onCancel }: AnakProfileFormProp
 
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
         <Btn type="button" variant="ghost" onClick={onCancel} disabled={saving}>Batal</Btn>
-        <Btn type="submit" variant="primary" disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan Perubahan'}</Btn>
+        <Btn type="submit" variant="primary" disabled={saving}>
+          {saving ? 'Menyimpan...' : mode === 'create' ? 'Simpan Anak Baru' : 'Simpan Perubahan'}
+        </Btn>
       </div>
     </form>
   );

@@ -14,9 +14,14 @@ interface AnakJuaraCardProps {
   onOpname?: (row: AnakJuaraRow) => void;
   /** Fires the "Generate Lapsem" action straight from the card. */
   onGenerateLapsem?: (row: AnakJuaraRow) => void;
+  /** Opens the Ganti Program modal straight from the card. */
+  onGantiProgram?: (row: AnakJuaraRow) => void;
+  /** Opens the Profil Surat / Profil CV PDF straight from the card. */
+  onPdfSurat?: (row: AnakJuaraRow) => void;
+  onPdfCv?:    (row: AnakJuaraRow) => void;
 }
 
-export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, onOpname, onGenerateLapsem }: AnakJuaraCardProps) {
+export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, onOpname, onGenerateLapsem, onGantiProgram, onPdfSurat, onPdfCv }: AnakJuaraCardProps) {
   if (loading && data.length === 0) {
     return (
       <div className="datagrid-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -75,6 +80,9 @@ export function AnakJuaraCard({ data, loading, selectedId, onSelect, onAjuan, on
                     { label: 'Ajuan Ganti Anak', onClick: () => onAjuan?.(r) },
                     { label: 'Update Opname', onClick: () => onOpname?.(r) },
                     { label: 'Generate Lapsem', onClick: () => onGenerateLapsem?.(r) },
+                    { label: 'Ganti Program', onClick: () => onGantiProgram?.(r) },
+                    { label: 'Profil Surat', onClick: () => onPdfSurat?.(r) },
+                    { label: 'Profil CV', onClick: () => onPdfCv?.(r) },
                   ]}
                 />
               </span>

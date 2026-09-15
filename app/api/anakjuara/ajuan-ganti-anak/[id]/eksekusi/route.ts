@@ -102,6 +102,34 @@ export async function POST(
       return NextResponse.json({ error: 'Pemasangan lama tidak ditemukan.' }, { status: 404 });
     }
 
+    const penggantiBio = await queryOne<{
+      id_wilayah_pembinaan: string | null;
+      kantor_id: string | null;
+      nama_kantor: string | null;
+      nama_wilayah: string | null;
+      nama_lengkap: string | null;
+      jns_kel: string | null;
+      jenjang_pendidikan: string | null;
+      asnaf: string | null;
+      nik: string | null;
+      status_ortu: string | null;
+      no_rekening: string | null;
+      kelas: string | null;
+    }>(
+      `SELECT id_wilayah_pembinaan, kantor_id, nama_kantor, nama_wilayah, nama_lengkap,
+              jns_kel, jenjang_pendidikan, asnaf, nik, status_ortu, no_rekening, kelas
+       FROM ajis_anak
+       WHERE id_anak = ?
+       LIMIT 1`,
+      [ajuan.id_anak_pengganti],
+    );
+    if (!penggantiBio || !penggantiBio.id_wilayah_pembinaan) {
+      return NextResponse.json(
+        { error: 'Data wilayah pembinaan anak pengganti tidak ditemukan.' },
+        { status: 400 },
+      );
+    }
+
     const year = String(new Date().getFullYear());
     const newIdPemasangan = `${ajuan.id_anak_pengganti}${ajuan.id_donatur}${year}`;
 
@@ -149,8 +177,9 @@ export async function POST(
       );
 
       // 3) Create new pairing (PRD §8.5 step 3).
-      // Column list stays minimal: the remaining NOT NULL columns take their implicit
-      // defaults, and step 4 fills the denormalized biodata straight after.
+      // id_wilayah_pembinaan has no MySQL default under strict mode, so it must be
+      // supplied here rather than left to step 4's post-insert sync — the insert
+      // would otherwise fail before step 4 ever runs.
       // ON DUPLICATE KEY reactivates an existing pairing instead of aborting the whole
       // transaction — tipe_ganti = 'anak_existing' points at a child that already has an
       // inactive pairing row for this year.
@@ -159,11 +188,15 @@ export async function POST(
         `INSERT INTO ajis_pemasangan (
            tgl_pemasangan, id_donatur, id_anak, program_donasi, id_program,
            status_pasangan, user_insert, date_insert, id_pemasangan_baru, tahun,
-           tunda_penyaluran, via_input
+           tunda_penyaluran, via_input, id_wilayah_pembinaan, kantor_id, nama_kantor,
+           nama_wilayah, nama_anak, jns_kel, jenjang_pendidikan, asnaf, nik,
+           status_ortu, no_rekening, kelas
          ) VALUES (
            NOW(), ?, ?, ?, ?,
            'y', ?, NOW(), ?, ?,
-           '', 'desktop'
+           '', 'desktop', ?, ?, ?,
+           ?, ?, ?, ?, ?, ?,
+           ?, ?, ?
          )
          ON DUPLICATE KEY UPDATE
            status_pasangan = 'y',
@@ -179,6 +212,18 @@ export async function POST(
           username,
           newIdPemasangan,
           year,
+          penggantiBio.id_wilayah_pembinaan,
+          penggantiBio.kantor_id,
+          penggantiBio.nama_kantor,
+          penggantiBio.nama_wilayah,
+          penggantiBio.nama_lengkap,
+          penggantiBio.jns_kel,
+          penggantiBio.jenjang_pendidikan,
+          penggantiBio.asnaf,
+          penggantiBio.nik,
+          penggantiBio.status_ortu,
+          penggantiBio.no_rekening,
+          penggantiBio.kelas,
         ],
       );
 

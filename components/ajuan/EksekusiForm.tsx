@@ -186,6 +186,12 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
   const idAnak = pairing?.id_anak || row.id_anak;
   const namaAnak = pairing?.nama_anak || row.nama_anak_asal;
 
+  const handleQuickSubmit = () => {
+    if (saving) return;
+    if (!window.confirm('Eksekusi pergantian anak ini sekarang?')) return;
+    handleSubmit();
+  };
+
   return (
     // Execution writes 11 tables; closing or editing mid-flight would leave the
     // operator unsure whether it landed. Block the form until the request settles.
@@ -196,11 +202,30 @@ export function EksekusiForm({ row, onClose, onSuccess }: EksekusiFormProps) {
         opacity: saving ? 0.6 : 1,
         transition: 'opacity .15s',
       }}>
-        {/* Profile block — legacy-like key/value */}
-        <div style={{
-          background: '#FBF0E8', borderRadius: 12, padding: 12,
-          border: '1px solid #F0C4A0',
-        }}>
+        {/* Top action bar — duplicates the footer Simpan button so it's reachable
+            without scrolling past the whole form. */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <Btn variant="ghost" onClick={onClose} disabled={saving}>Batal</Btn>
+          <Btn variant="primary" onClick={handleSubmit} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 size={14} className="ajis-spin" />
+                Memproses...
+              </>
+            ) : 'Simpan'}
+          </Btn>
+        </div>
+
+        {/* Profile block — legacy-like key/value. Double-click executes immediately
+            (with a confirm guard) as a shortcut for repeat operators. */}
+        <div
+          onDoubleClick={handleQuickSubmit}
+          title="Klik dua kali untuk langsung eksekusi"
+          style={{
+            background: '#FBF0E8', borderRadius: 12, padding: 12,
+            border: '1px solid #F0C4A0', cursor: saving ? 'default' : 'pointer',
+          }}
+        >
           {detailLoading && !detail ? (
             <div style={{ fontSize: 12, color: '#7A6055' }}>Memuat detail pemasangan...</div>
           ) : (
