@@ -155,7 +155,7 @@ export function AnakJuaraTable({
     {
       key: 'no',
       label: '#',
-      width: 36,
+      width: 56,
       sticky: true,
       left: 0,
       render: (r: AnakJuaraRow, i: number) => (

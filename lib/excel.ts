@@ -11,7 +11,7 @@ export interface ExcelColumn {
 function cellValue(value: unknown): string | number {
   if (value === null || value === undefined) return '';
   if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (value instanceof Date) return value.toISOString();
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? '' : value.toISOString();
   // Keep IDs/dates as text so Excel does not mangle them
   return String(value);
 }
