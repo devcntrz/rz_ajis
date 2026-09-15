@@ -90,8 +90,12 @@ export async function POST(
       program_donasi: string;
       id_donatur: string;
       id_anak: string;
+      nama_donatur: string | null;
+      nia_rfo: string | null;
+      nama_rfo: string | null;
     }>(
-      `SELECT id_pemasangan_baru, id_program, program_donasi, id_donatur, id_anak
+      `SELECT id_pemasangan_baru, id_program, program_donasi, id_donatur, id_anak,
+              nama_donatur, nia_rfo, nama_rfo
        FROM ajis_pemasangan
        WHERE id_pemasangan_baru = ?
        LIMIT 1`,
@@ -129,6 +133,15 @@ export async function POST(
         { status: 400 },
       );
     }
+
+    // harga_program has no MySQL default under strict mode either — same class of
+    // bug as id_wilayah_pembinaan above. Source it up front from setting_program
+    // (step 5 below re-syncs it, but that runs after this INSERT, so it can't be
+    // the thing that satisfies the NOT NULL constraint on the first write).
+    const programHarga = await queryOne<{ harga_program: number; harga_penyaluran: number }>(
+      `SELECT harga_program, harga_penyaluran FROM setting_program WHERE nama_program = ? LIMIT 1`,
+      [oldPairing.program_donasi || ajuan.program_donasi],
+    );
 
     const year = String(new Date().getFullYear());
     const newIdPemasangan = `${ajuan.id_anak_pengganti}${ajuan.id_donatur}${year}`;
@@ -177,54 +190,70 @@ export async function POST(
       );
 
       // 3) Create new pairing (PRD §8.5 step 3).
-      // id_wilayah_pembinaan has no MySQL default under strict mode, so it must be
-      // supplied here rather than left to step 4's post-insert sync — the insert
-      // would otherwise fail before step 4 ever runs.
+      // Every column below is NOT NULL with no MySQL default under strict mode
+      // (confirmed against information_schema.columns — ajis_pemasangan has 46
+      // such columns in total). Building the column/placeholder/value lists from
+      // one object instead of three hand-aligned parallel lists means a missed
+      // column shows up immediately as a missing key, not as a silent off-by-one
+      // between the SQL text and the params array.
       // ON DUPLICATE KEY reactivates an existing pairing instead of aborting the whole
       // transaction — tipe_ganti = 'anak_existing' points at a child that already has an
       // inactive pairing row for this year.
+      const pairingFields: Record<string, unknown> = {
+        id_donatur: ajuan.id_donatur,
+        id_anak: ajuan.id_anak_pengganti,
+        program_donasi: oldPairing.program_donasi || ajuan.program_donasi,
+        id_program: oldPairing.id_program,
+        user_insert: username,
+        id_pemasangan_baru: newIdPemasangan,
+        tahun: year,
+        id_wilayah_pembinaan: penggantiBio.id_wilayah_pembinaan,
+        kantor_id: penggantiBio.kantor_id,
+        nama_kantor: penggantiBio.nama_kantor,
+        nama_wilayah: penggantiBio.nama_wilayah,
+        nama_anak: penggantiBio.nama_lengkap,
+        jns_kel: penggantiBio.jns_kel,
+        jenjang_pendidikan: penggantiBio.jenjang_pendidikan,
+        asnaf: penggantiBio.asnaf,
+        nik: penggantiBio.nik,
+        status_ortu: penggantiBio.status_ortu,
+        no_rekening: penggantiBio.no_rekening,
+        kelas: penggantiBio.kelas,
+        harga_program: programHarga?.harga_program ?? 0,
+        harga_penyaluran: programHarga?.harga_penyaluran ?? 0,
+        program_sebelumnya: oldPairing.program_donasi || ajuan.program_donasi || '',
+        nama_donatur: oldPairing.nama_donatur || '',
+        nia_rfo: oldPairing.nia_rfo || '',
+        nama_rfo: oldPairing.nama_rfo || '',
+        user_update: username,
+        // Remaining NOT NULL columns this flow has no real value for.
+        keterangan_pemberhentian: '', saldo_awal: 0, status_saldo: 'n',
+        status_aj: '', id_sdm: '', cek: '', id_naik_jenjang: '', history: '',
+        user_stop: '', via_stop: '', jcustid: 0, id_pemasangan_new: '', pinjam: '',
+        status_mentor: '',
+      };
+      const pairingCols = Object.keys(pairingFields);
+      const pairingPlaceholders = pairingCols.map(() => '?');
+      const pairingValues = pairingCols.map(c => pairingFields[c]);
+
       await txExecute(
         conn,
         `INSERT INTO ajis_pemasangan (
-           tgl_pemasangan, id_donatur, id_anak, program_donasi, id_program,
-           status_pasangan, user_insert, date_insert, id_pemasangan_baru, tahun,
-           tunda_penyaluran, via_input, id_wilayah_pembinaan, kantor_id, nama_kantor,
-           nama_wilayah, nama_anak, jns_kel, jenjang_pendidikan, asnaf, nik,
-           status_ortu, no_rekening, kelas
+           tgl_pemasangan, date_insert, date_update, status_pasangan,
+           tunda_penyaluran, via_input, ${pairingCols.join(', ')}
          ) VALUES (
-           NOW(), ?, ?, ?, ?,
-           'y', ?, NOW(), ?, ?,
-           '', 'desktop', ?, ?, ?,
-           ?, ?, ?, ?, ?, ?,
-           ?, ?, ?
+           NOW(), NOW(), NOW(), 'y',
+           '', 'desktop', ${pairingPlaceholders.join(', ')}
          )
          ON DUPLICATE KEY UPDATE
-           status_pasangan = 'y',
-           tgl_pemasangan  = NOW(),
-           program_donasi  = VALUES(program_donasi),
-           user_update     = VALUES(user_insert),
-           date_update     = NOW()`,
-        [
-          ajuan.id_donatur,
-          ajuan.id_anak_pengganti,
-          oldPairing.program_donasi || ajuan.program_donasi,
-          oldPairing.id_program,
-          username,
-          newIdPemasangan,
-          year,
-          penggantiBio.id_wilayah_pembinaan,
-          penggantiBio.kantor_id,
-          penggantiBio.nama_kantor,
-          penggantiBio.nama_wilayah,
-          penggantiBio.nama_lengkap,
-          penggantiBio.jns_kel,
-          penggantiBio.jenjang_pendidikan,
-          penggantiBio.asnaf,
-          penggantiBio.nik,
-          penggantiBio.status_ortu,
-          penggantiBio.no_rekening,
-          penggantiBio.kelas,
-        ],
+           status_pasangan  = 'y',
+           tgl_pemasangan   = NOW(),
+           program_donasi   = VALUES(program_donasi),
+           harga_program    = VALUES(harga_program),
+           harga_penyaluran = VALUES(harga_penyaluran),
+           user_update      = VALUES(user_insert),
+           date_update      = NOW()`,
+        pairingValues,
       );
 
       // 4) Sync biodata from ajis_anak
