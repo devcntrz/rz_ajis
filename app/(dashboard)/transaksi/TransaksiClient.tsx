@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { CheckCheck, Info, Download } from 'lucide-react';
+import { CheckCheck, Info, Download, Loader2 } from 'lucide-react';
 import { TabBar } from '@/components/ui/TabBar';
 import { Btn } from '@/components/ui/Btn';
 import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
@@ -19,6 +19,7 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useMobileInfiniteList } from '@/hooks/useMobileInfiniteList';
 import { useStickyTotal } from '@/hooks/useStickyTotal';
 import { DEFAULT_PAGE_SIZE, filtersAreEqual } from '@/lib/pagination';
+import { filtersToQuery } from '@/lib/excel';
 import { fmtRp } from '@/lib/utils';
 import type { Transaksi, TransaksiScope } from '@/types/transaksi';
 
@@ -65,6 +66,7 @@ export function TransaksiClient({ idGroupUser }: Props) {
   const [programRow, setProgramRow] = useState<Transaksi | null>(null);
   const [syncTransidOpen, setSyncTransidOpen] = useState(false);
   const [syncDonaturOpen, setSyncDonaturOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const queryParams = useMemo(
     () => ({ ...filters, scope, ...(sortBy ? { sort_by: sortBy, sort_dir: sortDir } : {}) }),
@@ -123,6 +125,35 @@ export function TransaksiClient({ idGroupUser }: Props) {
     setSortDir(d => (sortBy === key && d === 'asc' ? 'desc' : 'asc'));
     setSortBy(key);
     setPage(1);
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    const toastId = toast.loading('Menyiapkan data export…');
+    try {
+      const qs = filtersToQuery(queryParams);
+      const res = await fetch(`/api/anakjuara/transaksi/export${qs ? `?${qs}` : ''}`);
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        toast.error(json.error || 'Gagal export Excel.', { id: toastId });
+        return;
+      }
+      toast.loading('Mengunduh file…', { id: toastId });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `transaksi-${scope}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success('Export Excel berhasil diunduh.', { id: toastId });
+    } catch {
+      toast.error('Gagal export Excel.', { id: toastId });
+    } finally {
+      setExporting(false);
+    }
   };
 
   const toggleSelect = (idReview: string) => {
@@ -198,16 +229,22 @@ export function TransaksiClient({ idGroupUser }: Props) {
 
       <TabBar tabs={TABS} active={scope} onChange={changeScope} />
 
-      {isAdmin && (
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Btn variant="outline" size="sm" onClick={() => setSyncTransidOpen(true)}>
-            <Download size={14} /> Get Transid
-          </Btn>
-          <Btn variant="outline" size="sm" onClick={() => setSyncDonaturOpen(true)}>
-            <Download size={14} /> Get Donatur
-          </Btn>
-        </div>
-      )}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        {isAdmin ? (
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Btn variant="outline" size="sm" onClick={() => setSyncTransidOpen(true)}>
+              <Download size={14} /> Get Transid
+            </Btn>
+            <Btn variant="outline" size="sm" onClick={() => setSyncDonaturOpen(true)}>
+              <Download size={14} /> Get Donatur
+            </Btn>
+          </div>
+        ) : <div />}
+        <Btn variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+          {exporting ? <Loader2 size={14} className="ajis-spin" /> : <Download size={14} />}
+          {exporting ? 'Mengekspor...' : 'Export Excel'}
+        </Btn>
+      </div>
 
       <TransaksiFilter value={filters} onApply={applyFilters} isBranch={isBranch} />
 
