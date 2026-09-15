@@ -12,6 +12,7 @@ import { AnakJuaraTable } from '@/components/anak-juara/AnakJuaraTable';
 import { AnakJuaraCard } from '@/components/anak-juara/AnakJuaraCard';
 import { AjuanGantiAnakForm } from '@/components/anak-juara/AjuanGantiAnakForm';
 import { OpnameForm } from '@/components/anak-juara/OpnameForm';
+import { GantiProgramAnakJuaraModal } from '@/components/anak-juara/GantiProgramAnakJuaraModal';
 import { Btn } from '@/components/ui/Btn';
 import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { InfiniteScrollTrigger } from '@/components/ui/InfiniteScrollTrigger';
@@ -36,6 +37,7 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const [selected, setSelected] = useState<AnakJuaraRow | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [opnameRow, setOpnameRow] = useState<AnakJuaraRow | null>(null);
+  const [programRow, setProgramRow] = useState<AnakJuaraRow | null>(null);
   const [ajuanToast, setAjuanToast] = useState('');
   const [exporting, setExporting] = useState(false);
   const [sortBy, setSortBy] = useState('nama_anak');
@@ -67,6 +69,19 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
   const handleOpname = (r: AnakJuaraRow) => {
     setSelected(r);
     setOpnameRow(r);
+  };
+
+  const handleGantiProgram = (r: AnakJuaraRow) => {
+    setSelected(r);
+    setProgramRow(r);
+  };
+
+  const handlePdf = (r: AnakJuaraRow, kind: 'pdf-surat' | 'pdf-cv') => {
+    window.open(
+      `/api/anakjuara/anak-juara/${encodeURIComponent(r.id_anak)}/${kind}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
   };
 
   const handleGenerateLapsem = async (r: AnakJuaraRow) => {
@@ -245,6 +260,9 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
           onAjuan={handleAjuan}
           onOpname={handleOpname}
           onGenerateLapsem={handleGenerateLapsem}
+          onGantiProgram={handleGantiProgram}
+          onPdfSurat={r => handlePdf(r, 'pdf-surat')}
+          onPdfCv={r => handlePdf(r, 'pdf-cv')}
           keuangan={keuangan}
           keuanganLoading={keuanganLoading}
         />
@@ -258,6 +276,9 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
         onAjuan={handleAjuan}
         onOpname={handleOpname}
         onGenerateLapsem={handleGenerateLapsem}
+        onGantiProgram={handleGantiProgram}
+        onPdfSurat={r => handlePdf(r, 'pdf-surat')}
+        onPdfCv={r => handlePdf(r, 'pdf-cv')}
       />
 
       {!isMobile && displayTotal > 0 && (
@@ -288,6 +309,18 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
             desktopList.mutate();
             mobileList.mutate();
             mutateKeuangan();
+          }}
+        />
+      )}
+
+      {programRow && (
+        <GantiProgramAnakJuaraModal
+          row={programRow}
+          onClose={() => setProgramRow(null)}
+          onSuccess={() => {
+            setProgramRow(null);
+            desktopList.mutate();
+            mobileList.mutate();
           }}
         />
       )}

@@ -21,6 +21,11 @@ interface AnakJuaraTableProps {
   onOpname?:   (row: AnakJuaraRow) => void;
   /** Fires the "Generate Lapsem" action straight from the row. */
   onGenerateLapsem?: (row: AnakJuaraRow) => void;
+  /** Opens the Ganti Program modal straight from the row. */
+  onGantiProgram?: (row: AnakJuaraRow) => void;
+  /** Opens the Profil Surat / Profil CV PDF straight from the row. */
+  onPdfSurat?: (row: AnakJuaraRow) => void;
+  onPdfCv?:    (row: AnakJuaraRow) => void;
   /** Per-page finance pivot, keyed by id_pemasangan_baru. Fills in after the grid. */
   keuangan?:        Record<string, KeuanganPivot>;
   keuanganLoading?: boolean;
@@ -39,7 +44,7 @@ function fmtRp(n: number | undefined) {
 
 export function AnakJuaraTable({
   data, loading, rowOffset = 0, selectedId, sortBy, sortDir, onSort, onSelect, onAjuan, onOpname,
-  onGenerateLapsem, keuangan = {}, keuanganLoading = false,
+  onGenerateLapsem, onGantiProgram, onPdfSurat, onPdfCv, keuangan = {}, keuanganLoading = false,
 }: AnakJuaraTableProps) {
   const isSel = (r: AnakJuaraRow) =>
     !!selectedId && r.id_pemasangan_baru === selectedId;
@@ -174,6 +179,9 @@ export function AnakJuaraTable({
             { label: 'Ajuan Ganti Anak', onClick: () => onAjuan?.(r) },
             { label: 'Update Opname', onClick: () => onOpname?.(r) },
             { label: 'Generate Lapsem', onClick: () => onGenerateLapsem?.(r) },
+            { label: 'Ganti Program', onClick: () => onGantiProgram?.(r) },
+            { label: 'Profil Surat', onClick: () => onPdfSurat?.(r) },
+            { label: 'Profil CV', onClick: () => onPdfCv?.(r) },
           ]}
         />
       ),
@@ -193,22 +201,29 @@ export function AnakJuaraTable({
     {
       key: 'nama_anak',
       label: 'Nama Anak',
-      width: 200,
+      width: 190,
       sticky: true,
       sep: true,
       left: 136,
       sortable: true,
       sortKey: 'nama_anak',
       render: (r: AnakJuaraRow) => (
-        <div>
-          <div style={{ fontWeight: 800, fontSize: 13, color: tone(r, CHARCOAL) }}>
-            {r.nama_anak || '—'}
-          </div>
-          <div style={{ fontSize: 11, color: tone(r, MUTED), opacity: isSel(r) ? 0.85 : 1 }}>
-            {r.jenjang_pendidikan} {r.kelas || ''}
-          </div>
-        </div>
+        <span style={{ fontWeight: 800, color: tone(r, CHARCOAL) }}>{r.nama_anak || '—'}</span>
       ),
+    },
+    {
+      key: 'jenjang',
+      label: 'Jenjang',
+      width: 90,
+      sortable: true,
+      sortKey: 'jenjang_pendidikan',
+      render: (r: AnakJuaraRow) => <span style={{ color: tone(r) }}>{r.jenjang_pendidikan || '—'}</span>,
+    },
+    {
+      key: 'kelas',
+      label: 'Kelas',
+      width: 70,
+      render: (r: AnakJuaraRow) => <span style={{ color: tone(r) }}>{r.kelas || '—'}</span>,
     },
     {
       key: 'status',
@@ -227,19 +242,18 @@ export function AnakJuaraTable({
     {
       key: 'donatur',
       label: 'Donatur',
-      width: 180,
+      width: 170,
       sortable: true,
       sortKey: 'nama_donatur',
       render: (r: AnakJuaraRow) => (
-        <div>
-          <div style={{ fontWeight: 600, color: tone(r, CHARCOAL) }}>
-            {r.nama_donatur || '—'}
-          </div>
-          <div style={{ fontSize: 11, color: tone(r, MUTED), opacity: isSel(r) ? 0.85 : 1 }}>
-            {r.id_donatur}
-          </div>
-        </div>
+        <span style={{ fontWeight: 600, color: tone(r, CHARCOAL) }}>{r.nama_donatur || '—'}</span>
       ),
+    },
+    {
+      key: 'id_donatur',
+      label: 'ID Donatur',
+      width: 120,
+      render: (r: AnakJuaraRow) => <span style={{ color: tone(r) }}>{r.id_donatur || '—'}</span>,
     },
     {
       key: 'program',
@@ -254,17 +268,18 @@ export function AnakJuaraTable({
     {
       key: 'rfo',
       label: 'Funding',
-      width: 150,
+      width: 140,
       sortable: true,
       sortKey: 'nama_rfo',
       render: (r: AnakJuaraRow) => (
-        <div>
-          <div style={{ fontWeight: 600, color: tone(r, CHARCOAL) }}>{r.nama_rfo || '—'}</div>
-          <div style={{ fontSize: 11, color: tone(r, MUTED), opacity: isSel(r) ? 0.85 : 1 }}>
-            {r.nia_rfo}
-          </div>
-        </div>
+        <span style={{ fontWeight: 600, color: tone(r, CHARCOAL) }}>{r.nama_rfo || '—'}</span>
       ),
+    },
+    {
+      key: 'nia_rfo',
+      label: 'ID Zisco',
+      width: 110,
+      render: (r: AnakJuaraRow) => <span style={{ color: tone(r) }}>{r.nia_rfo || '—'}</span>,
     },
     {
       key: 'kantor',

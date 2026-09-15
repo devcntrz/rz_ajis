@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import { Btn } from '@/components/ui/Btn';
+import { RowActions } from '@/components/ui/RowActions';
 import { STATUS_COLOR, calcAge } from '@/lib/utils';
 import { anakFotoUrl } from '@/lib/anakFotoUrl';
-import { CheckCircle2, XCircle, Pencil } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import type { AnakListRow } from '@/types/anak';
 
 interface AnakCardProps {
@@ -81,10 +81,14 @@ export function AnakCard({ data, rowOffset = 0, loading }: AnakCardProps) {
                 {fotoUrl
                   ? <Badge label="Foto Ada" color="#1A7A45" bg="#E5F5ED" icon={CheckCircle2} />
                   : <Badge label="Foto Belum" color="#B02020" bg="#FDEAEA" icon={XCircle} />}
-                <span onClick={e => { e.preventDefault(); e.stopPropagation(); router.push(`/anak/${r.id_anak}?edit=1`); }}>
-                  <Btn size="sm" variant="outline">
-                    <Pencil size={13} /> Edit
-                  </Btn>
+                <span onClick={e => e.preventDefault()}>
+                  <RowActions
+                    label={`Aksi untuk ${r.nama_lengkap}`}
+                    items={[
+                      { label: 'Edit', onClick: () => router.push(`/anak/${r.id_anak}?edit=1`) },
+                      { label: 'Survey', onClick: () => router.push(`/survey?id_anak=${encodeURIComponent(r.id_anak)}`) },
+                    ]}
+                  />
                 </span>
               </div>
             </div>
