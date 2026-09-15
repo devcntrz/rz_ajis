@@ -28,7 +28,12 @@ interface SearchSelectBaseProps {
   allowEmpty?:    boolean;
   emptyLabel?:    string;
   style?:         React.CSSProperties;
-  /** Max rows fetched per request (async mode only). Defaults to SEARCH_SELECT_LIMIT (5). */
+  /**
+   * Max rows shown/fetched at once. Async mode: rows fetched per request.
+   * Static mode: rows kept after filtering. Defaults to SEARCH_SELECT_LIMIT (5)
+   * either way — pass a higher number (e.g. the full options length) for a
+   * short, fully-known static list that should never truncate.
+   */
   limit?:         number;
 }
 
@@ -186,7 +191,7 @@ export function SearchSelect(props: SearchSelectProps) {
     if (!query.trim()) return true;
     const q = query.toLowerCase();
     return o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q);
-  }).slice(0, SEARCH_SELECT_LIMIT);
+  }).slice(0, fetchLimit);
 
   const listOptions = fetchUrl ? asyncOptions : filteredStatic;
 
@@ -229,9 +234,18 @@ export function SearchSelect(props: SearchSelectProps) {
 
   useEffect(() => {
     if (!open) return;
-    // Any scroll/resize can move the trigger; closing avoids a stale-positioned
-    // list rather than re-measuring on every scroll tick.
-    const onMove = () => setOpen(false);
+    // Any scroll/resize of the PAGE can move the trigger; closing avoids a
+    // stale-positioned list rather than re-measuring on every scroll tick.
+    // Scroll events don't bubble, but they do reach capture-phase listeners on
+    // ancestors — including this one on window — for every scrollable
+    // descendant, not just the page. Without excluding the dropdown's own
+    // list, scrolling the options list itself fires this handler and closes
+    // the dropdown on the very first scroll tick, making a long list
+    // effectively unscrollable.
+    const onMove = (e: Event) => {
+      if (listRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
     window.addEventListener('scroll', onMove, true);
     window.addEventListener('resize', onMove);
     return () => {

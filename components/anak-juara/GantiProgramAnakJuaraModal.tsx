@@ -77,6 +77,9 @@ export function GantiProgramAnakJuaraModal({ row, onClose, onSuccess }: Props) {
             options={programOptions}
             disabled={loading}
             clearable
+            // Program list is short and fully loaded up front — show all of it
+            // instead of the default 5-row cap so nothing is hidden behind typing.
+            limit={Math.max(programOptions.length, 1)}
           />
         </div>
 
