@@ -2,7 +2,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Loader2 } from 'lucide-react';
 import { useAnakJuara } from '@/hooks/useAnakJuara';
 import { useAnakJuaraKeuangan } from '@/hooks/useAnakJuaraKeuangan';
 import { useIsMobile } from '@/hooks/useMediaQuery';
@@ -114,14 +114,18 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
 
   const handleExport = async () => {
     setExporting(true);
+    const toastId = toast.loading('Menyiapkan data export…', {
+      description: 'Menghitung rekap keuangan Jan–Des, mohon tunggu.',
+    });
     try {
       const qs = filtersToQuery(filters);
       const res = await fetch(`/api/anakjuara/anak-juara/export${qs ? `?${qs}` : ''}`);
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        alert(json.error || 'Gagal export Excel.');
+        toast.error(json.error || 'Gagal export Excel.', { id: toastId });
         return;
       }
+      toast.loading('Mengunduh file…', { id: toastId });
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -131,8 +135,9 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success('Export Excel berhasil diunduh.', { id: toastId });
     } catch {
-      alert('Gagal export Excel.');
+      toast.error('Gagal export Excel.', { id: toastId });
     } finally {
       setExporting(false);
     }
@@ -210,8 +215,8 @@ export function AnakJuaraClient({ idGroupUser }: Props) {
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Btn variant="outline" onClick={handleExport} disabled={exporting}>
-            <Download size={16} />
-            {exporting ? 'Export...' : 'Export Excel'}
+            {exporting ? <Loader2 size={16} className="ajis-spin" /> : <Download size={16} />}
+            {exporting ? 'Mengekspor...' : 'Export Excel'}
           </Btn>
           <Btn
             variant="primary"
