@@ -102,8 +102,35 @@ export async function GET(
       [...ids, ...semParams],
     );
 
+    // These two fallbacks match by nama_lengkap + id_wilayah_pembinaan (CAST to
+    // compare across the column's varying legacy types) instead of id_anak, to
+    // cover rows saved under an aliased id. Neither column is indexed for this
+    // combination, and ajis_pembinaan_baru has ~2.8M rows on MyISAM (table-level
+    // locking) — an unbounded scan here has been observed to run 40+ minutes on
+    // production, and for that whole time it holds up every other MyISAM write
+    // (including ajis_anak, e.g. the ajuan-ganti-anak eksekusi flow) queued
+    // behind the table lock. MAX_EXECUTION_TIME caps the damage: if it can't
+    // finish fast, fail this fallback and fall through to "no data" rather than
+    // degrade the whole app.
+    const FALLBACK_TIMEOUT_MS = 3000;
+    async function fetchRowsBounded(where: string, params: unknown[]): Promise<Row[]> {
+      try {
+        return await query<Row>(
+          `SELECT /*+ MAX_EXECUTION_TIME(${FALLBACK_TIMEOUT_MS}) */ ${selectCols}
+           FROM   ajis_pembinaan_baru pb
+           WHERE  ${where}
+           ORDER  BY pb.tgl_pembinaan DESC
+           LIMIT  100`,
+          params,
+        );
+      } catch (err) {
+        console.error('[kehadiran] nama_lengkap fallback aborted (likely MAX_EXECUTION_TIME)', err);
+        return [];
+      }
+    }
+
     if (rows.length === 0) {
-      rows = await fetchRows(
+      rows = await fetchRowsBounded(
         `pb.nama_lengkap = ? AND CAST(pb.id_wilayah_pembinaan AS CHAR) = CAST(? AS CHAR) ${semClause}`,
         [anak.nama_lengkap, anak.id_wilayah_pembinaan, ...semParams],
       );
@@ -118,7 +145,7 @@ export async function GET(
     }
 
     if (rows.length === 0 && sem?.tgl_awal && sem?.tgl_akhir) {
-      rows = await fetchRows(
+      rows = await fetchRowsBounded(
         `pb.nama_lengkap = ? AND CAST(pb.id_wilayah_pembinaan AS CHAR) = CAST(? AS CHAR)
          AND pb.tgl_pembinaan >= ? AND pb.tgl_pembinaan < DATE_ADD(?, INTERVAL 1 DAY)`,
         [anak.nama_lengkap, anak.id_wilayah_pembinaan, sem.tgl_awal, sem.tgl_akhir],
