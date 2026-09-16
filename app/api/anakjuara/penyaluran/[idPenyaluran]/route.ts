@@ -1,7 +1,11 @@
-/** GET /api/anakjuara/penyaluran/{id} — detail batch (PRD §5.0b). */
+/**
+ * GET    /api/anakjuara/penyaluran/{id} — detail batch (PRD §5.0b).
+ * DELETE /api/anakjuara/penyaluran/{id} — hapus batch (seluruh baris).
+ */
 import { NextResponse } from 'next/server';
 import { guard, toErrorResponse } from '@/lib/transaksi/api';
 import { fetchBatchDetail } from '@/lib/penyaluran/queries';
+import { deleteBatch } from '@/lib/penyaluran/mutations';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ idPenyaluran: string }> }) {
   try {
@@ -14,5 +18,19 @@ export async function GET(_req: Request, { params }: { params: Promise<{ idPenya
     return NextResponse.json({ data });
   } catch (err) {
     return toErrorResponse('penyaluran detail', err);
+  }
+}
+
+export async function DELETE(_req: Request, { params }: { params: Promise<{ idPenyaluran: string }> }) {
+  try {
+    const g = await guard();
+    if (!g.ok) return g.response;
+
+    const { idPenyaluran } = await params;
+    await deleteBatch(idPenyaluran);
+
+    return NextResponse.json({ message: 'Batch penyaluran dihapus.' });
+  } catch (err) {
+    return toErrorResponse('penyaluran delete batch', err);
   }
 }

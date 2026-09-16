@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Download, Plus } from 'lucide-react';
 import { Btn } from '@/components/ui/Btn';
 import { Sel } from '@/components/ui/Input';
@@ -7,6 +8,7 @@ import { SearchSelect } from '@/components/ui/SearchSelect';
 import { FLabel } from '@/components/ui/FLabel';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
+import { RowActions } from '@/components/ui/RowActions';
 import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { ErrorRetry } from '@/components/ui/ErrorRetry';
 import { NewBulkWizard } from '@/components/penyaluran/NewBulkWizard';
@@ -43,6 +45,15 @@ export function WilayahTab() {
     [filteredWilayah],
   );
 
+  const handleDelete = async (row: PenyaluranBatch) => {
+    if (!window.confirm(`Hapus batch penyaluran ${row.id_penyaluran} (${row.nama_wilayah}, ${labelBulan(row.bulan)} ${row.tahun})? Seluruh baris anak dalam batch ini akan ikut terhapus.`)) return;
+    const res = await fetch(`/api/anakjuara/penyaluran/${encodeURIComponent(row.id_penyaluran)}`, { method: 'DELETE' });
+    const json = await res.json();
+    if (!res.ok) { toast.error(json.error || 'Gagal menghapus batch.'); return; }
+    toast.success(json.message || 'Batch dihapus.');
+    refresh();
+  };
+
   const exportUrl = (() => {
     const qs = new URLSearchParams();
     if (kantorId) qs.set('kantor_id', kantorId);
@@ -75,6 +86,17 @@ export function WilayahTab() {
       render: (r: PenyaluranBatch) => r.status_akhir === 'y'
         ? <Badge label="Terkunci" color={T.gold} bg={T.goldPale} />
         : <Badge label="Berjalan" color={T.green} bg={T.greenPale} />,
+    },
+    {
+      key: 'aksi', label: '', width: 56,
+      render: (r: PenyaluranBatch) => (
+        <RowActions
+          label={`Aksi ${r.id_penyaluran}`}
+          items={[
+            { label: 'Hapus batch', onClick: () => handleDelete(r), danger: true },
+          ]}
+        />
+      ),
     },
   ];
 

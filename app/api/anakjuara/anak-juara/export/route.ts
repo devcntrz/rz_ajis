@@ -139,6 +139,38 @@ async function buildKeuanganMap(ids: string[]): Promise<Record<string, KeuanganP
   return data;
 }
 
+/**
+ * `nama_donatur` on `ajis_pemasangan` is a denormalized per-row copy and is blank
+ * on some rows even though `id_donatur` is correct (same quirk documented in
+ * app/api/anakjuara/anak-juara/route.ts). Backfill from any sibling row sharing
+ * the same `id_donatur` that does have a name, so the export doesn't show blanks
+ * the grid's search already knows how to work around.
+ */
+async function buildDonaturFallback(rows: Record<string, unknown>[]): Promise<Map<string, string>> {
+  const missingIds = Array.from(new Set(
+    rows
+      .filter(r => !r.nama_donatur && r.id_donatur)
+      .map(r => String(r.id_donatur)),
+  ));
+  if (missingIds.length === 0) return new Map();
+
+  const map = new Map<string, string>();
+  for (let i = 0; i < missingIds.length; i += KEUANGAN_CHUNK) {
+    const chunk = missingIds.slice(i, i + KEUANGAN_CHUNK);
+    const ph = chunk.map(() => '?').join(',');
+    const found = await query<{ id_donatur: string; nama_donatur: string }>(
+      `SELECT DISTINCT id_donatur, nama_donatur
+       FROM ajis_pemasangan
+       WHERE id_donatur IN (${ph}) AND nama_donatur != ''`,
+      chunk,
+    );
+    for (const f of found) {
+      if (!map.has(String(f.id_donatur))) map.set(String(f.id_donatur), f.nama_donatur);
+    }
+  }
+  return map;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
@@ -219,16 +251,18 @@ export async function GET(req: NextRequest) {
 
     const ids = rows.map(r => String(r.id_pemasangan_baru));
     const keuangan = await buildKeuanganMap(ids);
+    const donaturFallback = await buildDonaturFallback(rows);
 
     const exportRows = rows.map(r => {
       const k = keuangan[String(r.id_pemasangan_baru)];
+      const namaDonatur = (r.nama_donatur as string | null) || donaturFallback.get(String(r.id_donatur)) || r.nama_donatur;
       return {
         id_anak: r.id_anak,
         nama_anak: r.nama_anak,
         jenjang_pendidikan: r.jenjang_pendidikan,
         kelas: r.kelas,
         status_label: r.status_pasangan === 'y' ? 'Aktif' : 'Nonaktif',
-        nama_donatur: r.nama_donatur,
+        nama_donatur: namaDonatur,
         id_donatur: r.id_donatur,
         program_donasi: r.program_donasi,
         nama_rfo: r.nama_rfo,
