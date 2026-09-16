@@ -237,6 +237,19 @@ export async function editRow(
   await revalidatePenyaluranCache(idPenyaluran);
 }
 
+/** Hapus batch — seluruh baris dalam satu id_penyaluran. */
+export async function deleteBatch(idPenyaluran: string): Promise<void> {
+  await withTransaction(async conn => {
+    await assertBatchNotLocked(conn, idPenyaluran);
+    const res = await txExecuteResult(
+      conn, 'DELETE FROM ajis_penyaluran WHERE id_penyaluran = ?',
+      [idPenyaluran],
+    );
+    if (res.affectedRows === 0) throw new RuleError('Batch penyaluran tidak ditemukan.');
+  });
+  await revalidatePenyaluranCache(idPenyaluran);
+}
+
 /** Update Tgl-SDM (Teknis Penyaluran) — seluruh batch. */
 export async function teknisPenyaluran(
   idPenyaluran: string, input: TeknisInput,
