@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ idP
 
     const { idPenyaluran } = await params;
     const body = newSingleRowPayload.parse(await req.json());
-    const result = await createSingleRow(idPenyaluran, body.idAnak, g.session);
+    const result = await createSingleRow(idPenyaluran, body.idAnak, g.session, body.force);
 
     return NextResponse.json({ message: 'Anak ditambahkan ke batch.', ...result }, { status: 201 });
   } catch (err) {

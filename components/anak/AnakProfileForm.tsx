@@ -74,6 +74,7 @@ const PEKERJAAN_OPTIONS = [
   'Petani', 'Buruh', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'PNS/ASN', 'TNI/Polri',
   'Sopir/Ojek', 'Nelayan', 'Ibu Rumah Tangga', 'Tidak Bekerja', 'Sudah Meninggal', 'Lainnya',
 ];
+const BANK_OPTIONS = ['BSI', 'BRI'];
 
 /**
  * Plain <select> from a curated static list, e.g. Jenjang Pendidikan or Asnaf.
@@ -332,7 +333,7 @@ export function AnakProfileForm({ anak, mode = 'edit', lockedScope, onSaved, onC
           <Field label="Hubungan Kerabat"><Input value={form.hubungan_kerabat} onChange={onText('hubungan_kerabat')} /></Field>
           <Field label="Nama Pemilik Rekening"><Input value={form.pemilik_rekening} onChange={onText('pemilik_rekening')} /></Field>
           <Field label="Nomor Rekening"><Input value={form.no_rekening} onChange={onText('no_rekening')} /></Field>
-          <Field label="Nama Bank"><Input value={form.nama_bank} onChange={onText('nama_bank')} /></Field>
+          <Field label="Nama Bank"><StaticSel value={form.nama_bank} options={BANK_OPTIONS} onChange={v => set('nama_bank', v)} /></Field>
         </div>
       </Card>
 

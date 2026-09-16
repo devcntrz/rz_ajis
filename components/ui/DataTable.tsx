@@ -274,7 +274,6 @@ export function DataTable<Row>({
                   data-selected={selected ? '1' : undefined}
                   style={{
                     background: bg,
-                    cursor: rowInteractive ? 'pointer' : undefined,
                     color: textColor,
                     userSelect: onRowDoubleClick ? 'none' : undefined,
                   }}

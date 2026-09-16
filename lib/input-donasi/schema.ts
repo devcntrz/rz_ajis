@@ -43,6 +43,31 @@ export const newSinglePayload = z.object({
 });
 export type NewSinglePayload = z.infer<typeof newSinglePayload>;
 
+/**
+ * Entry Special (legacy `InputDonasiBaru_Create` with `transid[]`) — several
+ * cicilan transactions from the same donor, each smaller than a program's
+ * price, packaged into one ajis_input_donasi row once their sum matches the
+ * chosen program exactly.
+ */
+export const specialDonasiPayload = z.object({
+  did:                z.string().min(1),
+  idAnak:              z.string().min(1),
+  idPemasanganBaru:    z.string().min(1),
+  idProgram:           z.string().min(1),
+  programDonasi:       z.string().min(1),
+  kantorId:            z.string().min(1),
+  idWilayahPembinaan:  z.string().min(1),
+  items: z.array(z.object({
+    transid:  z.string().min(1),
+    detailid: z.number().int().nonnegative(),
+  })).min(2, 'Pilih minimal 2 transaksi untuk Entry Special.'),
+  tglTransaksi: dateStr,
+  bulan:        z.number().int().min(1).max(12),
+  tahun:        z.number().int().min(2000).max(2100),
+  nominalDonasi: z.number().positive(),
+});
+export type SpecialDonasiPayload = z.infer<typeof specialDonasiPayload>;
+
 export function searchParamsToObject(sp: URLSearchParams): Record<string, string> {
   const out: Record<string, string> = {};
   sp.forEach((v, k) => { out[k] = v; });

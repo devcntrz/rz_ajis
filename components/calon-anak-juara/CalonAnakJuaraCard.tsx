@@ -9,9 +9,10 @@ interface Props {
   loading?: boolean;
   onPdfSurat: (row: CalonAnakJuaraRow) => void;
   onPdfCv: (row: CalonAnakJuaraRow) => void;
+  onPasangDonatur: (row: CalonAnakJuaraRow) => void;
 }
 
-export function CalonAnakJuaraCard({ data, loading, onPdfSurat, onPdfCv }: Props) {
+export function CalonAnakJuaraCard({ data, loading, onPdfSurat, onPdfCv, onPasangDonatur }: Props) {
   if (loading && data.length === 0) {
     return (
       <div className="datagrid-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -49,6 +50,7 @@ export function CalonAnakJuaraCard({ data, loading, onPdfSurat, onPdfCv }: Props
               <RowActions
                 label={`Aksi untuk ${r.nama_lengkap}`}
                 items={[
+                  { label: 'Pasang ke Donatur', onClick: () => onPasangDonatur(r) },
                   { label: 'PDF Surat', onClick: () => onPdfSurat(r) },
                   { label: 'PDF CV', onClick: () => onPdfCv(r) },
                 ]}

@@ -99,6 +99,14 @@ export function TransaksiTable({
       render: (r: Transaksi) => <span style={{ fontWeight: 700 }}>{r.nama_donatur || '-'}</span>,
     },
     {
+      key: 'kantor_donatur', label: 'Kantor Donatur', width: 140, sortable: true,
+      render: (r: Transaksi) => r.kantor_donatur || '-',
+    },
+    {
+      key: 'kantor_ijis', label: 'Kantor IJIS', width: 150,
+      render: (r: Transaksi) => r.kantor_ijis || '-',
+    },
+    {
       key: 'did', label: 'ID Donatur', width: 145,
       render: (r: Transaksi) => (
         <span style={{ fontVariantNumeric: 'tabular-nums' }}>{r.did || '-'}</span>
@@ -118,7 +126,7 @@ export function TransaksiTable({
       // DataTable clips cells to the declared width. Sized for the longest name actually
       // present in `transaksi` — 49 chars, e.g. "Zakat untuk Program Beasiswa Pendidikan
       // Siswa SMP" — so the column never ellipsises in practice.
-      key: 'nama_program', label: 'Program', width: 380, sortable: true,
+      key: 'nama_program', label: 'Program', width: 300, sortable: true,
       render: (r: Transaksi) => r.nama_program || '-',
     },
     {
@@ -171,16 +179,8 @@ export function TransaksiTable({
       render: (r: Transaksi) => fmtTgl(r.tgl_donasi),
     },
     {
-      key: 'kantor_donatur', label: 'Kantor Donatur', width: 170, sortable: true,
-      render: (r: Transaksi) => r.kantor_donatur || '-',
-    },
-    {
       key: 'jml_anak_ijis', label: 'Anak IJIS', width: 95, align: 'right' as const, sortable: true,
       render: (r: Transaksi) => r.jml_anak_ijis ?? 0,
-    },
-    {
-      key: 'kantor_ijis', label: 'Kantor IJIS', width: 190,
-      render: (r: Transaksi) => r.kantor_ijis || '-',
     },
     {
       key: 'jml_mustahik', label: 'Jml PM', width: 80, align: 'right' as const,
@@ -210,7 +210,7 @@ export function TransaksiTable({
       stickyHeader
       // Exactly the sum of the column widths above, so the browser honours them as
       // declared instead of stretching them and shifting the sticky offsets.
-      minWidth={2640}
+      minWidth={2490}
       rowTextColor={transaksiRowColor}
       onRowDoubleClick={row => {
         if (canEntry(row)) {

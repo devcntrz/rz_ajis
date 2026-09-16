@@ -6,6 +6,7 @@ import { useMobileInfiniteList } from '@/hooks/useMobileInfiniteList';
 import { CalonAnakJuaraFilter } from '@/components/calon-anak-juara/CalonAnakJuaraFilter';
 import { CalonAnakJuaraTable } from '@/components/calon-anak-juara/CalonAnakJuaraTable';
 import { CalonAnakJuaraCard } from '@/components/calon-anak-juara/CalonAnakJuaraCard';
+import { PasangDonaturForm, type PasangAnakTarget } from '@/components/calon-anak-juara/PasangDonaturForm';
 import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopPagination';
 import { InfiniteScrollTrigger } from '@/components/ui/InfiniteScrollTrigger';
 import { DEFAULT_PAGE_SIZE, filtersAreEqual } from '@/lib/pagination';
@@ -21,6 +22,7 @@ export function CalonAnakJuaraClient({ idGroupUser }: Props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [mobilePage, setMobilePage] = useState(1);
+  const [pasangTarget, setPasangTarget] = useState<PasangAnakTarget | null>(null);
   const filtersKey = JSON.stringify(filters);
   const totalRef = useRef(0);
 
@@ -82,6 +84,10 @@ export function CalonAnakJuaraClient({ idGroupUser }: Props) {
     );
   };
 
+  const handlePasangDonatur = (row: CalonAnakJuaraRow) => {
+    setPasangTarget({ id_anak: row.id_anak, nama_anak: row.nama_lengkap, nama_kantor: row.nama_kantor });
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
@@ -103,6 +109,7 @@ export function CalonAnakJuaraClient({ idGroupUser }: Props) {
           rowOffset={(page - 1) * limit}
           onPdfSurat={r => handlePdf(r, 'pdf-surat')}
           onPdfCv={r => handlePdf(r, 'pdf-cv')}
+          onPasangDonatur={handlePasangDonatur}
         />
       </div>
 
@@ -111,7 +118,20 @@ export function CalonAnakJuaraClient({ idGroupUser }: Props) {
         loading={infinite.isInitialLoading}
         onPdfSurat={r => handlePdf(r, 'pdf-surat')}
         onPdfCv={r => handlePdf(r, 'pdf-cv')}
+        onPasangDonatur={handlePasangDonatur}
       />
+
+      {pasangTarget && (
+        <PasangDonaturForm
+          anak={pasangTarget}
+          onClose={() => setPasangTarget(null)}
+          onSuccess={() => {
+            setPasangTarget(null);
+            desktopList.mutate();
+            mobileList.mutate();
+          }}
+        />
+      )}
 
       {!isMobile && displayTotal > 0 && (
         <DesktopPagination

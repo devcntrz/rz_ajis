@@ -57,7 +57,7 @@ export function requireAdmin(session: SessionData): NextResponse | null {
  */
 export function toErrorResponse(context: string, err: unknown): NextResponse {
   if (err instanceof RuleError) {
-    return NextResponse.json({ error: err.message, code: 'RULE' }, { status: 400 });
+    return NextResponse.json({ error: err.message, code: err.code ?? 'RULE' }, { status: 400 });
   }
   if (err instanceof ZodError) {
     return NextResponse.json({ error: firstIssue(err), code: 'VALIDATION' }, { status: 400 });

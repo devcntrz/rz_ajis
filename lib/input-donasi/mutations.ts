@@ -10,11 +10,11 @@
  * transaction (mirrors lib/transaksi/mutations.ts::recalcTransaksi).
  */
 import {
-  withTransaction, txQueryOne, txExecute, txExecuteResult, type TxConnection,
+  withTransaction, txQuery, txQueryOne, txExecute, txExecuteResult, type TxConnection,
 } from '@/lib/db';
 import type { SessionData } from '@/lib/auth';
 import { RuleError, idPemasanganBaru, periode } from '@/lib/transaksi/rules';
-import type { NewSinglePayload } from '@/lib/input-donasi/schema';
+import type { NewSinglePayload, SpecialDonasiPayload } from '@/lib/input-donasi/schema';
 
 interface AnakSnapshot {
   nama_lengkap: string; nik: string; nama_wilayah: string; nama_kantor: string;
@@ -110,6 +110,109 @@ export async function createSingleDonasi(
     );
 
     await recalcTransaksi(conn, payload.transid, payload.detailid, session.username);
+
+    return { id_input_donasi: result.insertId, periode: per };
+  });
+}
+
+export interface SpecialDonasiResult {
+  id_input_donasi: number;
+  periode: 'ganjil' | 'genap';
+}
+
+/**
+ * Entry Special (legacy `InputDonasiBaru_Create` w/ `transid[]`, InputDonasiBaruAdmin.html
+ * "Entry Special"). Unlike New Single (one transaction, partial `pilihanDonasi` against its
+ * `sisa`), this packages several whole cicilan transactions into one donation record: their
+ * `perkiraan_rp` must sum exactly to the target program's price, and every consumed
+ * transaction is marked fully packaged (`status_pasang = 'y'`), not partially recalculated —
+ * so this never calls recalcTransaksi, which assumes one input_donasi row sums against one
+ * transid/detailid pair.
+ */
+export async function createSpecialDonasi(
+  payload: SpecialDonasiPayload, session: SessionData,
+): Promise<SpecialDonasiResult> {
+  return withTransaction(async conn => {
+    const placeholders = payload.items.map(() => '(transid = ? AND detailid = ?)').join(' OR ');
+    const params = payload.items.flatMap(i => [i.transid, i.detailid]);
+
+    const rows = await txQuery<{ transid: string; detailid: number; perkiraan_rp: number; status_pasang: string }>(
+      conn,
+      `SELECT transid, detailid, perkiraan_rp, status_pasang
+       FROM transaksi
+       WHERE did = ? AND (${placeholders})
+       FOR UPDATE`,
+      [payload.did, ...params],
+    );
+
+    if (rows.length !== payload.items.length) {
+      throw new RuleError('Salah satu transaksi tidak ditemukan atau bukan milik donatur ini.');
+    }
+    if (rows.some(r => r.status_pasang === 'y')) {
+      throw new RuleError('Salah satu transaksi yang dipilih sudah dipasangkan sebelumnya.');
+    }
+
+    const totalNominalTransaksi = rows.reduce((s, r) => s + Number(r.perkiraan_rp), 0);
+    if (Math.abs(totalNominalTransaksi - payload.nominalDonasi) > 0.01) {
+      throw new RuleError(
+        `Total nominal transaksi terpilih (${totalNominalTransaksi.toLocaleString('id-ID')}) harus ` +
+        `persis sama dengan harga program (${payload.nominalDonasi.toLocaleString('id-ID')}).`,
+      );
+    }
+
+    const anak = await txQueryOne<AnakSnapshot>(
+      conn,
+      `SELECT nama_lengkap, nik, nama_wilayah, nama_kantor, jenjang_pendidikan, jns_kel, asnaf
+       FROM ajis_anak WHERE id_anak = ? LIMIT 1`,
+      [payload.idAnak],
+    );
+    if (!anak) {
+      throw new RuleError('Anak tidak ditemukan di master.');
+    }
+
+    const donatur = await txQueryOne<{ nama_lengkap: string }>(
+      conn, 'SELECT nama_lengkap FROM donatur WHERE did = ? LIMIT 1', [payload.did],
+    );
+
+    const per = periode(payload.bulan);
+    const now = new Date();
+    const joinedTransid = payload.items.map(i => i.transid).join(',');
+
+    const result = await txExecuteResult(
+      conn,
+      `INSERT INTO ajis_input_donasi
+        (id_pemasangan_baru, tgl_transaksi, id_anak, id_donatur, program_donasi,
+         qty, pilihan_donasi, nominal_donasi, bulan, tahun,
+         user_insert, date_insert, user_update, date_update,
+         transid, detailid, kantor_id, id_wilayah_pembinaan, jenis,
+         jenjang_pendidikan, jns_kel, asnaf, id_pemasangan, nik,
+         nama_anak, nama_donatur, nama_wilayah, nama_kantor,
+         periode, id_program, via_input)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        idPemasanganBaru(payload.idAnak, payload.did, payload.tahun),
+        payload.tglTransaksi, payload.idAnak, payload.did, payload.programDonasi,
+        1, payload.nominalDonasi, payload.nominalDonasi, String(payload.bulan), String(payload.tahun),
+        session.username, now, session.username, now,
+        // transid is stored CSV'd (legacy behaviour) since one row now represents
+        // several raw transaksi; detailid has no single meaning here, so it is 0.
+        joinedTransid, 0, payload.kantorId, payload.idWilayahPembinaan, 'trans',
+        anak.jenjang_pendidikan ?? '', anak.jns_kel ?? '', anak.asnaf ?? '', '', anak.nik ?? '',
+        anak.nama_lengkap ?? '', donatur?.nama_lengkap ?? '', anak.nama_wilayah ?? '', anak.nama_kantor ?? '',
+        per, payload.idProgram, 'special',
+      ],
+    );
+
+    for (const item of payload.items) {
+      await txExecute(
+        conn,
+        `UPDATE transaksi
+         SET status_pasang = 'y', user_update_cf = ?,
+             total_input_donasi = perkiraan_rp, selisih_donasi = 0
+         WHERE transid = ? AND detailid = ?`,
+        [session.username, item.transid, item.detailid],
+      );
+    }
 
     return { id_input_donasi: result.insertId, periode: per };
   });

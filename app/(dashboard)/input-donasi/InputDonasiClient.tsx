@@ -7,6 +7,7 @@ import { DesktopPagination, type PageSizeOption } from '@/components/ui/DesktopP
 import { InputDonasiFilter, type Filters } from '@/components/input-donasi/InputDonasiFilter';
 import { InputDonasiTable } from '@/components/input-donasi/InputDonasiTable';
 import { NewSingleDonasiForm } from '@/components/input-donasi/NewSingleDonasiForm';
+import { EntrySpecialDonasiForm } from '@/components/input-donasi/EntrySpecialDonasiForm';
 import { useInputDonasiList } from '@/hooks/useInputDonasi';
 import { DEFAULT_PAGE_SIZE, filtersAreEqual } from '@/lib/pagination';
 import { fmtRp } from '@/lib/utils';
@@ -22,6 +23,7 @@ export function InputDonasiClient({ idGroupUser }: Props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<PageSizeOption>(DEFAULT_PAGE_SIZE);
   const [showNewSingle, setShowNewSingle] = useState(false);
+  const [showEntrySpecial, setShowEntrySpecial] = useState(false);
 
   const list = useInputDonasiList({ ...filters, page, limit });
 
@@ -53,9 +55,14 @@ export function InputDonasiClient({ idGroupUser }: Props) {
             Riwayat donasi masuk per anak · Total {list.total} baris
           </p>
         </div>
-        <Btn variant="primary" onClick={() => setShowNewSingle(true)}>
-          <Plus size={15} /> New Single
-        </Btn>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Btn variant="outline" onClick={() => setShowEntrySpecial(true)}>
+            Entry Special
+          </Btn>
+          <Btn variant="primary" onClick={() => setShowNewSingle(true)}>
+            <Plus size={15} /> New Single
+          </Btn>
+        </div>
       </div>
 
       <InputDonasiFilter value={filters} onApply={applyFilters} />
@@ -93,6 +100,13 @@ export function InputDonasiClient({ idGroupUser }: Props) {
         <NewSingleDonasiForm
           onClose={() => setShowNewSingle(false)}
           onSuccess={() => { setShowNewSingle(false); refresh(); }}
+        />
+      )}
+
+      {showEntrySpecial && (
+        <EntrySpecialDonasiForm
+          onClose={() => setShowEntrySpecial(false)}
+          onSuccess={() => { setShowEntrySpecial(false); refresh(); }}
         />
       )}
     </div>

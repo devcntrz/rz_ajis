@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Btn } from '@/components/ui/Btn';
 import { Input } from '@/components/ui/Input';
 import { FLabel } from '@/components/ui/FLabel';
@@ -21,6 +22,7 @@ export function NewSingleRowForm({ batch, onClose, onSuccess }: Props) {
   const [q, setQ] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [dupWarning, setDupWarning] = useState<string | null>(null);
 
   const kandidat = useKandidat({
     wilayahId: batch.id_wilayah_pembinaan,
@@ -31,7 +33,7 @@ export function NewSingleRowForm({ batch, onClose, onSuccess }: Props) {
     limit: 20,
   });
 
-  const save = async () => {
+  const save = async (force = false) => {
     if (!selected) { toast.error('Pilih anak terlebih dahulu.'); return; }
     setSaving(true);
     try {
@@ -40,11 +42,18 @@ export function NewSingleRowForm({ batch, onClose, onSuccess }: Props) {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idAnak: selected }),
+          body: JSON.stringify({ idAnak: selected, force }),
         },
       );
       const json = await res.json();
-      if (!res.ok) { toast.error(json.error || 'Gagal menambah anak.'); return; }
+      if (!res.ok) {
+        if (json.code === 'DUP_ANAK' && !force) {
+          setDupWarning(json.error);
+          return;
+        }
+        toast.error(json.error || 'Gagal menambah anak.');
+        return;
+      }
       toast.success(json.message || 'Anak ditambahkan.');
       onSuccess();
     } catch {
@@ -55,6 +64,7 @@ export function NewSingleRowForm({ batch, onClose, onSuccess }: Props) {
   };
 
   return (
+    <>
     <Modal title={`New Single — Batch ${batch.id_penyaluran}`} onClose={onClose} maxWidth={640}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
@@ -107,11 +117,23 @@ export function NewSingleRowForm({ batch, onClose, onSuccess }: Props) {
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Btn variant="outline" onClick={onClose}>Batal</Btn>
-          <Btn variant="primary" onClick={save} disabled={!selected || saving}>
+          <Btn variant="primary" onClick={() => save()} disabled={!selected || saving}>
             {saving ? 'Menyimpan…' : 'Tambahkan'}
           </Btn>
         </div>
       </div>
     </Modal>
+
+    {dupWarning && (
+      <ConfirmDialog
+        title="Anak sudah ada dalam batch"
+        message={`${dupWarning}\n\nLanjutkan menambahkan anak ini?`}
+        confirmLabel="Lanjutkan"
+        danger
+        onConfirm={() => { setDupWarning(null); save(true); }}
+        onCancel={() => setDupWarning(null)}
+      />
+    )}
+    </>
   );
 }
