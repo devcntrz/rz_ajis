@@ -65,23 +65,25 @@ export async function createBulkPenyaluran(
     const now = new Date();
 
     const values = final.map(k => [
-      idPenyaluran, k.id_pemasangan_baru, k.id_anak, k.jenjang_pendidikan, k.kelas,
+      idPenyaluran, '', k.id_pemasangan_baru, k.id_anak, k.jenjang_pendidikan, k.kelas,
       k.id_donatur, k.id_wilayah_pembinaan, k.kantor_id, k.program_donasi,
-      session.username, now, String(input.bulan), String(input.tahun), k.jns_kel, k.asnaf,
-      k.nama_anak, k.nama_donatur, k.nama_wilayah, k.nama_kantor,
+      session.username, now, session.username, '0000-00-00', String(input.bulan), String(input.tahun),
+      '', '', 'n', 'y', k.jns_kel, k.asnaf,
+      k.nama_anak, k.nama_donatur, k.nama_wilayah, k.nama_kantor, '',
       k.no_rekening ?? '', k.nama_bank ?? '', k.pemilik_rekening ?? '', k.nik, per,
-      k.harga_program, k.harga_penyaluran, 'massal',
+      k.harga_program, k.harga_penyaluran, 'massal', '',
     ]);
 
     await txQueryUnprepared(
       conn,
       `INSERT INTO ajis_penyaluran
-        (id_penyaluran, id_pemasangan_baru, id_anak, jenjang_pendidikan, kelas,
+        (id_penyaluran, id_pemasangan, id_pemasangan_baru, id_anak, jenjang_pendidikan, kelas,
          id_donatur, id_wilayah_pembinaan, id_kantor, program_donasi,
-         user_insert, date_insert, bulan, tahun, jns_kel, asnaf,
-         nama_anak, nama_donatur, nama_wilayah, nama_kantor,
+         user_insert, date_insert, user_update, date_update, bulan, tahun,
+         detailid, jenis, status_akhir, status_tersalurkan, jns_kel, asnaf,
+         nama_anak, nama_donatur, nama_wilayah, nama_kantor, alamat,
          no_rekening, nama_bank, pemilik_rekening, nik, periode,
-         nominal_penyaluran, nominal_hpp, via_input)
+         nominal_penyaluran, nominal_hpp, via_input, id_pemasangan_new)
        VALUES ?`,
       [values],
     );
@@ -135,20 +137,22 @@ export async function createSingleRow(
     const result = await txExecuteResult(
       conn,
       `INSERT INTO ajis_penyaluran
-        (id_penyaluran, id_pemasangan_baru, id_anak, jenjang_pendidikan, kelas,
+        (id_penyaluran, id_pemasangan, id_pemasangan_baru, id_anak, jenjang_pendidikan, kelas,
          id_donatur, id_wilayah_pembinaan, id_kantor, program_donasi,
-         user_insert, date_insert, bulan, tahun, jns_kel, asnaf,
-         nama_anak, nama_donatur, nama_wilayah, nama_kantor,
+         user_insert, date_insert, user_update, date_update, bulan, tahun,
+         detailid, jenis, status_akhir, status_tersalurkan, jns_kel, asnaf,
+         nama_anak, nama_donatur, nama_wilayah, nama_kantor, alamat,
          no_rekening, nama_bank, pemilik_rekening, nik, periode,
-         nominal_penyaluran, nominal_hpp, via_input)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         nominal_penyaluran, nominal_hpp, via_input, id_pemasangan_new)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        idPenyaluran, k.id_pemasangan_baru, k.id_anak, k.jenjang_pendidikan, k.kelas,
+        idPenyaluran, '', k.id_pemasangan_baru, k.id_anak, k.jenjang_pendidikan, k.kelas,
         k.id_donatur, k.id_wilayah_pembinaan, k.kantor_id, k.program_donasi,
-        session.username, now, String(bulan), String(tahun), k.jns_kel, k.asnaf,
-        k.nama_anak, k.nama_donatur, k.nama_wilayah, k.nama_kantor,
+        session.username, now, session.username, '0000-00-00', String(bulan), String(tahun),
+        '', '', 'n', 'y', k.jns_kel, k.asnaf,
+        k.nama_anak, k.nama_donatur, k.nama_wilayah, k.nama_kantor, '',
         k.no_rekening ?? '', k.nama_bank ?? '', k.pemilik_rekening ?? '', k.nik, per,
-        k.harga_program, k.harga_penyaluran, 'single',
+        k.harga_program, k.harga_penyaluran, 'single', '',
       ],
     );
 
