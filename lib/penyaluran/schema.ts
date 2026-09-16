@@ -48,6 +48,9 @@ export type NewBulkInput = z.infer<typeof newBulkPayload>;
 
 export const newSingleRowPayload = z.object({
   idAnak: z.string().min(1),
+  // Set after the operator has been warned this child is already in another
+  // batch/pemasangan and confirmed anyway — see createSingleRow's dup check.
+  force:  z.boolean().optional(),
 });
 export type NewSingleRowInput = z.infer<typeof newSingleRowPayload>;
 

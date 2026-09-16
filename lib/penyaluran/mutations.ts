@@ -97,7 +97,7 @@ export async function createBulkPenyaluran(
 
 /** New Single — tambah satu anak ke batch yang sudah ada. PRD §5.4 (memperbaiki hardcode periode). */
 export async function createSingleRow(
-  idPenyaluran: string, idAnak: string, session: SessionData,
+  idPenyaluran: string, idAnak: string, session: SessionData, force = false,
 ): Promise<{ id_row: number }> {
   return withTransaction(async conn => {
     const batch = await txQueryOne<{
@@ -113,11 +113,19 @@ export async function createSingleRow(
     const bulan = Number(batch.bulan);
     const tahun = Number(batch.tahun);
 
+    // A repeat add is allowed once the operator has been warned and confirmed
+    // (`force`) — it does affect saldo/total penyaluran, so it must never be silent.
     const dup = await txQueryOne<{ id_row: number }>(
       conn, 'SELECT id_row FROM ajis_penyaluran WHERE id_penyaluran = ? AND id_anak = ? LIMIT 1',
       [idPenyaluran, idAnak],
     );
-    if (dup) throw new RuleError('Anak ini sudah ada dalam batch.');
+    if (dup && !force) {
+      throw new RuleError(
+        'Anak ini sudah ada dalam batch dan akan mempengaruhi saldo serta total penyaluran. ' +
+        'Konfirmasi untuk tetap menambahkan.',
+        'DUP_ANAK',
+      );
+    }
 
     const sudah = await alreadySalur([idAnak], bulan, tahun);
     if (sudah.has(idAnak)) {

@@ -1,5 +1,5 @@
 'use client';
-import { Btn } from '@/components/ui/Btn';
+import { RowActions } from '@/components/ui/RowActions';
 import { fmtTgl } from '@/lib/utils';
 import type { AjuanGantiAnak } from '@/types/ajuan';
 
@@ -39,6 +39,7 @@ type ColDef = {
  * Freeze through Kantor so cabang stays visible while scrolling.
  */
 const COLS: ColDef[] = [
+  { key: 'aksi',           label: 'Aksi',           width: 52,  sticky: true },
   { key: 'no',             label: '#',              width: 36,  sticky: true },
   { key: 'approve',        label: 'Approve',        width: 72,  sticky: true },
   { key: 'eksekusi',       label: 'Eksekusi',       width: 72,  sticky: true },
@@ -55,7 +56,6 @@ const COLS: ColDef[] = [
   { key: 'nama_pengganti', label: 'Nama Pengganti', width: 160 },
   { key: 'alasan',         label: 'Alasan',         width: 200 },
   { key: 'saldo',          label: 'Saldo',          width: 96 },
-  { key: 'aksi',           label: 'Aksi',           width: 260 },
 ];
 
 const TABLE_WIDTH = COLS.reduce((s, c) => s + c.width, 0);
@@ -200,23 +200,14 @@ export function AjuanTable({
                 alasan:         r.alasan_pergantian || '—',
                 saldo:          Number(r.pindah_saldo || 0).toLocaleString('id-ID'),
                 aksi: (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'nowrap',
-                    gap: 6,
-                    alignItems: 'center',
-                  }}>
-                    <Btn size="sm" variant="primary" disabled={!canEksekusi} onClick={() => onEksekusi(r)}>
-                      Eksekusi
-                    </Btn>
-                    <Btn size="sm" variant="outline" disabled={!canUlangi} onClick={() => onUlangi(r)}>
-                      Ulangi
-                    </Btn>
-                    <Btn size="sm" variant="danger" disabled={!canDelete} onClick={() => onDelete(r)}>
-                      Hapus
-                    </Btn>
-                  </div>
+                  <RowActions
+                    label={`Aksi ajuan ${r.nama_anak_pengganti || r.id_ajuan}`}
+                    items={[
+                      { label: 'Eksekusi', onClick: () => onEksekusi(r), disabled: !canEksekusi },
+                      { label: 'Ulangi', onClick: () => onUlangi(r), disabled: !canUlangi },
+                      { label: 'Hapus', onClick: () => onDelete(r), disabled: !canDelete, danger: true },
+                    ]}
+                  />
                 ),
               };
 
@@ -239,11 +230,11 @@ export function AjuanTable({
                             ? 600
                             : 400,
                           color,
-                          padding: PAD,
+                          padding: c.key === 'aksi' ? '4px 8px' : PAD,
                           whiteSpace: 'nowrap',
-                          overflow: 'hidden',
+                          overflow: c.key === 'aksi' ? 'visible' : 'hidden',
                           textOverflow: c.key === 'aksi' ? 'clip' : 'ellipsis',
-                          textAlign: c.key === 'saldo' ? 'right' : 'left',
+                          textAlign: c.key === 'saldo' ? 'right' : c.key === 'aksi' ? 'center' : 'left',
                           fontFamily: 'inherit',
                           verticalAlign: 'middle',
                           lineHeight: 1.25,

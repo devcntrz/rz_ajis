@@ -33,6 +33,8 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
   /** null = untouched, still mirroring the server. */
   const [edits, setEdits] = useState<DraftRow[] | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showAddAnak, setShowAddAnak] = useState(false);
+  const [addSearch, setAddSearch] = useState('');
 
   const candidates = useAnakKandidat(row.transid, row.detailid, qty, {
     enabled: mode === 'create',
@@ -40,6 +42,15 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
   const entries = useTransaksiEntries(row.transid, row.detailid, {
     enabled: mode === 'update',
   });
+  // Update mode has no candidates fetch of its own (it seeds from saved entries), so
+  // "tambah anak" needs a separate candidates fetch there. Create mode already fetches
+  // the full eligible pool above (`candidates`, at the toolbar's qty) — reuse it instead
+  // of firing a second, qty-inconsistent request.
+  const addCandidatesFetch = useAnakKandidat(row.transid, row.detailid, 1, {
+    enabled: mode === 'update' && showAddAnak,
+  });
+  const addPool = mode === 'create' ? candidates.rows : addCandidatesFetch.rows;
+  const addPoolLoading = mode === 'create' ? candidates.loading : addCandidatesFetch.loading;
 
   /**
    * The grid is derived from whichever source this mode uses, not copied into state by
@@ -97,6 +108,31 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
   };
 
   const remove = (idAnak: string) => setEdits(draft.filter(r => r.id_anak !== idAnak));
+
+  const addAnak = (c: (typeof addPool)[number]) => {
+    setEdits([
+      ...draft,
+      {
+        id_anak:              c.id_anak,
+        nama_anak:            c.nama_anak,
+        id_pemasangan_baru:   c.id_pemasangan_baru,
+        id_program:           String(c.id_program ?? ''),
+        program_donasi:       c.program_donasi,
+        kantor_id:            c.kantor_id,
+        id_wilayah_pembinaan: c.id_wilayah_pembinaan,
+        pilihan_donasi:       Number(c.pilihan_donasi),
+        qty:                  1,
+        nominal_donasi:       Number(c.pilihan_donasi),
+      },
+    ]);
+  };
+
+  const addableAnak = addPool.filter(c => {
+    if (draft.some(d => d.id_anak === c.id_anak)) return false;
+    if (!addSearch.trim()) return true;
+    const q = addSearch.trim().toLowerCase();
+    return c.nama_anak?.toLowerCase().includes(q) || c.id_anak?.toLowerCase().includes(q);
+  });
 
   /** Discard local edits and fall back to the server data. */
   const reload = () => setEdits(null);
@@ -197,7 +233,50 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
           <Btn variant="ghost" size="sm" onClick={reload}>
             <RotateCcw size={14} /> Muat ulang
           </Btn>
+          <Btn variant="outline" size="sm" onClick={() => setShowAddAnak(s => !s)}>
+            {showAddAnak ? 'Tutup Tambah Anak' : '+ Tambah Anak'}
+          </Btn>
         </div>
+
+        {showAddAnak && (
+          <div style={{
+            border: `1.5px solid ${T.primarySoft}`, borderRadius: 12, padding: 12,
+            display: 'flex', flexDirection: 'column', gap: 8, background: T.primaryPale,
+          }}>
+            <Input
+              placeholder="Cari nama atau ID anak…"
+              value={addSearch}
+              onChange={e => setAddSearch(e.target.value)}
+            />
+            {addPoolLoading && (
+              <div style={{ color: T.gray, fontSize: 13 }}>Memuat kandidat anak…</div>
+            )}
+            {!addPoolLoading && addableAnak.length === 0 && (
+              <div style={{ color: T.gray, fontSize: 13 }}>
+                Tidak ada anak pasangan lain yang bisa ditambahkan untuk donatur/program ini.
+              </div>
+            )}
+            {!addPoolLoading && addableAnak.length > 0 && (
+              <div style={{ maxHeight: 180, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {addableAnak.map(c => (
+                  <div
+                    key={c.id_anak}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      background: T.white, borderRadius: 8, padding: '6px 10px',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{c.nama_anak || c.id_anak}</div>
+                      <div style={{ fontSize: 10, color: T.gray }}>{c.id_anak}</div>
+                    </div>
+                    <Btn size="sm" variant="primary" onClick={() => addAnak(c)}>+ Tambah</Btn>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Balance indicator */}
         <div style={{

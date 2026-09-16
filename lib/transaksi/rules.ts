@@ -11,9 +11,11 @@ import type { Periode, Transaksi } from '@/types/transaksi';
 
 /** Raised for rule violations that must surface to the user as a 400, not a 500. */
 export class RuleError extends Error {
-  constructor(message: string) {
+  code?: string;
+  constructor(message: string, code?: string) {
     super(message);
     this.name = 'RuleError';
+    this.code = code;
   }
 }
 

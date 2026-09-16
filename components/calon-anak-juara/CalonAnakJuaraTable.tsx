@@ -11,10 +11,11 @@ interface Props {
   rowOffset?: number;
   onPdfSurat: (row: CalonAnakJuaraRow) => void;
   onPdfCv: (row: CalonAnakJuaraRow) => void;
+  onPasangDonatur: (row: CalonAnakJuaraRow) => void;
 }
 
 export function CalonAnakJuaraTable({
-  data, loading, rowOffset = 0, onPdfSurat, onPdfCv,
+  data, loading, rowOffset = 0, onPdfSurat, onPdfCv, onPasangDonatur,
 }: Props) {
   return (
     <DataTable
@@ -25,6 +26,22 @@ export function CalonAnakJuaraTable({
       rowNumberStart={rowOffset + 1}
       stickyHeader
       columns={[
+        {
+          key: 'aksi',
+          label: '',
+          width: 52,
+          sticky: true,
+          render: (r: CalonAnakJuaraRow) => (
+            <RowActions
+              label={`Aksi untuk ${r.nama_lengkap}`}
+              items={[
+                { label: 'Pasang ke Donatur', onClick: () => onPasangDonatur(r) },
+                { label: 'PDF Surat', onClick: () => onPdfSurat(r) },
+                { label: 'PDF CV', onClick: () => onPdfCv(r) },
+              ]}
+            />
+          ),
+        },
         {
           key: 'nama_lengkap',
           label: 'Nama Calon Anak Juara',
@@ -124,20 +141,6 @@ export function CalonAnakJuaraTable({
           label: 'Alamat',
           width: 240,
           render: (r: CalonAnakJuaraRow) => r.alamat || '—',
-        },
-        {
-          key: 'aksi',
-          label: 'Aksi',
-          width: 72,
-          render: (r: CalonAnakJuaraRow) => (
-            <RowActions
-              label={`Aksi untuk ${r.nama_lengkap}`}
-              items={[
-                { label: 'PDF Surat', onClick: () => onPdfSurat(r) },
-                { label: 'PDF CV', onClick: () => onPdfCv(r) },
-              ]}
-            />
-          ),
         },
       ]}
     />
