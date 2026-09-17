@@ -19,18 +19,29 @@ const T = {
 
 interface Props {
   row:       Transaksi;
-  mode:      'create' | 'update';
+  /** Whether this transaction already has saved entries — decides create vs. update save. */
+  entered:   boolean;
   onClose:   () => void;
   onSuccess: () => void;
 }
 
-export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
+/**
+ * A larger, bulk-oriented variant of EntryCashflowForm for donors with many sponsored
+ * children (high jml_mustahik). Same data source, same draft shape, same save endpoint
+ * as the standard modal — only the input ergonomics differ: a taller grid, a way to set
+ * one price across every row, multi-select "tambah anak", and a grid-level search.
+ */
+export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: Props) {
+  const mode: 'create' | 'update' = entered ? 'update' : 'create';
   const [qty, setQty] = useState(1);
   /** null = untouched, still mirroring the server. */
   const [edits, setEdits] = useState<DraftRow[] | null>(null);
   const [saving, setSaving] = useState(false);
   const [showAddAnak, setShowAddAnak] = useState(false);
   const [addSearch, setAddSearch] = useState('');
+  const [checkedToAdd, setCheckedToAdd] = useState<Set<string>>(new Set());
+  const [gridSearch, setGridSearch] = useState('');
+  const [flatPrice, setFlatPrice] = useState('');
 
   const candidates = useAnakKandidat(row.transid, row.detailid, qty, {
     enabled: mode === 'create',
@@ -38,21 +49,12 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
   const entries = useTransaksiEntries(row.transid, row.detailid, {
     enabled: mode === 'update',
   });
-  // Update mode has no candidates fetch of its own (it seeds from saved entries), so
-  // "tambah anak" needs a separate candidates fetch there. Create mode already fetches
-  // the full eligible pool above (`candidates`, at the toolbar's qty) — reuse it instead
-  // of firing a second, qty-inconsistent request.
   const addCandidatesFetch = useAnakKandidat(row.transid, row.detailid, 1, {
     enabled: mode === 'update' && showAddAnak,
   });
   const addPool = mode === 'create' ? candidates.rows : addCandidatesFetch.rows;
   const addPoolLoading = mode === 'create' ? candidates.loading : addCandidatesFetch.loading;
 
-  /**
-   * The grid is derived from whichever source this mode uses, not copied into state by
-   * an effect. Local edits simply shadow it, so a slow fetch can never land after the
-   * operator has started typing and overwrite their work.
-   */
   const seed: DraftRow[] = useMemo(() => {
     if (mode === 'create') return candidates.rows.map(draftFromCandidate);
     return entries.rows.map(draftFromEntry);
@@ -60,9 +62,6 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
 
   const draft = edits ?? seed;
   const perkiraan = Math.round(Number(row.perkiraan_rp));
-  // Always derived from harga satuan × qty — the two numbers the operator can see and
-  // edit — rather than trusted from a separately-stored nominal_donasi, which for saved
-  // entries is only ever seeded from the server and can drift from what the grid shows.
   const total = draft.reduce((s, r) => s + rowNominal(r), 0);
   const selisih = perkiraan - Math.round(total);
   const balanced = selisih === 0 && draft.length > 0;
@@ -74,7 +73,6 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
     setEdits(draft.map(r => {
       if (r.id_anak !== idAnak) return r;
       const merged = { ...r, ...next };
-      // qty and unit price are the inputs; the line total always follows from them.
       if (next.qty !== undefined || next.pilihan_donasi !== undefined) {
         merged.nominal_donasi = Number(merged.pilihan_donasi) * Number(merged.qty);
       }
@@ -84,16 +82,29 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
 
   const remove = (idAnak: string) => setEdits(draft.filter(r => r.id_anak !== idAnak));
 
-  const addAnak = (c: (typeof addPool)[number]) => {
-    setEdits([...draft, draftFromNewCandidate(c)]);
-  };
-
   const addableAnak = addPool.filter(c => {
     if (draft.some(d => d.id_anak === c.id_anak)) return false;
     if (!addSearch.trim()) return true;
     const q = addSearch.trim().toLowerCase();
     return c.nama_anak?.toLowerCase().includes(q) || c.id_anak?.toLowerCase().includes(q);
   });
+
+  const toggleCheckedToAdd = (idAnak: string) => {
+    setCheckedToAdd(prev => {
+      const next = new Set(prev);
+      if (next.has(idAnak)) next.delete(idAnak);
+      else next.add(idAnak);
+      return next;
+    });
+  };
+
+  /** Adds every checked candidate to the draft in one shot. */
+  const addSelected = () => {
+    const chosen = addableAnak.filter(c => checkedToAdd.has(c.id_anak));
+    if (chosen.length === 0) return;
+    setEdits([...draft, ...chosen.map(draftFromNewCandidate)]);
+    setCheckedToAdd(new Set());
+  };
 
   /** Discard local edits and fall back to the server data. */
   const reload = () => setEdits(null);
@@ -109,6 +120,19 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
     }));
   };
 
+  /** Set the same harga satuan on every row, keeping each row's own qty. */
+  const applyFlatPrice = () => {
+    const price = Number(flatPrice);
+    if (!Number.isFinite(price) || price <= 0 || draft.length === 0) return;
+    setEdits(draft.map(r => ({ ...r, pilihan_donasi: price, nominal_donasi: price * Number(r.qty || 0) })));
+  };
+
+  const visibleDraft = useMemo(() => {
+    if (!gridSearch.trim()) return draft;
+    const q = gridSearch.trim().toLowerCase();
+    return draft.filter(r => r.nama_anak?.toLowerCase().includes(q) || r.id_anak?.toLowerCase().includes(q));
+  }, [draft, gridSearch]);
+
   const save = async () => {
     if (!balanced) return;
     setSaving(true);
@@ -118,9 +142,6 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
         {
           method:  'PUT',
           headers: { 'Content-Type': 'application/json' },
-          // Body, not query string: legacy sent this as &data=<JSON> in the URL, which
-          // truncated for donors with hundreds of children.
-          // `nama_anak` is display-only; the server reads names from the master.
           body: JSON.stringify({
             mode,
             rows: draft.map(r => ({
@@ -153,12 +174,11 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
 
   return (
     <Modal
-      title={`${mode === 'create' ? 'Entry' : 'Update'} Cashflow — ${row.nama_donatur || row.did}`}
+      title={`Entry Premium — ${row.nama_donatur || row.did}`}
       onClose={onClose}
-      maxWidth={1000}
+      maxWidth={1400}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {/* Transaction header, read-only */}
         <div style={{
           background: T.primaryPale, borderRadius: 12, padding: 12,
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10,
@@ -182,12 +202,25 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
                 onChange={e => {
                   const n = Number(e.target.value);
                   setQty(Number.isInteger(n) && n > 0 ? n : 1);
-                  // Changing qty re-derives every line from the server price.
                   setEdits(null);
                 }}
               />
             </div>
           )}
+          <div style={{ width: 170 }}>
+            <FLabel>Harga satuan (semua)</FLabel>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <Input
+                type="number"
+                placeholder="mis. 210000"
+                value={flatPrice}
+                onChange={e => setFlatPrice(e.target.value)}
+              />
+              <Btn variant="outline" size="sm" onClick={applyFlatPrice} disabled={draft.length === 0}>
+                Terapkan
+              </Btn>
+            </div>
+          </div>
           <Btn variant="outline" size="sm" onClick={distributeEvenly} disabled={draft.length === 0}>
             Bagi rata sesuai nominal
           </Btn>
@@ -204,11 +237,22 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
             border: `1.5px solid ${T.primarySoft}`, borderRadius: 12, padding: 12,
             display: 'flex', flexDirection: 'column', gap: 8, background: T.primaryPale,
           }}>
-            <Input
-              placeholder="Cari nama atau ID anak…"
-              value={addSearch}
-              onChange={e => setAddSearch(e.target.value)}
-            />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Input
+                placeholder="Cari nama atau ID anak…"
+                value={addSearch}
+                onChange={e => setAddSearch(e.target.value)}
+                style={{ flex: 1, minWidth: 200 }}
+              />
+              <Btn
+                size="sm"
+                variant="primary"
+                onClick={addSelected}
+                disabled={checkedToAdd.size === 0}
+              >
+                + Tambah Terpilih ({checkedToAdd.size})
+              </Btn>
+            </div>
             {addPoolLoading && (
               <div style={{ color: T.gray, fontSize: 13 }}>Memuat kandidat anak…</div>
             )}
@@ -218,21 +262,28 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
               </div>
             )}
             {!addPoolLoading && addableAnak.length > 0 && (
-              <div style={{ maxHeight: 180, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {addableAnak.map(c => (
-                  <div
+                  <label
                     key={c.id_anak}
                     style={{
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      background: T.white, borderRadius: 8, padding: '6px 10px',
+                      background: T.white, borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
                     }}
                   >
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 13 }}>{c.nama_anak || c.id_anak}</div>
-                      <div style={{ fontSize: 10, color: T.gray }}>{c.id_anak}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <input
+                        type="checkbox"
+                        checked={checkedToAdd.has(c.id_anak)}
+                        onChange={() => toggleCheckedToAdd(c.id_anak)}
+                        style={{ accentColor: T.primary, width: 16, height: 16 }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>{c.nama_anak || c.id_anak}</div>
+                        <div style={{ fontSize: 10, color: T.gray }}>{c.id_anak}</div>
+                      </div>
                     </div>
-                    <Btn size="sm" variant="primary" onClick={() => addAnak(c)}>+ Tambah</Btn>
-                  </div>
+                  </label>
                 ))}
               </div>
             )}
@@ -256,7 +307,6 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
           </span>
         </div>
 
-        {/* Editable rows */}
         {loading && <div style={{ color: T.gray, fontSize: 13, padding: 20 }}>Memuat data anak…</div>}
 
         {!loading && sourceError && (
@@ -280,73 +330,80 @@ export function EntryCashflowForm({ row, mode, onClose, onSuccess }: Props) {
         )}
 
         {draft.length > 0 && (
-          <div style={{
-            border: `1.5px solid ${T.primarySoft}`, borderRadius: 12, overflow: 'hidden',
-            maxHeight: 340, overflowY: 'auto',
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: 720 }}>
-              <thead>
-                <tr style={{ background: T.primaryPale, position: 'sticky', top: 0, zIndex: 1 }}>
-                  {['#', 'Anak', 'Harga satuan', 'Qty', 'Nominal', ''].map((h, i) => (
-                    <th key={h + i} style={{
-                      fontSize: 11, fontWeight: 800, color: T.primaryDk, textTransform: 'uppercase',
-                      letterSpacing: 0.4, padding: '9px 10px', textAlign: i >= 2 && i <= 4 ? 'right' : 'left',
-                      borderBottom: `1.5px solid ${T.primarySoft}`, whiteSpace: 'nowrap',
-                    }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {draft.map((r, i) => (
-                  <tr key={r.id_anak} style={{ background: i % 2 === 0 ? T.white : '#FDFAF8' }}>
-                    <td style={cell}>{i + 1}</td>
-                    <td style={cell}>
-                      <div style={{ fontWeight: 600 }}>{r.nama_anak || r.id_anak}</div>
-                      <div style={{ fontSize: 10, color: T.gray }}>{r.id_anak}</div>
-                    </td>
-                    <td style={{ ...cell, textAlign: 'right' }}>
-                      <Input
-                        type="number"
-                        value={r.pilihan_donasi}
-                        onChange={e => patch(r.id_anak, { pilihan_donasi: Number(e.target.value) || 0 })}
-                        style={{ textAlign: 'right', padding: '5px 8px', fontSize: 12 }}
-                      />
-                    </td>
-                    <td style={{ ...cell, textAlign: 'right', width: 90 }}>
-                      <Input
-                        type="number"
-                        value={r.qty}
-                        onChange={e => patch(r.id_anak, { qty: Number(e.target.value) || 0 })}
-                        style={{ textAlign: 'right', padding: '5px 8px', fontSize: 12 }}
-                      />
-                    </td>
-                    <td style={{ ...cell, textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-                      {fmtRp(rowNominal(r))}
-                    </td>
-                    <td style={{ ...cell, width: 44 }}>
-                      <button
-                        type="button"
-                        onClick={() => remove(r.id_anak)}
-                        aria-label={`Hapus ${r.nama_anak}`}
-                        style={{
-                          background: 'none', border: 'none', cursor: 'pointer',
-                          color: T.red, display: 'flex', padding: 4,
-                        }}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </td>
+          <>
+            <Input
+              placeholder={`Cari di ${draft.length} baris anak…`}
+              value={gridSearch}
+              onChange={e => setGridSearch(e.target.value)}
+            />
+            <div style={{
+              border: `1.5px solid ${T.primarySoft}`, borderRadius: 12, overflow: 'hidden',
+              maxHeight: 560, overflowY: 'auto',
+            }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: 720 }}>
+                <thead>
+                  <tr style={{ background: T.primaryPale, position: 'sticky', top: 0, zIndex: 1 }}>
+                    {['#', 'Anak', 'Harga satuan', 'Qty', 'Nominal', ''].map((h, i) => (
+                      <th key={h + i} style={{
+                        fontSize: 11, fontWeight: 800, color: T.primaryDk, textTransform: 'uppercase',
+                        letterSpacing: 0.4, padding: '9px 10px', textAlign: i >= 2 && i <= 4 ? 'right' : 'left',
+                        borderBottom: `1.5px solid ${T.primarySoft}`, whiteSpace: 'nowrap',
+                      }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {visibleDraft.map((r, i) => (
+                    <tr key={r.id_anak} style={{ background: i % 2 === 0 ? T.white : '#FDFAF8' }}>
+                      <td style={cell}>{i + 1}</td>
+                      <td style={cell}>
+                        <div style={{ fontWeight: 600 }}>{r.nama_anak || r.id_anak}</div>
+                        <div style={{ fontSize: 10, color: T.gray }}>{r.id_anak}</div>
+                      </td>
+                      <td style={{ ...cell, textAlign: 'right' }}>
+                        <Input
+                          type="number"
+                          value={r.pilihan_donasi}
+                          onChange={e => patch(r.id_anak, { pilihan_donasi: Number(e.target.value) || 0 })}
+                          style={{ textAlign: 'right', padding: '5px 8px', fontSize: 12 }}
+                        />
+                      </td>
+                      <td style={{ ...cell, textAlign: 'right', width: 90 }}>
+                        <Input
+                          type="number"
+                          value={r.qty}
+                          onChange={e => patch(r.id_anak, { qty: Number(e.target.value) || 0 })}
+                          style={{ textAlign: 'right', padding: '5px 8px', fontSize: 12 }}
+                        />
+                      </td>
+                      <td style={{ ...cell, textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                        {fmtRp(rowNominal(r))}
+                      </td>
+                      <td style={{ ...cell, width: 44 }}>
+                        <button
+                          type="button"
+                          onClick={() => remove(r.id_anak)}
+                          aria-label={`Hapus ${r.nama_anak}`}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: T.red, display: 'flex', padding: 4,
+                          }}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
           <Btn variant="ghost" onClick={onClose}>Batal</Btn>
           <Btn variant="primary" onClick={save} disabled={!balanced || saving}>
-            {saving ? 'Menyimpan…' : mode === 'create' ? 'Simpan Entry' : 'Simpan Perubahan'}
+            {saving ? 'Menyimpan…' : 'Simpan Perubahan'}
           </Btn>
         </div>
       </div>

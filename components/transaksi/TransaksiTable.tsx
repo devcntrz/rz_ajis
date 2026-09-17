@@ -25,6 +25,7 @@ export function transaksiRowColor(r: Transaksi): string {
 export interface RowHandlers {
   onEntry:         (row: Transaksi) => void;
   onUpdate:        (row: Transaksi) => void;
+  onEntryPremium:  (row: Transaksi) => void;
   onApproveSalur:  (row: Transaksi) => void;
   onGantiProgram:  (row: Transaksi) => void;
   onDeleteEntries: (row: Transaksi) => void;
@@ -57,6 +58,13 @@ export function buildRowActions(row: Transaksi, h: RowHandlers, isAdmin: boolean
       disabled: entered || row.approve_salur === 'n',
     },
     { label: 'Update Cashflow', onClick: () => h.onUpdate(row), disabled: !entered },
+    {
+      label: 'Entry Premium',
+      onClick: () => h.onEntryPremium(row),
+      // Same eligibility as Entry/Update Cashflow combined: available whenever either
+      // one would be (fresh entry, or updating an already-entered transaction).
+      disabled: !entered && row.approve_salur === 'n',
+    },
     { label: 'Not / Approve Salur', onClick: () => h.onApproveSalur(row) },
     { label: 'Ganti Program', onClick: () => h.onGantiProgram(row) },
     { label: 'Hapus Entry Donasi', onClick: () => h.onDeleteEntries(row), danger: true, disabled: !entered },

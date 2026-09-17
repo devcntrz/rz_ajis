@@ -10,6 +10,8 @@ interface AjuanTableProps {
   onDelete:   (row: AjuanGantiAnak) => void;
   onUlangi:   (row: AjuanGantiAnak) => void;
   onEksekusi: (row: AjuanGantiAnak) => void;
+  /** Double-clicking a row is a shortcut for the "Eksekusi" row action. */
+  onRowDoubleClick?: (row: AjuanGantiAnak) => void;
 }
 
 function rowTextColor(row: AjuanGantiAnak): string {
@@ -79,7 +81,7 @@ const BORDER = '#F0C4A0';
 const SEP = '#D96A1A';
 
 export function AjuanTable({
-  data, loading, rowOffset = 0, onDelete, onUlangi, onEksekusi,
+  data, loading, rowOffset = 0, onDelete, onUlangi, onEksekusi, onRowDoubleClick,
 }: AjuanTableProps) {
   if (loading) {
     return (
@@ -212,7 +214,11 @@ export function AjuanTable({
               };
 
               return (
-                <tr key={r.id_ajuan}>
+                <tr
+                  key={r.id_ajuan}
+                  style={{ userSelect: onRowDoubleClick ? 'none' : undefined }}
+                  onDoubleClick={() => onRowDoubleClick?.(r)}
+                >
                   {COLS.map(c => {
                     const sticky = !!c.sticky;
                     const left = sticky ? STICKY_LEFT[c.key] : undefined;

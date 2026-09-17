@@ -10,6 +10,7 @@ import { TransaksiFilter, type Filters } from '@/components/transaksi/TransaksiF
 import { TransaksiTable, rowKeyOf } from '@/components/transaksi/TransaksiTable';
 import { TransaksiCard } from '@/components/transaksi/TransaksiCard';
 import { EntryCashflowForm } from '@/components/transaksi/EntryCashflowForm';
+import { EntryCashflowPremiumForm } from '@/components/transaksi/EntryCashflowPremiumForm';
 import { ApproveSalurModal } from '@/components/transaksi/ApproveSalurModal';
 import { GantiProgramModal } from '@/components/transaksi/GantiProgramModal';
 import { SyncTransidModal } from '@/components/transaksi/SyncTransidModal';
@@ -61,6 +62,7 @@ export function TransaksiClient({ idGroupUser }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const [entryTarget, setEntryTarget] = useState<EntryTarget | null>(null);
+  const [premiumTarget, setPremiumTarget] = useState<Transaksi | null>(null);
   const [salurRow, setSalurRow] = useState<Transaksi | null>(null);
   const [bulkSalur, setBulkSalur] = useState(false);
   const [programRow, setProgramRow] = useState<Transaksi | null>(null);
@@ -170,6 +172,7 @@ export function TransaksiClient({ idGroupUser }: Props) {
   const handlers = {
     onEntry:  (row: Transaksi) => setEntryTarget({ row, mode: 'create' }),
     onUpdate: (row: Transaksi) => setEntryTarget({ row, mode: 'update' }),
+    onEntryPremium: (row: Transaksi) => setPremiumTarget(row),
     onApproveSalur: (row: Transaksi) => setSalurRow(row),
     onGantiProgram: (row: Transaksi) => setProgramRow(row),
 
@@ -333,6 +336,15 @@ export function TransaksiClient({ idGroupUser }: Props) {
           mode={entryTarget.mode}
           onClose={() => setEntryTarget(null)}
           onSuccess={() => { setEntryTarget(null); refresh(); }}
+        />
+      )}
+
+      {premiumTarget && (
+        <EntryCashflowPremiumForm
+          row={premiumTarget}
+          entered={premiumTarget.status_pasang === 'y'}
+          onClose={() => setPremiumTarget(null)}
+          onSuccess={() => { setPremiumTarget(null); refresh(); }}
         />
       )}
 

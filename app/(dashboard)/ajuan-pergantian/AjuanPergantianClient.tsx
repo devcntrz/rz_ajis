@@ -106,6 +106,15 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
     setEksekusiRow(row);
   };
 
+  /** Double-clicking a row is a shortcut for the "Eksekusi" row action. */
+  const handleRowDoubleClick = (row: AjuanGantiAnak) => {
+    if (row.status_eksekusi === 'y') {
+      alert('Ajuan ini sudah dieksekusi.');
+      return;
+    }
+    handleEksekusi(row);
+  };
+
   const handleDelete = async (row: AjuanGantiAnak) => {
     if (!window.confirm(`Hapus ajuan #${row.id_ajuan} (${row.nama_anak_asal} → ${row.nama_anak_pengganti})?`)) {
       return;
@@ -190,6 +199,7 @@ export function AjuanPergantianClient({ idGroupUser }: Props) {
           onDelete={handleDelete}
           onUlangi={handleUlangi}
           onEksekusi={handleEksekusi}
+          onRowDoubleClick={handleRowDoubleClick}
         />
       </div>
 
