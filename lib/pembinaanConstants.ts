@@ -1,3 +1,5 @@
+import { parseLocalDate } from '@/lib/utils';
+
 /** Jenis pembinaan — shared by filter, form, and validation. */
 export const JENIS_PEMBINAAN_OPTIONS = [
   'Pembinaan Reguler',
@@ -24,7 +26,7 @@ export function isParenting(jenis: string): boolean {
 
 /** Month/year from date — matches legacy DB (bulan without leading zero). */
 export function bulanTahunFromDate(tgl: string): { bulan: string; tahun: string } {
-  const d = new Date(tgl);
+  const d = parseLocalDate(tgl);
   return {
     bulan: String(d.getMonth() + 1),
     tahun: String(d.getFullYear()),

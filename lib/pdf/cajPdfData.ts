@@ -3,7 +3,7 @@
  */
 import { queryOne, queryUnprepared } from '@/lib/db';
 import { getScopeCondition, type SessionData } from '@/lib/auth';
-import { fmtRp } from '@/lib/utils';
+import { fmtRp, parseLocalDate } from '@/lib/utils';
 
 const LEGACY_BASE = 'https://ajis.indonesiajuara.org';
 
@@ -131,14 +131,14 @@ export function isFilled(value: string | null | undefined): boolean {
 
 export function dateStringInd(value: string | Date | null | undefined): string {
   if (!value) return '';
-  const d = value instanceof Date ? value : new Date(value);
+  const d = parseLocalDate(value);
   if (Number.isNaN(d.getTime())) return String(value);
   return `${String(d.getDate()).padStart(2, '0')} ${ID_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function yearsSince(value: string | Date | null | undefined): string {
   if (!value) return '';
-  const d = value instanceof Date ? value : new Date(value);
+  const d = parseLocalDate(value);
   if (Number.isNaN(d.getTime())) return '';
   const years = Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
   if (years <= 0) return 'beberapa bulan';

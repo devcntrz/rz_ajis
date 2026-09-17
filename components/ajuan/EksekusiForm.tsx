@@ -4,6 +4,7 @@ import useSWR from 'swr';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { parseLocalDate } from '@/lib/utils';
 import { Btn } from '@/components/ui/Btn';
 import { FLabel } from '@/components/ui/FLabel';
 import { Input, Textarea } from '@/components/ui/Input';
@@ -82,7 +83,7 @@ function fmtRp(n: number) {
 
 function fmtTanggal(v: string | null | undefined) {
   if (!v) return '—';
-  const d = new Date(v);
+  const d = parseLocalDate(v);
   return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('id-ID');
 }
 

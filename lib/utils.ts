@@ -12,10 +12,23 @@ export function scoreToNilai(pct: number): NilaiHuruf {
   return 'Poor';
 }
 
+/**
+ * Parse a date-only string ("YYYY-MM-DD", optionally with a time part) as local
+ * midnight instead of UTC midnight — `new Date('2026-09-20')` is UTC and rolls
+ * back a day once printed in a timezone behind UTC (e.g. WIB during DST-less
+ * shifts, or a UTC-hosted server). Date objects and full timestamps pass through.
+ */
+export function parseLocalDate(date: string | Date): Date {
+  if (date instanceof Date) return date;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return new Date(date);
+}
+
 /** Format date to Indonesian locale (e.g. "15 Jan 2026") */
 export function fmtTgl(date: string | Date | null | undefined): string {
   if (!date) return '-';
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   if (isNaN(d.getTime())) return '-';
   return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
@@ -31,7 +44,7 @@ export function fmtRp(value: number | string | null | undefined): string {
 /** Calculate age from birth date */
 export function calcAge(tglLahir: string | Date | null | undefined): number {
   if (!tglLahir) return 0;
-  const d = new Date(tglLahir);
+  const d = parseLocalDate(tglLahir);
   const now = new Date();
   let y = now.getFullYear() - d.getFullYear();
   if (now < new Date(now.getFullYear(), d.getMonth(), d.getDate())) y--;
