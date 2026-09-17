@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, txQueryOne, txExecute, txExecuteResult } from '@/lib/db';
 import { getSession, getScopeCondition, type SessionData } from '@/lib/auth';
 import { RuleError } from '@/lib/transaksi/rules';
+import { parseLocalDate } from '@/lib/utils';
 import type { PeminjamanAnakCreateInput, PeminjamanAnakRow } from '@/types/peminjaman';
 
 const LIST_COLUMNS = `
@@ -145,9 +146,12 @@ export async function POST(req: NextRequest) {
         throw new RuleError('Anak ini sedang dalam status dipinjam.', 'ALREADY_BORROWED');
       }
 
-      const tglExpired = new Date(tglAwal);
+      const tglExpired = parseLocalDate(tglAwal);
       tglExpired.setDate(tglExpired.getDate() + jmlHari);
-      const tglExpiredStr = tglExpired.toISOString().slice(0, 10);
+      const y = tglExpired.getFullYear();
+      const m = String(tglExpired.getMonth() + 1).padStart(2, '0');
+      const d = String(tglExpired.getDate()).padStart(2, '0');
+      const tglExpiredStr = `${y}-${m}-${d}`;
 
       const inserted = await txExecuteResult(
         conn,

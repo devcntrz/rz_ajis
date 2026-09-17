@@ -1,5 +1,6 @@
 'use client';
 import type { KeuanganPivot, MonthCell, SemesterBlock } from '@/lib/keuangan';
+import { parseLocalDate } from '@/lib/utils';
 
 export interface KeuanganGridRow {
   key:       string;
@@ -125,7 +126,7 @@ function fmtRp(n: number) {
 
 function fmtTanggal(v: string | null | undefined) {
   if (!v) return '—';
-  const d = new Date(v);
+  const d = parseLocalDate(v);
   return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('id-ID');
 }
 

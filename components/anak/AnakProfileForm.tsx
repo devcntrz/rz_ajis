@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Card, CardHead } from '@/components/ui/Card';
 import { FLabel } from '@/components/ui/FLabel';
 import { Input, Textarea, Sel } from '@/components/ui/Input';
+import { parseLocalDate } from '@/lib/utils';
 import { SearchSelect } from '@/components/ui/SearchSelect';
 import { Btn } from '@/components/ui/Btn';
 import type { AnakDetail } from '@/types/anak';
@@ -50,9 +51,12 @@ export const BLANK_ANAK: AnakDetail = {
 /** ISO datetime/date -> yyyy-mm-dd for <input type="date">. */
 function toDateInput(value: string | null | undefined): string {
   if (!value) return '';
-  const d = new Date(value);
+  const d = parseLocalDate(value);
   if (isNaN(d.getTime())) return '';
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 const FIELD_STYLE: React.CSSProperties = {};

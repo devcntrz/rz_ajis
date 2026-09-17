@@ -18,6 +18,7 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 10_000,
   timezone:           '+07:00',
   charset:            'utf8mb4',
+  dateStrings:        true,
 });
 
 export async function query<T>(sql: string, params?: any[]): Promise<T[]> {
