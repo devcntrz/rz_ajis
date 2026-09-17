@@ -69,9 +69,11 @@ export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: P
   const loading = mode === 'create' ? candidates.loading : entries.loading;
   const sourceError = mode === 'create' ? candidates.error : entries.error;
 
-  const patch = (idAnak: string, next: Partial<DraftRow>) => {
+  // Keyed by rowId, not id_anak: a donor can have two saved rows for the same child
+  // (multi-slot pairings), so acting on "the row for this child" would hit both.
+  const patch = (rowId: string, next: Partial<DraftRow>) => {
     setEdits(draft.map(r => {
-      if (r.id_anak !== idAnak) return r;
+      if (r.rowId !== rowId) return r;
       const merged = { ...r, ...next };
       if (next.qty !== undefined || next.pilihan_donasi !== undefined) {
         merged.nominal_donasi = Number(merged.pilihan_donasi) * Number(merged.qty);
@@ -80,7 +82,7 @@ export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: P
     }));
   };
 
-  const remove = (idAnak: string) => setEdits(draft.filter(r => r.id_anak !== idAnak));
+  const remove = (rowId: string) => setEdits(draft.filter(r => r.rowId !== rowId));
 
   const addableAnak = addPool.filter(c => {
     if (draft.some(d => d.id_anak === c.id_anak)) return false;
@@ -354,7 +356,7 @@ export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: P
                 </thead>
                 <tbody>
                   {visibleDraft.map((r, i) => (
-                    <tr key={r.id_anak} style={{ background: i % 2 === 0 ? T.white : '#FDFAF8' }}>
+                    <tr key={r.rowId} style={{ background: i % 2 === 0 ? T.white : '#FDFAF8' }}>
                       <td style={cell}>{i + 1}</td>
                       <td style={cell}>
                         <div style={{ fontWeight: 600 }}>{r.nama_anak || r.id_anak}</div>
@@ -364,7 +366,7 @@ export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: P
                         <Input
                           type="number"
                           value={r.pilihan_donasi}
-                          onChange={e => patch(r.id_anak, { pilihan_donasi: Number(e.target.value) || 0 })}
+                          onChange={e => patch(r.rowId, { pilihan_donasi: Number(e.target.value) || 0 })}
                           style={{ textAlign: 'right', padding: '5px 8px', fontSize: 12 }}
                         />
                       </td>
@@ -372,7 +374,7 @@ export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: P
                         <Input
                           type="number"
                           value={r.qty}
-                          onChange={e => patch(r.id_anak, { qty: Number(e.target.value) || 0 })}
+                          onChange={e => patch(r.rowId, { qty: Number(e.target.value) || 0 })}
                           style={{ textAlign: 'right', padding: '5px 8px', fontSize: 12 }}
                         />
                       </td>
@@ -382,7 +384,7 @@ export function EntryCashflowPremiumForm({ row, entered, onClose, onSuccess }: P
                       <td style={{ ...cell, width: 44 }}>
                         <button
                           type="button"
-                          onClick={() => remove(r.id_anak)}
+                          onClick={() => remove(r.rowId)}
                           aria-label={`Hapus ${r.nama_anak}`}
                           style={{
                             background: 'none', border: 'none', cursor: 'pointer',
